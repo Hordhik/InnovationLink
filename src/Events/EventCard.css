@@ -1,0 +1,49 @@
+.event-card{
+    width: 800px;
+    border-radius: 10px;
+    border: 1.5px solid #E6E9EE;
+    background: #FFF;
+    display: flex;
+    padding: 20px 30px;
+    justify-content: space-between;
+}
+
+.event-content{
+    width: 55%;
+    color: #000;
+}
+
+.event-content .event-title{
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0;
+}
+
+.event-content .event-details{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.event-details .event-detail{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.event-content .event-description{
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.event-logo{
+    width: 40%;
+}
+.event-logo img{
+    width: 256px;
+    height: 182px;
+    object-fit: fill;
+    border-radius: 10px;
+}
