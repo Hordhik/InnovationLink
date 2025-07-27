@@ -9,7 +9,6 @@ const Events = () => <div>Events Page</div>;
 const About = () => <div>About Page</div>;
 
 function App() {
-
   return (
       <NavBar />
       // <Route path="/" element={<Home />} />
