@@ -45,26 +45,49 @@ const allEvents = [
 ];
 
 const Events = () => {
-  // State to track the selected filter
-  const [selectedState, setSelectedState] = useState("Andhra Pradesh");
-  const [selectedCity, setSelectedCity] = useState(null);
+  // State to track the selected filters (now arrays for multiple selections)
+  const [selectedStates, setSelectedStates] = useState([]);
+  const [selectedCities, setSelectedCities] = useState([]);
 
   // Function to handle clicking a state option
   const handleStateClick = (state) => {
-    // If the clicked state is already selected, unselect it. Otherwise, select it.
-    setSelectedState(prevSelectedState => prevSelectedState === state ? null : state);
+    setSelectedStates(prevSelectedStates => {
+      // If the state is already selected, remove it from the array
+      if (prevSelectedStates.includes(state)) {
+        return prevSelectedStates.filter(s => s !== state);
+      } else {
+        // If the state is not selected, add it to the array
+        return [...prevSelectedStates, state];
+      }
+    });
   };
 
   // Function to handle clicking a city option
   const handleCityClick = (city) => {
-    setSelectedCity(prevSelectedCity => prevSelectedCity === city ? null : city);
+    setSelectedCities(prevSelectedCities => {
+      // If the city is already selected, remove it from the array
+      if (prevSelectedCities.includes(city)) {
+        return prevSelectedCities.filter(c => c !== city);
+      } else {
+        // If the city is not selected, add it to the array
+        return [...prevSelectedCities, city];
+      }
+    });
   };
 
-  // Filter events based on selected state and city
+  // Filter events based on selected states and cities (OR logic)
   const filteredEvents = allEvents.filter(event => {
-    const stateMatch = !selectedState || event.state === selectedState;
-    const cityMatch = !selectedCity || event.city === selectedCity;
-    return stateMatch && cityMatch;
+    // If no filters are selected, show all events
+    if (selectedStates.length === 0 && selectedCities.length === 0) {
+      return true;
+    }
+    
+    // Check if event matches any selected state OR any selected city
+    const stateMatch = selectedStates.length > 0 && selectedStates.includes(event.state);
+    const cityMatch = selectedCities.length > 0 && selectedCities.includes(event.city);
+    
+    // Return true if event matches either state OR city selection
+    return stateMatch || cityMatch;
   });
 
   return (
@@ -77,7 +100,7 @@ const Events = () => {
             {states.map((state) => (
               <div
                 key={state}
-                className={`option ${selectedState === state ? 'active' : ''}`}
+                className={`option ${selectedStates.includes(state) ? 'active' : ''}`}
                 onClick={() => handleStateClick(state)}
               >
                 {state}
@@ -93,7 +116,7 @@ const Events = () => {
             {cities.map((city) => (
               <div
                 key={city}
-                className={`option ${selectedCity === city ? 'active' : ''}`}
+                className={`option ${selectedCities.includes(city) ? 'active' : ''}`}
                 onClick={() => handleCityClick(city)}
               >
                 {city}

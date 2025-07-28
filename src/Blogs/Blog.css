@@ -1,0 +1,70 @@
+/* Individual blog content within the blog-page container */
+.blog-page {
+    display: flex;
+    gap: 50px;
+    justify-content: space-between;
+}
+
+.blog-page .empty{
+    width: 40%;
+}
+
+.blog-page .blog {
+    margin: 0;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.blog-page .blog .blog-header {
+    margin-bottom: 30px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid #000;
+}
+
+.blog-page .blog .blog-hero-image {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.blog-page .blog .blog-title {
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1.2;
+    margin-bottom: 17px;
+    color: #333;
+}
+
+.blog-page .blog .blog-meta {
+    display: flex;
+    align-items: center;
+    color: #666;
+    gap: 15px;
+}
+
+.blog-page .blog .blog-date, .blog-page .blog .blog-author {
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 16px;
+    color: #000;
+}
+
+.blog-page .blog .blog-date img, .blog-page .blog .blog-author img{
+    width: 24px;
+    height: 24px;
+}
+
+.blog-page .blog .blog-full-content {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 24px;
+}
+
+.blog-page .blog .blog-full-content p {
+    margin-bottom: 30px;
+}
