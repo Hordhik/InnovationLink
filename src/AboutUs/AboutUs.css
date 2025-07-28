@@ -1,6 +1,3 @@
-/* src/AboutUs/AboutUs.css */
-
-/* --- FONT IMPORT --- */
 @import url('[https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:ital,wght@1,400&family=Poppins:wght@500;700&display=swap](https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:ital,wght@1,400&family=Poppins:wght@500;700&display=swap)');
 
 /* --- GLOBAL PAGE STYLING --- */
@@ -51,14 +48,14 @@
   padding: 40px 20px;
   display: flex;
   flex-direction: column;
-  gap: 120px;
+  gap: 100px; /* Adjusted spacing */
 }
 
 /* --- SECTIONS 2 & 3: REUSABLE INFO SECTIONS --- */
 .info-section {
   display: flex;
   flex-direction: column;
-  gap: 80px; /* This now creates space between the large cards */
+  gap: 60px; 
 }
 
 .info-item {
@@ -68,7 +65,6 @@
   flex-wrap: wrap;
 }
 
-/* NEW: The unified large card style */
 .info-card-large {
   background-color: #FFFFFF;
   border-radius: 20px;
@@ -77,7 +73,6 @@
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* NEW: The hover effect is now on the card, not the image */
 .info-card-large:hover {
   transform: translateY(-10px);
   box-shadow: 0 20px 25px -10px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
@@ -182,7 +177,158 @@
   color: #4A5568;
 }
 
-/* --- SECTION 5: FAQS --- */
+/* --- NEW: OUR STORY SECTION --- */
+.story-section-new {
+  background-color: #F9FAFB;
+  padding: 80px 24px;
+  text-align: center;
+  border-radius: 20px;
+}
+.story-section-new h2, .values-section-new h2, .team-section-new h2, .milestones-section-new h2, .cta-section-new h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.5rem;
+    margin-bottom: 16px;
+}
+.story-section-new h3 {
+    font-size: 1.25rem;
+    color: #6B7280;
+    font-weight: 500;
+    margin-bottom: 24px;
+}
+.story-section-new p {
+    max-width: 750px;
+    margin: 0 auto;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #4A5568;
+}
+
+/* --- NEW: OUR VALUES SECTION --- */
+.values-section-new {
+    text-align: center;
+}
+.values-section-new h2 {
+    margin-bottom: 60px;
+}
+.values-grid-new {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    text-align: left;
+}
+.value-card-new {
+    background: #F9FAFB;
+    padding: 32px;
+    border-radius: 12px;
+}
+.value-card-new h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 16px 0 8px;
+}
+.value-card-new p {
+    color: #4A5568;
+    line-height: 1.6;
+}
+
+/* --- NEW: TEAM SECTION --- */
+.team-section-new {
+    text-align: center;
+}
+.team-section-new h2 {
+    margin-bottom: 60px;
+}
+.team-grid-new {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 40px;
+}
+.team-photo-new {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    object-fit: cover;
+}
+.team-member-card-new h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+.team-member-card-new .team-role-new {
+    color: #3B82F6;
+    font-weight: 500;
+    margin: 4px 0 12px;
+}
+
+/* --- NEW: MILESTONES SECTION --- */
+.milestones-section-new {
+    text-align: center;
+}
+.milestones-section-new h2 {
+    margin-bottom: 60px;
+}
+.milestones-timeline-new {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+    padding-left: 30px;
+    border-left: 2px solid #E5E7EB;
+    text-align: left;
+}
+.milestone-item-new {
+    position: relative;
+    margin-bottom: 40px;
+}
+.milestone-dot-new {
+    position: absolute;
+    left: -40px;
+    top: 5px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: #FFFFFF;
+    border: 3px solid #E5E7EB;
+}
+.milestone-item-new.complete .milestone-dot-new {
+    background-color: #3B82F6;
+    border-color: #3B82F6;
+}
+.milestone-item-new p {
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+/* --- NEW: CTA SECTION --- */
+.cta-section-new {
+  background-color: #111827;
+  color: #FFFFFF;
+  padding: 80px 24px;
+  text-align: center;
+  border-radius: 20px;
+}
+.cta-section-new p {
+  font-size: 1.25rem;
+  color: #A0AEC0;
+  margin-bottom: 32px;
+}
+.cta-button-new {
+  background-color: #3B82F6;
+  color: #FFFFFF;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 16px 32px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+.cta-button-new:hover {
+  background-color: #2563EB;
+  transform: translateY(-3px);
+}
+
+
+/* --- FAQS --- */
 .faq-section {
   text-align: center;
 }
