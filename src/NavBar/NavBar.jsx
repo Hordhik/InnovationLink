@@ -1,11 +1,12 @@
 import React from 'react'
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logo from '../assets/NavBar/logo.png';
 import arrow from '../assets/NavBar/register.svg';
 import './NavBar.css';
 
 function NavBar() {
     const location = useLocation();
+    const navigate = useNavigate();
 
     const NavOptions = [
         {name: "Home", path: "/"},
@@ -13,6 +14,14 @@ function NavBar() {
         {name: "Events", path: "/events"},
         {name: "About", path: "/about"}
     ];
+
+    const handleLoginClick = () => {
+        navigate('/login');
+    };
+
+    const handleRegisterClick = () => {
+        navigate('/signup');
+    };
 
   return (
     <>
@@ -32,8 +41,10 @@ function NavBar() {
                 ))}
             </div>
             <div className="Signin-options">
-                <div className="Signin-option login">Login In</div>
-                <div className="Signup-option register">
+                <div className="Signin-option login" onClick={handleLoginClick}>
+                    Login In
+                </div>
+                <div className="Signup-option register" onClick={handleRegisterClick}>
                     Register
                     <img src={arrow} alt="" />
                 </div>
