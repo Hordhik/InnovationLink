@@ -121,3 +121,11 @@
 .policies span:hover {
     text-decoration: underline;
 }
+
+.error-message {
+    color: #e74c3c;
+    font-size: 14px;
+    text-align: center;
+    margin: 10px 0;
+    font-weight: 500;
+}

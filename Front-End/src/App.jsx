@@ -9,12 +9,13 @@ import Blogs from './Website/Blogs/Blogs';
 import Blog from './Website/Blogs/Blog';
 import LogIn from './Authentication/LogIn';
 import SignUp from './Authentication/SignUp';
+import Portal from './Portal/Portal';
 
 function App() {
   const location = useLocation();
   
   // Define routes where navbar should be hidden
-  const hideNavbarRoutes = ['/login', '/signup'];
+  const hideNavbarRoutes = ['/login', '/signup', '/portal/home'];
   const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
 
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route path="/about" element={<About />} /> 
           <Route path="/login" element={<LogIn />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/portal/home" element={<Portal />} />
         </Routes>
       </>
   )
