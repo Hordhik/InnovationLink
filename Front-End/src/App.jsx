@@ -1,12 +1,12 @@
 import React from 'react'
 import './App.css';
 import { Routes, Route, useLocation } from 'react-router-dom';
-import NavBar from './NavBar/NavBar';
-import Home from './Home/Home';
-import Events from './Events/Events';
-import About from './AboutUs/AboutUs';
-import Blogs from './Blogs/Blogs';
-import Blog from './Blogs/Blog';
+import NavBar from './Website/NavBar/NavBar';
+import Home from './Website/Home/Home';
+import Events from './Website/Events/Events';
+import About from './Website/AboutUs/AboutUs';
+import Blogs from './Website/Blogs/Blogs';
+import Blog from './Website/Blogs/Blog';
 import LogIn from './Authentication/LogIn';
 import SignUp from './Authentication/SignUp';
 

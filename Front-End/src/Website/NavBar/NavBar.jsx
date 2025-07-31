@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import logo from '../assets/NavBar/logo.png';
-import arrow from '../assets/NavBar/register.svg';
+import logo from '../../assets/NavBar/logo.png';
+import arrow from '../../assets/NavBar/register.svg';
 import './NavBar.css';
 
 function NavBar() {

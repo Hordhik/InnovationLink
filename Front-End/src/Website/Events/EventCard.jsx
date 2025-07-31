@@ -1,10 +1,10 @@
 import React from 'react'
 import './EventCard.css';
-import claendarIcon from '../assets/Events/calendar.svg';
-import locationIcon from '../assets/Events/location.svg';
-import Mahakumbh from '../assets/Events/mahakumb.png';
-import inspireIndia from '../assets/Events/inspire.png';
-import bengaluruTechSumit from '../assets/Events/tech.jpg';
+import claendarIcon from '../../assets/Events/calendar.svg';
+import locationIcon from '../../assets/Events/location.svg';
+import Mahakumbh from '../../assets/Events/mahakumb.png';
+import inspireIndia from '../../assets/Events/inspire.png';
+import bengaluruTechSumit from '../../assets/Events/tech.jpg';
 
 const EventCard = ({ events = [] }) => {
 

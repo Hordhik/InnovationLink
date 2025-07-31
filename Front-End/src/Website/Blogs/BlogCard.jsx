@@ -1,8 +1,8 @@
 import React from 'react'
 import './BlogCard.css';
 import { useNavigate } from 'react-router-dom';
-import calendarIcon from '../assets/Events/calendar.svg';
-import profileIcon from '../assets/Blogs/profile.svg';
+import calendarIcon from '../../assets/Events/calendar.svg';
+import profileIcon from '../../assets/Blogs/profile.svg';
 
 const BlogCard = ({ blog }) => {
     const navigate = useNavigate();

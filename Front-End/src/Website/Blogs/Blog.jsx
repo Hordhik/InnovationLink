@@ -2,8 +2,8 @@ import React from 'react'
 import './Blog.css';
 import { useParams } from 'react-router-dom';
 import { getBlogById } from './blogData';
-import calendarIcon from '../assets/Events/calendar.svg';
-import profileIcon from '../assets/Blogs/profile.svg';
+import calendarIcon from '../../assets/Events/calendar.svg';
+import profileIcon from '../../assets/Blogs/profile.svg';
 import BlogCardShort from './BlogCardShort';
 import { blogData } from './blogData';
 
