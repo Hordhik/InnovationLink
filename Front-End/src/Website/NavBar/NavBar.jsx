@@ -9,18 +9,18 @@ function NavBar() {
     const navigate = useNavigate();
 
     const NavOptions = [
-        {name: "Home", path: "/"},
+        {name: "Home", path: "/home"},
         {name: "Blogs", path: "/blogs"},
         {name: "Events", path: "/events"},
         {name: "About", path: "/about"}
     ];
 
     const handleLoginClick = () => {
-        navigate('/login');
+        navigate('/auth/login');
     };
 
     const handleRegisterClick = () => {
-        navigate('/signup');
+        navigate('/auth/signup');
     };
 
   return (

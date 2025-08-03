@@ -1,6 +1,6 @@
 import React from 'react'
 import './App.css';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import NavBar from './Website/NavBar/NavBar';
 import Home from './Website/Home/Home';
 import Events from './Website/Events/Events';
@@ -13,23 +13,45 @@ import Portal from './Portal/Portal';
 
 function App() {
   const location = useLocation();
-  
-  // Define routes where navbar should be hidden
-  const hideNavbarRoutes = ['/login', '/signup', '/portal/home'];
-  const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
+
+  // Define routes where navbar should be shown (website routes)
+  const showNavbarRoutes = ["/home", "/blogs", "/events", "/about"];
+  const shouldShowNavbar = showNavbarRoutes.some(route => location.pathname === route) || 
+                           location.pathname.startsWith('/blog/'); // Show navbar on blog detail pages
 
   return (
       <>
-        {!shouldHideNavbar && <NavBar />}
+        {shouldShowNavbar && <NavBar />}
         <Routes>
-          <Route path="/" element={<Home />} />
+          {/* Website Routes */}
+          <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/blogs" element={<Blogs />} />
           <Route path="/blog/:id" element={<Blog />} />
           <Route path="/events" element={<Events />} />
-          <Route path="/about" element={<About />} /> 
+          <Route path="/about" element={<About />} />
+
+          {/* Legacy routes - redirect to new structure */}
+          {/* <Route path="/blogs" element={<Blogs />} />
+          <Route path="/blog/:id" element={<Blog />} />
+          <Route path="/events" element={<Events />} />
+          <Route path="/about" element={<About />} />
+           */}
+          {/* Authentication Routes */}
+          <Route path="/auth/login" element={<LogIn />} />
+          <Route path="/auth/signup" element={<SignUp />} />
+          
+          {/* Legacy auth routes - redirect to new structure */}
           <Route path="/login" element={<LogIn />} />
           <Route path="/signup" element={<SignUp />} />
-          <Route path="/portal/home" element={<Portal />} />
+          
+          {/* Portal Routes */}
+          {/* <Route path="/portal/*" element={<Portal />} /> */}
+          
+          {/* Project Routes */}
+          <Route path="/project-1/*" element={<Portal />} />
+          <Route path="/project-2/*" element={<Portal />} />
+          <Route path="/project-3/*" element={<Portal />} />
         </Routes>
       </>
   )

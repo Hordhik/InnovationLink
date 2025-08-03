@@ -10,7 +10,7 @@ const SignUp = () => {
   const navigate = useNavigate();
 
   const handleLoginClick = () => {
-    navigate('/login');
+    navigate('/auth/login');
   };
   const [userType, setUserType] = useState('startup')
 

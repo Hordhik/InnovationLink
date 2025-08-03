@@ -25,7 +25,7 @@ const LogIn = () => {
   ];
 
   const handleCreateAccountClick = () => {
-    navigate('/signup');
+    navigate('/auth/signup');
   };
 
   const handleInputChange = (e) => {
@@ -47,8 +47,8 @@ const LogIn = () => {
     );
 
     if (user) {
-      // Successful login - redirect to Portal/Home
-      navigate('/portal/home');
+      // Successful login - redirect to Project Home (first project by default)
+      navigate('/project-1/home');
     } else {
       // Failed login - show error
       setError('Invalid username or password');
