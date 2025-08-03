@@ -24,10 +24,17 @@ function Portal() {
                     <Route path="/" element={<Navigate to={`/${defaultProject}/home`} replace />} />
                     <Route path="/home" element={<Home />} />
                     <Route path="/schedules" element={<div>Schedules Content</div>} />
+
                     <Route path="/inbox" element={<Inbox />} />
                     <Route path="/blogs" element={<Blogs />} />
                     <Route path="/blog/:id" element={<Blog />} />
                     <Route path="/events" element={<Events />} />
+
+                    <Route path="/inbox" element={<div>Inbox Content</div>} />
+                    <Route path="/blogs" element={<Blogs />} />
+                    <Route path="/blog/:id" element={<Blog />} />
+                    <Route path="/events" element={<div>Project Events Content</div>} />
+
                     <Route path="/profile" element={<div>Profile Content</div>} />
                     <Route path="/notifications" element={<div>Notifications Content</div>} />
                     <Route path="/support-tickets" element={<div>Support Tickets Content</div>} />
