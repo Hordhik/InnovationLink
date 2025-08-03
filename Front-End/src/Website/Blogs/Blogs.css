@@ -28,3 +28,70 @@
   text-decoration: underline ;
   margin-bottom: 30px;
 }
+
+/* Portal-specific styles */
+
+.portal-blogs-page {
+  padding: 20px 25px;
+  font-family: Inter, sans-serif;
+}
+
+.portal-blog-header {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.portal-button {
+  background-color: #f8f9fa;
+  border: 2px solid #007bff;
+  color: #007bff;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.portal-button:hover {
+  background-color: #007bff;
+  color: white;
+}
+
+.portal-button.new-blog {
+  background-color: #007bff;
+  color: white;
+}
+
+.portal-button.new-blog:hover {
+  background-color: #0056b3;
+}
+
+/* Portal layout - 2 columns instead of 3 */
+
+.portal-blog-list {
+  display: flex;
+  flex-direction: column;
+  width: 70%; /* Takes up remaining space */
+  padding-left: 20px;
+}
+
+.portal-blogs-layout .filter-name {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.portal-blogs-layout .option:hover {
+  background-color: #e9ecef;
+  border-color: #007bff;
+}
+
+.portal-blogs-layout .option.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}

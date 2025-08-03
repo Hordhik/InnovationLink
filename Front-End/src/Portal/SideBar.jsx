@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom';
 import './SideBar.css';
+import { projects, nameToUrl, getDefaultProject } from './projectsConfig';
 import home from '../assets/Portal/SideBar/home.svg';
 import schedules from '../assets/Portal/SideBar/schedules.svg';
 import inbox from '../assets/Portal/SideBar/inbox.svg';
@@ -24,14 +25,13 @@ const SideBar = () => {
   const location = useLocation();
   const [hoveredItem, setHoveredItem] = useState(null);
   
-  const projectItems = [
-    { name: 'Project 1', path: '/project-1/home' },
-    { name: 'Project 2', path: '/project-2/home' },
-    { name: 'Project 3', path: '/project-3/home' },
-  ]
+  const projectItems = projects.map(project => ({
+    ...project,
+    path: `/${nameToUrl(project.name)}/home`
+  }));
   
-  // Extract current project from URL (e.g., /project-1/home -> project-1)
-  const currentProject = location.pathname.split('/')[1] || 'project-1';
+  // Extract current project from URL (e.g., /handbook/home -> handbook)
+  const currentProject = location.pathname.split('/')[1] || getDefaultProject();
 
   const mainItems = [
     { name: 'Home', img1: home,img2: home2, path: `/${currentProject}/home` },
