@@ -1,0 +1,61 @@
+.NavBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    font-family: Inter, sans-serif;
+}
+
+.logo img{
+    width: 200px;
+}
+
+.Nav-options {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.Nav-option {
+    cursor: pointer;
+    color: #A9A9A9;
+    text-align: center;
+    text-decoration: none;
+}
+
+.Nav-option.active {
+    color: #000;
+    text-decoration: underline;
+}
+
+.Signin-options {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+}
+
+.Signin-option,
+.Signup-option {
+    cursor: pointer;
+    display: flex;
+    padding: 10px 24px;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.Signin-option.login{
+    border-radius: 50px;
+    border: 1px solid #E5E7EB;
+    background: #FFF;
+}
+
+.Signup-option.register {
+    border-radius: 50px;
+    background: #0C0C0C;
+    color: #FFF;
+    gap: 10px;
+}

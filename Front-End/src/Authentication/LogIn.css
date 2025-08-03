@@ -1,0 +1,131 @@
+.login-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    gap: 100px;
+}
+
+.login-page .image {
+    width: 50%;
+}
+
+.login-page .image img{
+    width: 100%;
+    object-fit: cover;
+}
+
+.login-page .login {
+    padding: 50px;
+    border-radius: 20px;
+    border: 1px solid #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+}
+
+.login-page .login img {
+    width: 250px;
+}
+
+.login-page .login .credentials {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.login-page .login .credentials .username, 
+.login-page .login .credentials .password {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.login-page .login .credentials label {
+    color: #000;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.login-page .login .credentials input {
+    width: 277px;
+    height: 41px;
+    padding: 14px 10px;
+    border-radius: 5px;
+    border: 1px solid #000;
+}
+
+.login-page .login .credentials .password .forgot-password {
+    font-size: 15px;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.login-page .login .login-button button{
+    border-radius: 20px;
+    border: 1px solid #000;
+    background: #FFF;
+    padding: 10px 35px;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.login-page .login .login-button button:hover {
+    background: #000;
+    color: #FFF;
+    cursor: pointer;
+}
+
+.login-page .login .alternatives {
+    display: flex;
+    justify-content: space-evenly;
+    width: 100%;
+}
+
+.login-page .login .alternatives button {
+    background-color: #FFF;
+    border-radius: 50%;
+    padding: 13px;
+    width: 51px;
+    height: 51px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #000;
+    
+}
+
+.login-page .login .alternatives button img {
+    width: 30px;
+    height: 30px;
+}
+
+.login-page .login .create-account,
+.login-page .login .policies {
+    font-size: 14px;
+    font-weight: 400;
+    color: #000;
+}
+
+.login-page .login .create-account span,
+.login-page .login .policies span {
+    color: #000;
+    font-weight: 500;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.create-account span:hover,
+.policies span:hover {
+    text-decoration: underline;
+}
+
+.error-message {
+    color: #e74c3c;
+    font-size: 14px;
+    text-align: center;
+    margin: 10px 0;
+    font-weight: 500;
+}

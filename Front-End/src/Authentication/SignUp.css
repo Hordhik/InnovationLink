@@ -1,0 +1,205 @@
+/* Signup page uses the same layout as login page */
+.signup-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    gap: 100px;
+}
+
+.signup-page .image {
+    width: 50%;
+    display: flex;
+    align-items: center;
+}
+
+.signup-page .image img{
+    width: 100%;
+    object-fit: cover;
+}
+
+.signup-page .signup-container {
+    padding: 20px;
+    border-radius: 20px;
+    border: 1px solid #000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 20px;
+    width: 530px;
+}
+
+.signup-page .signup-container img {
+    width: 250px;
+}
+
+.signup-page .signup-container .credentials {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.signup-page .signup-container .credentials .username, 
+.signup-page .signup-container .credentials .password {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.signup-page .signup-container .credentials label {
+    color: #000;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.signup-page .signup-container .credentials input {
+    width: 277px;
+    height: 41px;
+    padding: 14px 10px;
+    border-radius: 5px;
+    border: 1px solid #000;
+}
+
+.signup-page .signup-container .login-button button{
+    border-radius: 20px;
+    border: 1px solid #000;
+    background: #FFF;
+    padding: 10px 35px;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.signup-page .signup-container .login-button button:hover {
+    background: #000;
+    color: #FFF;
+    cursor: pointer;
+}
+
+.signup-page .signup-container .alternatives {
+    display: flex;
+    justify-content: space-evenly;
+    width: 100%;
+}
+
+.signup-page .signup-container .alternatives button {
+    background-color: #FFF;
+    border-radius: 50%;
+    padding: 13px;
+    width: 51px;
+    height: 51px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #000;
+}
+
+.signup-page .signup-container .alternatives button img {
+    width: 30px;
+    height: 30px;
+}
+
+.signup-page .signup-container .create-account,
+.signup-page .signup-container .policies {
+    font-size: 14px;
+    font-weight: 400;
+    color: #000;
+}
+
+.signup-page .signup-container .create-account span,
+.signup-page .signup-container .policies span {
+    color: #000;
+    font-weight: 500;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.signup-page .signup-container .create-account span:hover,
+.signup-page .signup-container .policies span:hover {
+    text-decoration: underline;
+}
+
+/* Signup-specific styles */
+.signup-page .signup-container .user-type-toggle {
+    display: flex;
+    width: 100%;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+    justify-content: space-evenly;
+    position: relative;
+}
+
+.signup-page .signup-container .user-type-toggle .toggle-button {
+    padding: 12px 20px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    color: #999;
+    transition: all 0.3s ease;
+    position: relative;
+    margin-bottom: -2px;
+}
+
+.signup-page .signup-container .user-type-toggle .toggle-button.active {
+    color: #333;
+    font-weight: 600;
+}
+
+.signup-page .signup-container .user-type-toggle .toggle-button.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #333;
+}
+
+.signup-page .signup-container .user-type-toggle .toggle-button:hover {
+    color: #333;
+}
+
+.signup-page .signup-container .credentials .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.signup-page .signup-container .credentials .form-grid .username,
+.signup-page .signup-container .credentials .form-grid .password {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.signup-page .signup-container .credentials .form-grid input {
+    width: 130px;
+}
+
+.signup-page .signup-container .credentials .checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.signup-page .signup-container .credentials .checkbox-container .form-checkbox {
+    width: auto;
+    height: auto;
+}
+
+.signup-page .signup-container .credentials .checkbox-container .checkbox-label {
+    font-size: 14px;
+    color: #000;
+}
+
+.signup-page .signup-container .credentials .checkbox-container .checkbox-label span {
+    color: #000;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.signup-page .signup-container .credentials .checkbox-container .checkbox-label span:hover {
+    text-decoration: underline;
+}
