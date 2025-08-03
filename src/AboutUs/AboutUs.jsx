@@ -14,7 +14,7 @@ const Icon = ({ name, size = 32 }) => (
 
 // --- Team Section Data ---
 const teamMembers = [
-    { name: 'Chandar Sekhar', role: 'Founder & CEO', bio: 'Visionary builder creating trust-based startup ecosystems.', imageUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop' },
+    { name: 'Chandar Sekhar', role: 'Founder & CEO', bio: 'Visionary builder creating trust-based startup ecosystems.', imageUrl: './ChandraSekhar.jpeg' },
     { name: 'Sravan Kumar', role: 'CFO', bio: 'Numbers expert passionate about funding strategies and early-stage growth.', imageUrl: 'https://images.unsplash.com/photo-1556157382-97eda2d62296?q=80&w=400&auto=format&fit=crop' },
     { name: 'Manikant Reddy', role: 'CTO', bio: 'Tech mind behind our secure and scalable platform architecture.', imageUrl: 'https://images.unsplash.com/photo-1624561172888-ac93c696e10c?q=80&w=400&auto=format&fit=crop' },
 ];
