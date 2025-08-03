@@ -1,6 +1,6 @@
 import React from 'react'
 import './Blog.css';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { getBlogById } from './blogData';
 import calendarIcon from '../../assets/Events/calendar.svg';
 import profileIcon from '../../assets/Blogs/profile.svg';
@@ -10,6 +10,11 @@ import { blogData } from './blogData';
 
 const Blog = () => {
   const { id } = useParams();
+  const location = useLocation();
+  
+  // Check if we're in portal context
+  const pathParts = location.pathname.split('/');
+  const isPortalView = pathParts.length >= 4 && pathParts[2] === 'blog' && pathParts[1] !== 'blog';
   
   const blog = getBlogById(id);
 
@@ -22,6 +27,38 @@ const Blog = () => {
     );
   }
 
+  // Portal view - without "Most Popular" section
+  if (isPortalView) {
+    return (
+      <div className="blog-page-portal">
+        <div className="blog">
+          <div className="blog-header">
+            <p className="blog-title">{blog.title}</p>
+            <div className="blog-meta">
+              <div className="blog-date">
+                <img src={calendarIcon} alt="" />
+                <p>{blog.date}</p>
+              </div>
+              <div className="blog-author">
+                <img src={profileIcon} alt="" />
+                <p>By {blog.user}</p>
+              </div>
+            </div>
+          </div>
+          {blog.img && <img src={blog.img} alt={blog.title} className="blog-hero-image" />}
+          <div className="blog-content">
+            <div className="blog-full-content">
+              {blog.fullContent.split('\n').map((paragraph, index) => (
+                <p key={index}>{paragraph}</p>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Website view - with "Most Popular" section
   return (
     <div className="blog-page">
         <div className="empty"></div>

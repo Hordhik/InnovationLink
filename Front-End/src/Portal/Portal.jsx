@@ -1,14 +1,15 @@
 import React from 'react'
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import TopBar from './TopBar';
 import SideBar from './SideBar';
 import './Portal.css';
+import Home from './Home/Home';
+import Blogs from '../Website/Blogs/Blogs';
+import Blog from '../Website/Blogs/Blog';
+import { getDefaultProject } from './projectsConfig';
 
 function Portal() {
-  const location = useLocation();
-  
-  // Extract project name from URL (e.g., /project-1/home -> project-1)
-  const projectName = location.pathname.split('/')[1] || 'project-1';
+  const defaultProject = getDefaultProject();
   
   return (
     <div className='portal-container'>
@@ -17,11 +18,12 @@ function Portal() {
             <SideBar />
             <div className='portal-main-content'>
                 <Routes>
-                    <Route path="/" element={<Navigate to={`/${projectName}/home`} replace />} />
-                    <Route path="/home" element={<div>Home Content</div>} />
+                    <Route path="/" element={<Navigate to={`/${defaultProject}/home`} replace />} />
+                    <Route path="/home" element={<Home />} />
                     <Route path="/schedules" element={<div>Schedules Content</div>} />
                     <Route path="/inbox" element={<div>Inbox Content</div>} />
-                    <Route path="/blogs" element={<div>Project Blogs Content</div>} />
+                    <Route path="/blogs" element={<Blogs />} />
+                    <Route path="/blog/:id" element={<Blog />} />
                     <Route path="/events" element={<div>Project Events Content</div>} />
                     <Route path="/profile" element={<div>Profile Content</div>} />
                     <Route path="/notifications" element={<div>Notifications Content</div>} />

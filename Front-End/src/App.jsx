@@ -10,6 +10,7 @@ import Blog from './Website/Blogs/Blog';
 import LogIn from './Authentication/LogIn';
 import SignUp from './Authentication/SignUp';
 import Portal from './Portal/Portal';
+import { projects, nameToUrl } from './Portal/projectsConfig';
 
 function App() {
   const location = useLocation();
@@ -48,10 +49,14 @@ function App() {
           {/* Portal Routes */}
           {/* <Route path="/portal/*" element={<Portal />} /> */}
           
-          {/* Project Routes */}
-          <Route path="/project-1/*" element={<Portal />} />
-          <Route path="/project-2/*" element={<Portal />} />
-          <Route path="/project-3/*" element={<Portal />} />
+          {/* Project Routes - Dynamically generated from projectsConfig */}
+          {projects.map((project) => (
+            <Route 
+              key={project.name} 
+              path={`/${nameToUrl(project.name)}/*`} 
+              element={<Portal />} 
+            />
+          ))}
         </Routes>
       </>
   )
