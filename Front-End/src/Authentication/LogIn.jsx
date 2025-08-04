@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import logo from '../assets/NavBar/logo.png';
 import googleIcon from '../assets/Authentication/google.svg';
 import login from '../assets/Authentication/login.png';
+import { getDefaultProject } from '../Portal/projectsConfig';
 
 const LogIn = () => {
   const navigate = useNavigate();
@@ -47,8 +48,9 @@ const LogIn = () => {
     );
 
     if (user) {
-      // Successful login - redirect to Project Home (first project by default)
-      navigate('/project-1/home');
+      // Successful login - redirect to Portal with default project
+      const defaultProject = getDefaultProject();
+      navigate(`/${defaultProject}/home`);
     } else {
       // Failed login - show error
       setError('Invalid username or password');
