@@ -1,45 +1,103 @@
+/* FILE: src/Inbox/Inbox.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
 .inbox-container {
   display: flex;
-  background-color: #f5f5f5;
-  font-family: Arial, sans-serif;
-    height: 100%;
+  height: 100vh;
+  font-family: 'Inter', sans-serif;
+  background-color: #FFFFFF;
 }
 
-.users {
-  width: 25%;
-  background-color: #fff;
-  padding: 20px 10px;
-  border-right: 1px solid #ddd;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-}
-
-.chat-box {
+.user-list-panel {
+  width: 320px;
+  flex-shrink: 0;
+  background-color: #FFFFFF;
+  border-right: 1px solid #E5E7EB;
   display: flex;
   flex-direction: column;
-  background-color: #f5f5f5;
+}
+
+.search-bar-container {
+    padding: 16px;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.user-search-input {
+    width: 100%;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 1px solid #E5E7EB;
+    font-size: 14px;
+    outline: none;
+}
+
+.user-list-items {
+    padding: 8px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.chat-panel {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #F9FAFB;
   position: relative;
+  /* CORRECTED: This ensures the panel itself has a max height and doesn't stretch the page */
+  height: 100vh; 
 }
 
 .chat-header {
   position: absolute;
   top: 20px;
-  width: 100%;
+  left: 0;
+  right: 0;
   text-align: center;
+  z-index: 1;
 }
 
 .date-divider {
-  background-color: #e0e0e0;
-  color: #666;
-  padding: 5px 15px;
+  background-color: #FFFFFF;
+  color: #6B7280;
+  padding: 4px 12px;
   border-radius: 20px;
   font-size: 12px;
+  font-weight: 500;
+  border: 1px solid #E5E7EB;
 }
 
 .messages-list {
   flex-grow: 1;
-  padding: 50px 20px 20px 20px; /* Adjust padding to make space for the date divider */
-  overflow-y: auto;
+  padding: 80px 40px 20px 40px;
+  overflow-y: auto; /* This makes ONLY the message list scrollable */
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
 }
+
+.no-messages-prompt {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #9CA3AF;
+    font-size: 1rem;
+}
+.message-input-panel {
+  padding: 16px;
+  background-color: #FFFFFF;
+  border-top: 1px solid #E5E7EB;
+  display: flex;
+  align-items: center;
+}
+.message-input-panel .message-input-container {
+  flex-grow: 1;
+}     
+.message-input-panel .message-input-container .message-input {
+  width: 100%;
+}
+.message-input-panel .message-input-container .attach-button,
+.message-input-panel .message-input-container .send-button {
+  margin-left: 8px;
+}
+

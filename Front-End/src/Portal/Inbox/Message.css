@@ -1,35 +1,123 @@
+/* FILE: src/Inbox/Message.css */
+
 .message-container {
   display: flex;
-  margin-bottom: 15px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+  gap: 10px;
+  max-width: 80%; /* Prevent messages from taking full width */
 }
 
 .message-container.sent-by-me {
-  justify-content: flex-end;
+  align-self: flex-end; /* Aligns the whole bubble to the right */
 }
 
-.message-container .message-content {
-  background-color: #fff;
-  border-radius: 12px;
-  padding: 10px 15px;
-  max-width: 70%;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
+.message-container.received {
+    align-self: flex-start; /* Aligns the whole bubble to the left */
+}
+
+.message-avatar {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+}
+
+.message-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+}
+
+.message-bubble {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sent-by-me .message-bubble {
+    flex-direction: row-reverse;
+}
+
+.message-content {
+  background-color: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 18px;
+  padding: 12px 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .message-container.sent-by-me .message-content {
-  background-color: #e6f7ff; /* Light blue color for sent messages */
+  background-color: #F9FAFB; /* Subtle gray for sent messages */
+  border-color: #E5E7EB;
 }
 
 .message-text {
   font-size: 15px;
-  line-height: 1.4;
-  color: #333;
+  line-height: 1.5;
+  color: #111827;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 .message-time {
   font-size: 12px;
-  color: #888;
-  align-self: flex-end;
+  color: #6B7280;
+  text-align: right;
   margin-top: 5px;
+}
+
+.message-actions-trigger {
+    opacity: 0;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: opacity 0.2s ease, background-color 0.2s ease;
+    color: #6B7280;
+}
+
+.message-bubble:hover .message-actions-trigger {
+    opacity: 1;
+}
+
+.message-actions-trigger:hover {
+    background-color: #F3F4F6;
+}
+
+.message-actions-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #FFFFFF;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 8px;
+    z-index: 10;
+    width: 120px;
+    border: 1px solid #E5E7EB;
+}
+
+.sent-by-me .message-actions-menu {
+    right: auto;
+    left: 0;
+}
+
+.message-actions-menu button {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.message-actions-menu button:hover {
+    background-color: #F3F4F6;
+}
+
+.message-actions-menu button.delete {
+    color: #EF4444;
 }
