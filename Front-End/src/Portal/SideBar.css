@@ -1,11 +1,12 @@
 .sidebar{
     width: 15%;
-    height: fill;
+    height: 100%;
     background: #EDEFF3;
     padding: 20px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    box-sizing: border-box;
 }
 /* .sidebar .projects, .sidebar .essentials  */
 .sidebar .main-project{

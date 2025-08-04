@@ -1,12 +1,16 @@
-import React from 'react'
+import React from 'react';
+import AdvancedSearch from './AdvancedSearch';
+import StartupCard from './StartupCard';
 import './Home.css';
 
 const Home = () => {
   return (
     <div className="home-container">
-      <h1>Welcome to the Home Page</h1>
+      <AdvancedSearch />
+      <StartupCard />
+      <StartupCard />
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
