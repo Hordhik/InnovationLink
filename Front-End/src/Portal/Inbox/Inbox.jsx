@@ -32,8 +32,8 @@ const allMessages = {
 
 
 const Inbox = () => {
-  const [users, setUsers] = useState(allUsers);
-  const [activeUser, setActiveUser] = useState(users[0]);
+  // const [users, setUsers] = useState(allUsers);
+  const [activeUser, setActiveUser] = useState(allUsers[0]);
   const [messages, setMessages] = useState(allMessages[activeUser.id] || []);
   const [searchTerm, setSearchTerm] = useState('');
   const messagesEndRef = useRef(null);
@@ -69,7 +69,7 @@ const Inbox = () => {
       allMessages[activeUser.id] = updatedMessages;
   };
 
-  const filteredUsers = users.filter(user => 
+  const filteredUsers = allUsers.filter(user => 
       user.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
   

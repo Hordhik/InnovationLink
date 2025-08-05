@@ -29,8 +29,11 @@
 }
 
 /* Portal-specific styles */
+.portal-blogs-page {
+  padding: 20px 25px;
+}
 .portal-blogs-layout {
-  padding: 0;
+  padding: 20px;
 }
 
 .portal-blog-header {

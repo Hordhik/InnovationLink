@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './Events.css';
 import EventCard from './EventCard';
+import { useLocation } from 'react-router-dom';
 
 // Data for the filters
 const states = [
@@ -48,6 +49,12 @@ const Events = () => {
   // State to track the selected filters (now arrays for multiple selections)
   const [selectedStates, setSelectedStates] = useState([]);
   const [selectedCities, setSelectedCities] = useState([]);
+  const location = useLocation();
+  
+  // Check if we're in any portal view (any project)
+  // More robust detection: check if URL has format /{project}/events
+  const pathParts = location.pathname.split('/');
+  const isPortalView = pathParts.length >= 3 && pathParts[2] === 'events' && pathParts[1] !== 'events';
 
   // Function to handle clicking a state option
   const handleStateClick = (state) => {
@@ -91,8 +98,8 @@ const Events = () => {
   });
 
   return (
-    <div className="events">
-      <div className="filters">
+    <div className={isPortalView ? "portal-events-page" : "events"}>
+      <div className={isPortalView ? "portal-events-layout filters" : "filters"}>
         {/* State Filter */}
         <div className="filter">
           <div className="filter-name">State</div>

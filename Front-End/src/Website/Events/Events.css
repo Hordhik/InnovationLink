@@ -1,9 +1,8 @@
-.events {
+.events, .portal-events-page{
     display: flex;
     align-items: start;
     gap: 50px;
     padding: 20px 50px;
-    font-family: Inter, sans-serif;
     color: #000;
 }
 
@@ -65,4 +64,24 @@
     flex-direction: column;
     gap: 20px;
     width: 60%;
+}
+
+/* Portal-specific styles */
+
+.portal-events-layout .filter-name {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.portal-events-layout .option:hover {
+    background-color: #e9ecef;
+    border-color: #007bff;
+}
+
+.portal-events-layout .option.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
 }

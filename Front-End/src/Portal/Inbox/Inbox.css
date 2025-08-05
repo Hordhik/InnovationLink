@@ -4,13 +4,11 @@
 
 .inbox-container {
   display: flex;
-  height: 100vh;
-  font-family: 'Inter', sans-serif;
-  background-color: #FFFFFF;
+  height: 100%;
 }
 
 .user-list-panel {
-  width: 320px;
+  width: 25%;
   flex-shrink: 0;
   background-color: #FFFFFF;
   border-right: 1px solid #E5E7EB;
@@ -34,7 +32,7 @@
 
 .user-list-items {
     padding: 8px;
-    overflow-y: auto;
+    overflow-y: scroll; 
     flex-grow: 1;
 }
 
@@ -44,8 +42,6 @@
   flex-direction: column;
   background-color: #F9FAFB;
   position: relative;
-  /* CORRECTED: This ensures the panel itself has a max height and doesn't stretch the page */
-  height: 100vh; 
 }
 
 .chat-header {
@@ -70,7 +66,7 @@
 .messages-list {
   flex-grow: 1;
   padding: 80px 40px 20px 40px;
-  overflow-y: auto; /* This makes ONLY the message list scrollable */
+  overflow-y: scroll; 
   display: flex;
   flex-direction: column;
 }
