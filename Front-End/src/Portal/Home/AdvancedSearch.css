@@ -20,6 +20,28 @@
   font-weight: bold;
 }
 
+.header-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.toggle-search-button {
+  background-color: #007aff;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.toggle-search-button:hover {
+  background-color: #0056b3;
+}
+
 .clear-all-button {
   background: none;
   border: none;
@@ -38,6 +60,24 @@
   display: flex;
   justify-content: space-between;
   gap: 15px;
+}
+
+.filter-row-advanced {
+  animation: slideDown 0.3s ease-out;
+  opacity: 1;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 100px;
+  }
 }
 
 .filter-item {
