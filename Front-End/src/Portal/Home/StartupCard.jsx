@@ -1,5 +1,7 @@
 import React from 'react';
 import './StartupCard.css';
+import eyes from "../../assets/Portal/StartupCard/eyes.svg"
+import statues from "../../assets/Portal/StartupCard/status-up.svg"
 
 const StartupCard = () => {
   const tags = ['HealthTech', 'RuralTech', 'SaaS', 'Clean Energy'];
@@ -12,25 +14,28 @@ const StartupCard = () => {
             <img src="https://ui-avatars.com/api/?name=Innovation+Link" alt="Innovation Link" />
           </div>
           <div className="text-info">
-            <h3 className="startup-name">Innovation Link</h3>
-            <p className="founder-name">Founder: Chandra Sekhar</p>
-            <p className="location-team">Vijaywda • 4-10 Team</p>
+            <p className="startup-name">Innovation Link</p>
+            <p className="founder-name">Founder: <span>Chandra Sekhar</span></p>
+            {/* <p className="location-team">Location: <span>Vijaywda</span></p> */}
+            <p className="team-size">Team size: <span>4-10</span></p>
           </div>
         </div>
-        <div className="mentor-info">
-          <div className="mentors-engaged">
-            <span className="icon"></span>
-            <span>12 Mentors Engaged</span>
+        <div className="connect">
+          <div className="mentor-info">
+            <div className="mentors-engaged">
+              <img src={eyes} alt="" className='icon'/>
+              <span>12 Engaged</span>
+            </div>
+            <div className="mentors-this-month">
+              <img src={statues} alt="" className='icon'/>
+              <span>128 Lookouts</span>
+            </div>
           </div>
-          <div className="mentors-this-month">
-            <span className="icon"></span>
-            <span>128 this month</span>
+          <div className="card-actions">
+            <button className="connect-button">Connect</button>
+            <button className="request-button">Request a Meeting</button>
           </div>
         </div>
-      </div>
-      <div className="card-actions">
-        <button className="connect-button">Connect</button>
-        <button className="request-button">Request a Meeting</button>
       </div>
       <div className="card-body">
         <p className="description">
@@ -40,7 +45,7 @@ const StartupCard = () => {
         </p>
         <div className="tags">
           {tags.map((tag, index) => (
-            <span key={index} className="tag">{tag}</span>
+            <p key={index} className="tag">{tag}</p>
           ))}
         </div>
         <a href="#" className="view-profile-link">
