@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom';
 import './SideBar.css';
-import { projects, nameToUrl, getDefaultProject } from './projectsConfig';
+import { getDefaultProject } from './projectsConfig';
 import home from '../assets/Portal/SideBar/home.svg';
 import schedules from '../assets/Portal/SideBar/schedules.svg';
 import inbox from '../assets/Portal/SideBar/inbox.svg';
@@ -14,8 +14,6 @@ import inbox2 from '../assets/Portal/SideBar/inbox-2.svg';
 import blogs2 from '../assets/Portal/SideBar/blogs-2.svg';
 import events2 from '../assets/Portal/SideBar/events-2.svg';
 import profile2 from '../assets/Portal/SideBar/profile-2.svg';
-import folder_open from '../assets/Portal/SideBar/folder-open.svg';
-import folder_close from '../assets/Portal/SideBar/folder-close.svg';
 import notifications from '../assets/Portal/SideBar/notification.svg';
 import support from '../assets/Portal/SideBar/ticket.svg';
 import settings from '../assets/Portal/SideBar/setting.svg';
@@ -24,11 +22,6 @@ const SideBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [hoveredItem, setHoveredItem] = useState(null);
-  
-  const projectItems = projects.map(project => ({
-    ...project,
-    path: `/${nameToUrl(project.name)}/home`
-  }));
   
   // Extract current project from URL (e.g., /handbook/home -> handbook)
   const currentProject = location.pathname.split('/')[1] || getDefaultProject();
@@ -70,7 +63,6 @@ const SideBar = () => {
               const isActive = location.pathname === item.path;
               const isHovered = hoveredItem === item.name;
               const shouldShowImg2 = isActive || isHovered;
-              
               return (
                 <div 
                   className={`main-item ${isActive ? 'active' : ''}`} 
@@ -87,26 +79,6 @@ const SideBar = () => {
             })}
           </div>
         </div>
-        <div className="projects">
-          <p>PROJECTS</p>
-          <div className="project-items">
-            {projectItems.map((item) => {
-              const isCurrentProject = currentProject === item.path.split('/')[1];
-              
-              return (
-                <div 
-                  className={`project-item ${isCurrentProject ? 'active' : ''}`} 
-                  key={item.name}
-                  onClick={() => handleItemClick(item.path)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <img src={isCurrentProject ? folder_open : folder_close} alt="" />
-                  <p>{item.name}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div> 
       </div>
       <div className="essentials">
         <p>ESSENTIALS</p>
