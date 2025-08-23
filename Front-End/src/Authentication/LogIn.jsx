@@ -5,6 +5,7 @@ import logo from '../assets/NavBar/logo.png';
 import googleIcon from '../assets/Authentication/google.svg';
 import login from '../assets/Authentication/login.png';
 import { getProjectForUser } from '../Portal/projectsConfig';
+import { post } from '../lib/api';
 
 
 const LogIn = () => {
@@ -24,24 +25,7 @@ const LogIn = () => {
     setError('');
   };
 
-  // Login data array
-  const loginData = [
-    {
-      username: 'manikant',
-      password: '1234',
-      userType: 'S' // Startup
-    },
-    {
-      username: 'arcuser',
-      password: 'arc1234',
-      userType: 'S' // Startup
-    },
-    {
-      username: 'luciduser',
-      password: 'lucid1234',
-      userType: 'I' // Investor
-    }
-  ];
+  // Remove hardcoded login data; use backend API instead
 
   const handleCreateAccountClick = () => {
     navigate('/auth/signup');
@@ -56,22 +40,28 @@ const LogIn = () => {
     if (error) setError('');
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Check if credentials and userType match any user in loginData array
-    const selectedType = userType === 'startup' ? 'S' : 'I';
-    const user = loginData.find(
-      userData =>
-        userData.username === formData.username &&
-        userData.password === formData.password &&
-        userData.userType === selectedType
-    );
-    if (user) {
-      const projectUrl = getProjectForUser(formData.username);
-      const typeUrl = user.userType; // 'S' or 'I'
-  navigate(`/${typeUrl}/${projectUrl}/home`);
-    } else {
-      setError('Invalid username, password, or user type');
+    setError('');
+    try {
+      const payload = { username: formData.username, password: formData.password };
+      if (userType === 'startup') {
+        const { token, startup } = await post('/api/startup/login', payload);
+        localStorage.setItem('il_token', token);
+        localStorage.setItem('il_role', 'startup');
+        const projectUrl = getProjectForUser(startup?.username || formData.username);
+        const typeUrl = 'S';
+        navigate(`/${typeUrl}/${projectUrl}/home`);
+      } else if (userType === 'investor') {
+        const { token, investor } = await post('/api/investor/login', payload);
+        localStorage.setItem('il_token', token);
+        localStorage.setItem('il_role', 'investor');
+        const projectUrl = getProjectForUser(investor?.username || formData.username);
+        const typeUrl = 'I';
+        navigate(`/${typeUrl}/${projectUrl}/home`);
+      }
+    } catch (err) {
+      setError(err.message || 'Login failed');
     }
   };
 
@@ -103,23 +93,23 @@ const LogIn = () => {
           <div className="credentials">
             <div className="username">
               <p className='label'>Username:</p>
-                <input 
-                  type="text" 
-                  name="username"
-                  value={formData.username}
-                  onChange={handleInputChange}
-                  placeholder={`Enter your ${userType} username...`} 
-                  required
-                />
+              <input
+                type="text"
+                name="username"
+                value={formData.username}
+                onChange={handleInputChange}
+                placeholder={`Enter your ${userType} username...`}
+                required
+              />
             </div>
             <div className="password">
               <p className='label'>Password:</p>
-              <input 
-                type="password" 
+              <input
+                type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                placeholder="Enter your password..." 
+                placeholder="Enter your password..."
                 required
               />
               <p className='forgot-password'>Forgot your password?</p>
