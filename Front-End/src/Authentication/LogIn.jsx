@@ -17,19 +17,29 @@ const LogIn = () => {
   const [error, setError] = useState('');
   const [userType, setUserType] = useState('startup'); // 'startup' or 'investor'
 
+  // Clear form data when userType changes
+  const handleUserTypeChange = (type) => {
+    setUserType(type);
+    setFormData({ username: '', password: '' });
+    setError('');
+  };
+
   // Login data array
   const loginData = [
     {
       username: 'manikant',
-      password: '1234'
+      password: '1234',
+      userType: 'S' // Startup
     },
     {
       username: 'arcuser',
-      password: 'arc1234'
+      password: 'arc1234',
+      userType: 'S' // Startup
     },
     {
       username: 'luciduser',
-      password: 'lucid1234'
+      password: 'lucid1234',
+      userType: 'I' // Investor
     }
   ];
 
@@ -48,15 +58,20 @@ const LogIn = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    // Check if credentials match any user in loginData array
+    // Check if credentials and userType match any user in loginData array
+    const selectedType = userType === 'startup' ? 'S' : 'I';
     const user = loginData.find(
-      userData => userData.username === formData.username && userData.password === formData.password
+      userData =>
+        userData.username === formData.username &&
+        userData.password === formData.password &&
+        userData.userType === selectedType
     );
     if (user) {
       const projectUrl = getProjectForUser(formData.username);
-      navigate(`/${projectUrl}/home`);
+      const typeUrl = user.userType; // 'S' or 'I'
+  navigate(`/${typeUrl}/${projectUrl}/home`);
     } else {
-      setError('Invalid username or password');
+      setError('Invalid username, password, or user type');
     }
   };
 
@@ -72,14 +87,14 @@ const LogIn = () => {
           <button
             type="button"
             className={`toggle-button ${userType === 'startup' ? 'active' : ''}`}
-            onClick={() => setUserType('startup')}
+            onClick={() => handleUserTypeChange('startup')}
           >
             Start Up
           </button>
           <button
             type="button"
             className={`toggle-button ${userType === 'investor' ? 'active' : ''}`}
-            onClick={() => setUserType('investor')}
+            onClick={() => handleUserTypeChange('investor')}
           >
             Investor
           </button>

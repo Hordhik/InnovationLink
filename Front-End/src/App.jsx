@@ -44,7 +44,7 @@ function App() {
           {projects.map((project) => (
             <Route 
               key={project.name} 
-              path={`/${nameToUrl(project.name)}/*`} 
+              path={`/:userType/${nameToUrl(project.name)}/*`} 
               element={<Portal />} 
             />
           ))}
