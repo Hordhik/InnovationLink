@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import logo from '../assets/NavBar/logo.png';
 import googleIcon from '../assets/Authentication/google.svg';
 import login from '../assets/Authentication/login.png';
-import { getDefaultProject } from '../Portal/projectsConfig';
+import { getProjectForUser } from '../Portal/projectsConfig';
 
 
 const LogIn = () => {
@@ -22,6 +22,14 @@ const LogIn = () => {
     {
       username: 'manikant',
       password: '1234'
+    },
+    {
+      username: 'arcuser',
+      password: 'arc1234'
+    },
+    {
+      username: 'luciduser',
+      password: 'lucid1234'
     }
   ];
 
@@ -45,8 +53,8 @@ const LogIn = () => {
       userData => userData.username === formData.username && userData.password === formData.password
     );
     if (user) {
-      const defaultProject = getDefaultProject();
-      navigate(`/${defaultProject}/home`);
+      const projectUrl = getProjectForUser(formData.username);
+      navigate(`/${projectUrl}/home`);
     } else {
       setError('Invalid username or password');
     }

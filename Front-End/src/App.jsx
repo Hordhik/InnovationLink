@@ -32,22 +32,13 @@ function App() {
           <Route path="/events" element={<Events />} />
           <Route path="/about" element={<About />} />
 
-          {/* Legacy routes - redirect to new structure */}
-          {/* <Route path="/blogs" element={<Blogs />} />
-          <Route path="/blog/:id" element={<Blog />} />
-          <Route path="/events" element={<Events />} />
-          <Route path="/about" element={<About />} />
-           */}
           {/* Authentication Routes */}
           <Route path="/auth/login" element={<LogIn />} />
           <Route path="/auth/signup" element={<SignUp />} />
           
           {/* Legacy auth routes - redirect to new structure */}
-          <Route path="/login" element={<LogIn />} />
-          <Route path="/signup" element={<SignUp />} />
-          
-          {/* Portal Routes */}
-          {/* <Route path="/portal/*" element={<Portal />} /> */}
+          {/* <Route path="/login" element={<LogIn />} />
+          <Route path="/signup" element={<SignUp />} /> */}
           
           {/* Project Routes - Dynamically generated from projectsConfig */}
           {projects.map((project) => (
