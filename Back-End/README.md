@@ -1,15 +1,17 @@
-# InnovationLink - Back-End
+# Innovation-Link Backend
 
-Minimal Express (ESM) scaffold for InnovationLink.
+Node.js + Express backend for Innovation-Link project.
 
-Run locally:
+## Features
+- User authentication (hardcoded users)
+- REST APIs for login, projects, blogs, and events
+- Modular structure: routes, controllers, models
 
-```bash
-# install deps
-npm install
+## Getting Started
+1. Install dependencies: `npm install`
+2. Start server: `npm run dev`
 
-# start in dev mode (nodemon watches src)
-npm run dev
-```
-
-Server will listen on `PORT` from `.env` or default `4000`.
+## Folder Structure
+- `routes/` - API route definitions
+- `controllers/` - Route logic
+- `models/` - Data models (in-memory for now)

@@ -1,12 +1,11 @@
+
 import React, { useState } from 'react'
 import './LogIn.css'
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/NavBar/logo.png';
+import Axios from 'axios';
 import googleIcon from '../assets/Authentication/google.svg';
 import login from '../assets/Authentication/login.png';
-import { getProjectForUser } from '../Portal/projectsConfig';
-import { post } from '../lib/api';
-
 
 const LogIn = () => {
   const navigate = useNavigate();
@@ -25,8 +24,6 @@ const LogIn = () => {
     setError('');
   };
 
-  // Remove hardcoded login data; use backend API instead
-
   const handleCreateAccountClick = () => {
     navigate('/auth/signup');
   };
@@ -40,30 +37,42 @@ const LogIn = () => {
     if (error) setError('');
   };
 
+
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
+
     try {
-      const payload = { username: formData.username, password: formData.password };
-      if (userType === 'startup') {
-        const { token, startup } = await post('/api/startup/login', payload);
-        localStorage.setItem('il_token', token);
-        localStorage.setItem('il_role', 'startup');
-        const projectUrl = getProjectForUser(startup?.username || formData.username);
-        const typeUrl = 'S';
-        navigate(`/${typeUrl}/${projectUrl}/home`);
-      } else if (userType === 'investor') {
-        const { token, investor } = await post('/api/investor/login', payload);
-        localStorage.setItem('il_token', token);
-        localStorage.setItem('il_role', 'investor');
-        const projectUrl = getProjectForUser(investor?.username || formData.username);
-        const typeUrl = 'I';
-        navigate(`/${typeUrl}/${projectUrl}/home`);
+      const response = await fetch("http://localhost:5001/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.username,   // 👈 sending name as username
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || "Login failed");
+        return;
       }
+
+      // Save token + role
+      localStorage.setItem("il_token", data.token);
+      localStorage.setItem("il_role", userType);
+
+      // Navigate to dashboard
+      const typeUrl = userType === "investor" ? "I" : "S";
+      navigate(`/${typeUrl}/dashboard`);
     } catch (err) {
-      setError(err.message || 'Login failed');
+      setError(err.message || "Server error. Try again later.");
     }
   };
+
+
+
 
   return (
     <div className="login-page">
