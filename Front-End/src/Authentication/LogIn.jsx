@@ -6,6 +6,8 @@ import logo from '../assets/NavBar/logo.png';
 import Axios from 'axios';
 import googleIcon from '../assets/Authentication/google.svg';
 import login from '../assets/Authentication/login.png';
+import { login as loginApi } from '../services/authApi';
+
 
 const LogIn = () => {
   const navigate = useNavigate();
@@ -14,6 +16,7 @@ const LogIn = () => {
     username: '',
     password: ''
   });
+
   const [error, setError] = useState('');
   const [userType, setUserType] = useState('startup'); // 'startup' or 'investor'
 
@@ -43,31 +46,23 @@ const LogIn = () => {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5001/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.username,   // 👈 sending name as username
-          password: formData.password,
-        }),
+      const data = await loginApi({
+        identifier: formData.username,
+        password: formData.password,
+        userType,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.message || "Login failed");
-        return;
-      }
-
-      // Save token + role
       localStorage.setItem("il_token", data.token);
       localStorage.setItem("il_role", userType);
+      if (data.user)
+        localStorage.setItem("il_user", JSON.stringify(data.user));
 
-      // Navigate to dashboard
-      const typeUrl = userType === "investor" ? "I" : "S";
-      navigate(`/${typeUrl}/dashboard`);
-    } catch (err) {
-      setError(err.message || "Server error. Try again later.");
+      const next = data.redirectPath || (data.user?.userType === 'investor' ? '/I/handbook/home' : '/S/handbook/home');
+      navigate(next);
+    }
+    catch (err) {
+      const apiMsg = err?.response?.data?.message;
+      setError(apiMsg || err.message || "Server error. Please try again.");
     }
   };
 

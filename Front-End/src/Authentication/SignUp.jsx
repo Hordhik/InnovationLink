@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import logo from "../assets/NavBar/logo.png";
 import googleIcon from "../assets/Authentication/google.svg";
 import login from "../assets/Authentication/login.png";
+import { signup as signupApi } from "../services/authApi";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -29,23 +30,12 @@ const SignUp = () => {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:5001/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || "Signup failed");
-        return;
-      }
-
-      alert("Signup successful!");
+      const data = await signupApi(formData);
+      alert(data.message || "Signup successful!");
       navigate("/auth/login");
     } catch (err) {
-      setError(err.message || "Something went wrong. Try again.");
+      const apiMsg = err?.response?.data?.message;
+      setError(apiMsg || err.message || "Something went wrong. Try again.");
     }
   };
 
