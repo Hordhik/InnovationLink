@@ -53,18 +53,25 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const { email, password, userType } = req.body;
+    const { email, username, identifier, password, userType } = req.body;
 
-    // find user by email
-    const user = await User.findByEmail(email);
+    // Determine identifier: prefer explicit identifier, else email/username fields
+    const id = (identifier || email || username || '').toString().trim();
+    if (!id) {
+      return res.status(400).json({ message: "Email or username is required" });
+    }
+
+    // find user by email or username
+    const isEmail = id.includes('@');
+    const user = isEmail ? await User.findByEmail(id) : await User.findByUsername(id);
     if (!user) {
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(400).json({ message: "Invalid credentials" });
     }
 
     // check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(400).json({ message: "Invalid credentials" });
     }
 
     // check userType
@@ -85,10 +92,14 @@ exports.login = async (req, res) => {
       return res.status(500).json({ message: "Authentication error" });
     }
 
+    const portal = user.userType === 'investor' ? 'I' : 'S';
+    const redirectPath = `/${portal}/handbook/home`;
+
     res.json({
       message: "Login successful",
       token,
-      user: { id: user.id, username: user.username, email: user.email, userType: user.userType }
+      user: { id: user.id, username: user.username, email: user.email, userType: user.userType },
+      redirectPath
     });
   } catch (err) {
     console.error("Login Error:", err);

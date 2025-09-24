@@ -1,5 +1,6 @@
 const express = require('express');
 require('dotenv').config();
+const cors = require('cors');
 
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -9,6 +10,9 @@ const User = require('./models/userModel');
 const Investor = require('./models/investorModel');
 const Startup = require('./models/startupModel');
 
+const corsOptions = {
+  origin: 'http://localhost:5173',
+}
 const app = express();
 app.use(express.json());
 
@@ -19,6 +23,7 @@ app.use(express.json());
   await Startup.init();
 })();
 
+app.use(cors(corsOptions));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);

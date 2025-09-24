@@ -12,7 +12,7 @@ export async function login({ identifier, password, userType }) {
     const id = (identifier || '').trim();
     const payload = id.includes('@')
         ? { email: id, password, userType }
-        : { name: id, password, userType };
+        : { identifier: id, password, userType };
 
     const { data } = await api.post('/api/auth/login', payload);
     return data; // { token, user, redirectPath }

@@ -96,13 +96,13 @@ const LogIn = () => {
         <form onSubmit={handleLogin}>
           <div className="credentials">
             <div className="username">
-              <p className='label'>Username:</p>
+              <p className='label'>Email or Username:</p>
               <input
                 type="text"
                 name="username"
                 value={formData.username}
                 onChange={handleInputChange}
-                placeholder={`Enter your ${userType} username...`}
+                placeholder={`Enter your email or username...`}
                 required
               />
             </div>
