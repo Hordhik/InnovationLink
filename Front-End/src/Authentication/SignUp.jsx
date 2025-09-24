@@ -10,9 +10,10 @@ import { signup as signupApi } from "../services/authApi";
 const SignUp = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    userType: "startup",
+    userType: "",
     name: "",
     email: "",
+    phone: "",
     password: "",
   });
   const [error, setError] = useState("");
@@ -65,9 +66,13 @@ const SignUp = () => {
             <label htmlFor="name" className="label">Name:</label>
             <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required />
           </div>
-          <div className="username">
-            <label htmlFor="email" className="label">Email:</label>
+          <div className="email">
+            <label htmlFor="email" className="label">Email:</label><br />
             <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required />
+          </div>
+          <div className="phone">
+            <label htmlFor="phone" className="label">Phone:</label><br />
+            <input type="tel" id="phone" name="phone" value={formData.phone} onChange={handleChange} required />
           </div>
           <div className="password">
             <label htmlFor="password" className="label">Password:</label>
