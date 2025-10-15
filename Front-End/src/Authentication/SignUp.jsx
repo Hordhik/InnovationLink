@@ -10,7 +10,7 @@ import { signup as signupApi } from "../services/authApi";
 const SignUp = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    userType: "",
+    userType: "startup",
     name: "",
     email: "",
     phone: "",
@@ -31,7 +31,14 @@ const SignUp = () => {
     setError("");
 
     try {
-      const data = await signupApi(formData);
+      const payload = {
+        ...formData,
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        password: formData.password,
+      };
+      const data = await signupApi(payload);
       alert(data.message || "Signup successful!");
       navigate("/auth/login");
     } catch (err) {

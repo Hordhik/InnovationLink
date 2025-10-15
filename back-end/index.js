@@ -24,6 +24,8 @@ app.use(express.json());
 })();
 
 app.use(cors(corsOptions));
+// Health check
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
