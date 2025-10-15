@@ -41,8 +41,10 @@ function App() {
           <Route path="/signup" element={<SignUp />} /> */}
           
           {/* Dynamic routes for both startups and investors using username as project */}
-          <Route path="/S/:username/*" element={<Portal />} />
-          <Route path="/I/:username/*" element={<Portal />} />
+         <Route path="/S/:username/*" element={<Portal />} />
+        <Route path="/I/:username/*" element={<Portal />} />
+
+
         </Routes>
       </>
   )

@@ -33,6 +33,9 @@ function Portal() {
             <Route path="/inbox" element={<Inbox />} />
             <Route path="/blogs" element={<Blogs />} />
             <Route path="/blog/:id" element={<Blog />} />
+
+          <Route path="handbook/blogs" element={<Blogs />} />
+          <Route path="handbook/blog/:id" element={<Blog />} />
             <Route path="/events" element={<Events />} />
             <Route path="/profile" element={userType === 'I' ? <InvestorProfile /> : <StartupProfile />} />
             <Route path="/notifications" element={<div>Notifications Content</div>} />

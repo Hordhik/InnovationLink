@@ -12,18 +12,11 @@ const Blogs = () => {
   ];
   const [selectedOption, setSelectedOption] = useState(null);
   // const { id } = useParams();
-  const location = useLocation();
-  
-  // Check if we're in any portal view (any project)
-  // More robust detection: check if URL has format /{project}/blogs
-  const pathParts = location.pathname.split('/');
-  const isPortalView = pathParts.length >= 3 && pathParts[2] === 'blogs' && pathParts[1] !== 'blogs';
-  
-  // Extract current project from URL
-  const currentProject = pathParts[1] || '';
-    // const blog = getBlogById(id);
-  
-
+    const location = useLocation();
+    const pathParts = location.pathname.split('/').filter(Boolean);
+    const firstSegment = pathParts[0]; // "S", "I", or "blogs"
+    const isPortalView = firstSegment === 'S' || firstSegment === 'I';
+    const currentProject = isPortalView ? firstSegment : '';
   // Function to handle clicking a state option
   const handleOptionClick = (option) => {
     // If the clicked option is already selected, unselect it. Otherwise, select it.
