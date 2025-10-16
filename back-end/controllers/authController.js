@@ -139,3 +139,25 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: "Server error", ...(isDev && { detail: err.message }) });
   }
 };
+
+// Return active session details using JWT (protected by auth middleware)
+exports.session = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json({
+      authenticated: true,
+      user: { id: user.id, username: user.username, email: user.email, userType: user.userType }
+    });
+  } catch (err) {
+    console.error('Session Error:', err);
+    const isDev = process.env.NODE_ENV !== 'production';
+    res.status(500).json({ message: 'Server error', ...(isDev && { detail: err.message }) });
+  }
+};
