@@ -29,13 +29,13 @@ function Portal() {
           <Routes>
             <Route path="/" element={<Navigate to={`/${defaultProject}/home`} replace />} />
             <Route path="/home" element={<Home />} />
-            <Route path="/schedules" element={<div>Schedules Content</div>} />
+            <Route path="/schedules" element={<Schedule/>} />
             <Route path="/inbox" element={<Inbox />} />
             <Route path="/blogs" element={<Blogs />} />
             <Route path="/blog/:id" element={<Blog />} />
 
-          <Route path="handbook/blogs" element={<Blogs />} />
-          <Route path="handbook/blog/:id" element={<Blog />} />
+            <Route path="handbook/blogs" element={<Blogs />} />
+            <Route path="handbook/blog/:id" element={<Blog />} />
             <Route path="/events" element={<Events />} />
             <Route path="/profile" element={userType === 'I' ? <InvestorProfile /> : <StartupProfile />} />
             <Route path="/notifications" element={<div>Notifications Content</div>} />
