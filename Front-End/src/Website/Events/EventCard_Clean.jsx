@@ -1,8 +1,7 @@
 import React from 'react'
 
 const EventCard = ({ events = [] }) => {
-    // Remove debug logging in production
-    // console.log('🎯 EventCard received:', events?.length || 0, 'events');
+    console.log('🎯 EventCard received:', events?.length || 0, 'events');
     
     const handleEventClick = (event) => {
         if (event.url && event.url !== '#') {
@@ -64,15 +63,13 @@ const EventCard = ({ events = [] }) => {
     };
 
     const renderLogo = (event) => {
-        // Check for valid image URL - must be non-empty string and not null/undefined
-        const imageUrl = event.image_url || event.imageUrl;
-        const hasValidImage = imageUrl && imageUrl.trim() && imageUrl !== 'null' && imageUrl !== 'undefined';
+        const hasImage = event.image_url || event.imageUrl;
         
-        if (hasValidImage) {
+        if (hasImage) {
             return (
                 <img 
-                    src={imageUrl} 
-                    alt={event.title || 'Event image'}
+                    src={event.image_url || event.imageUrl} 
+                    alt={event.title}
                     style={{
                         width: '100%',
                         height: '100%',
@@ -81,38 +78,21 @@ const EventCard = ({ events = [] }) => {
                         border: '1px solid #eee',
                         backgroundColor: '#f8f9fa'
                     }}
-                    onError={(e) => {
-                        // If image fails to load, hide it and show placeholder
-                        e.target.style.display = 'none';
-                        console.log('Image failed to load, should show placeholder');
-                    }}
                 />
             );
         }
         
-        // ALWAYS show placeholder - bulletproof version
+        // Placeholder
         const title = event.title || 'Event';
-        const words = title.split(' ').filter(word => word && word.length > 2);
-        let initials = '';
-        
-        if (words.length >= 2) {
-            initials = words.slice(0, 2).map(word => word[0]).join('').toUpperCase();
-        } else if (words.length === 1) {
-            initials = words[0].substring(0, 2).toUpperCase();
-        } else {
-            initials = title.substring(0, 2).toUpperCase() || 'EV';
-        }
-        
-        // Force minimum initials
-        if (!initials || initials.length === 0) {
-            initials = 'EV';
-        }
+        const words = title.split(' ').filter(word => word.length > 2);
+        const initials = words.length >= 2 
+            ? words.slice(0, 2).map(word => word[0]).join('').toUpperCase()
+            : title.substring(0, 2).toUpperCase() || 'EV';
         
         const colors = {
             'NASSCOM': '#2E86AB',
             'T-Hub': '#A23B72', 
             'Startup Events': '#F18F01',
-            'StartupStartup Events': '#F18F01',
             'Inc42': '#C73E1D',
             'Eventbrite': '#F05537',
             'StartupNews': '#6A994E'
@@ -131,24 +111,11 @@ const EventCard = ({ events = [] }) => {
                 color: 'white',
                 fontWeight: 'bold',
                 textAlign: 'center',
-                fontSize: '28px',
-                minHeight: '182px',
-                minWidth: '256px',
-                border: '2px solid rgba(255,255,255,0.2)'
+                fontSize: '28px'
             }}>
                 <div>
-                    <div style={{ 
-                        marginBottom: '8px', 
-                        fontSize: '32px', 
-                        fontWeight: '900' 
-                    }}>
-                        {initials}
-                    </div>
-                    <div style={{ 
-                        fontSize: '12px', 
-                        opacity: 0.9,
-                        fontWeight: 'normal' 
-                    }}>
+                    <div style={{ marginBottom: '8px' }}>{initials}</div>
+                    <div style={{ fontSize: '11px', opacity: 0.9 }}>
                         {event.source || 'Event'}
                     </div>
                 </div>
@@ -167,6 +134,9 @@ const EventCard = ({ events = [] }) => {
                 <p>No events found for the selected filters.</p>
                 <p style={{fontSize: '14px', color: '#888', marginTop: '10px'}}>
                     Try adjusting your search criteria or clear filters to see more events.
+                </p>
+                <p style={{fontSize: '12px', color: '#999', marginTop: '10px'}}>
+                    DEBUG: EventCard received {events?.length || 0} events
                 </p>
             </div>
         );

@@ -1,9 +1,11 @@
+/* Enhanced Events CSS with your platform features */
 .events, .portal-events-page{
     display: flex;
     align-items: start;
     gap: 50px;
     padding: 20px 50px;
     color: #000;
+    min-height: 100vh;
 }
 
 .filters {
@@ -11,6 +13,8 @@
     flex-direction: column;
     gap: 25px; 
     width: 25%;
+    position: sticky;
+    top: 20px;
 }
 
 .filter {
@@ -40,6 +44,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    transition: all 0.2s ease;
 }
 
 .option:hover {
@@ -59,11 +64,117 @@
     font-weight: bold;
 }
 
+/* Search Input Styling */
+.search-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #a0a0a0;
+    border-radius: 20px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.search-input:focus {
+    border-color: #333;
+}
+
+.search-input::placeholder {
+    color: #888;
+}
+
+/* Clear Filters Button */
+.clear-filters-btn {
+    width: 100%;
+    padding: 10px 15px;
+    background-color: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.clear-filters-btn:hover {
+    background-color: #cc3333;
+}
+
+/* Event Stats */
+.event-stats {
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+}
+
+.event-stats p {
+    margin: 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.error-message {
+    color: #ff4444 !important;
+    font-size: 12px !important;
+    margin-top: 5px !important;
+}
+
 .events-list {
     display: flex;
     flex-direction: column;
     gap: 20px;
     width: 60%;
+}
+
+/* Events Header */
+.events-header {
+    margin-bottom: 20px;
+}
+
+.events-header h2 {
+    margin: 0 0 10px 0;
+    font-size: 28px;
+    font-weight: 600;
+    color: #000;
+}
+
+.events-header p {
+    margin: 0;
+    font-size: 16px;
+    color: #666;
+    line-height: 1.5;
+}
+
+/* Loading States */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 60px 20px;
+    width: 100%;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #000;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-container p {
+    font-size: 16px;
+    color: #666;
+    text-align: center;
 }
 
 /* Portal-specific styles */
@@ -84,4 +195,29 @@
     background-color: #007bff;
     color: white;
     border-color: #007bff;
+}
+
+/* Enhanced placeholder for missing logos */
+.event-logo-placeholder {
+    width: 100%;
+    max-width: 256px;
+    height: 182px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+}
+
+.event-logo-placeholder:hover {
+    transform: scale(1.02);
 }
