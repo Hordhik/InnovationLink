@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Plus, User } from "lucide-react";
 import "./Schedule.css";
+import AddItemModal from "./AddItemModal"; // <--- 1. IMPORT THE NEW MODAL
 
 const Schedule = () => {
   const [events, setEvents] = useState({
+    // ... your existing events state ...
     "2025-10-01": [
       { time: "09:00 AM", title: "Team standup meeting", user: true, description: "Daily sync: blockers, priorities, and progress." },
       { time: "02:00 PM", title: "Product roadmap review", user: true, description: "Review Q4 roadmap items and dependencies." },
@@ -81,8 +83,32 @@ const Schedule = () => {
     `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`
   );
   const [hoveredDate, setHoveredDate] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false); // <--- 2. ADD MODAL STATE
+
+  // --- 3. ADD SAVE HANDLER ---
+  const handleSaveEvent = (date, newEvent) => {
+    setEvents(prevEvents => {
+      const dayEvents = prevEvents[date] || [];
+      const updatedDayEvents = [...dayEvents, newEvent];
+
+      // Sort events by time to keep the list chronological
+      updatedDayEvents.sort((a, b) => {
+        const timeA = new Date(`1970/01/01 ${a.time}`);
+        const timeB = new Date(`1970/01/01 ${b.time}`);
+        return timeA - timeB;
+      });
+
+      return {
+        ...prevEvents,
+        [date]: updatedDayEvents
+      };
+    });
+    setIsModalOpen(false); // Close modal after saving
+  };
+  // -----------------------------
 
   const toggleEventDone = (date, eventIndex) => {
+    // ... no change
     setEvents(prevEvents => ({
       ...prevEvents,
       [date]: prevEvents[date].map((event, idx) => 
@@ -92,6 +118,7 @@ const Schedule = () => {
   };
 
   const goToToday = () => {
+    // ... no change
     const now = new Date();
     setCurrentMonth(now.getMonth());
     setCurrentYear(now.getFullYear());
@@ -99,6 +126,7 @@ const Schedule = () => {
   };
 
   const previousMonth = () => {
+    // ... no change
     if (currentMonth === 0) {
       setCurrentMonth(11);
       setCurrentYear(currentYear - 1);
@@ -108,6 +136,7 @@ const Schedule = () => {
   };
 
   const nextMonth = () => {
+    // ... no change
     if (currentMonth === 11) {
       setCurrentMonth(0);
       setCurrentYear(currentYear + 1);
@@ -117,31 +146,37 @@ const Schedule = () => {
   };
 
   const getDaysInMonth = (month, year) => {
+    // ... no change
     return new Date(year, month + 1, 0).getDate();
   };
 
   const getFirstDayOfMonth = (month, year) => {
+    // ... no change
     return new Date(year, month, 1).getDay();
   };
 
   const isDatePast = (day, month, year) => {
+    // ... no change
     const checkDate = new Date(year, month, day);
     const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     return checkDate < todayDate;
   };
 
   const getMonthName = (month) => {
+    // ... no change
     const months = ["January", "February", "March", "April", "May", "June", 
                     "July", "August", "September", "October", "November", "December"];
     return months[month];
   };
 
   const getPendingTasks = (date) => {
+    // ... no change
     if (!events[date]) return [];
     return events[date].filter(event => !event.done);
   };
 
   const formatHeading = (isoDate) =>
+    // ... no change
     new Date(isoDate).toLocaleDateString("en-US", {
       weekday: "long",
       month: "long",
@@ -150,13 +185,24 @@ const Schedule = () => {
 
   return (
     <div className="schedule">
-      <button className="btn-primary">
+      {/* --- 4. RENDER THE MODAL (conditionally) --- */}
+      {isModalOpen && (
+        <AddItemModal 
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleSaveEvent}
+          selectedDate={selectedDate}
+        />
+      )}
+      {/* ------------------------------------------- */}
+
+      <button className="btn-primary" onClick={() => setIsModalOpen(true)}> {/* <-- 5. UPDATE ONCLICK */}
         <Plus size={14} /> Add item
       </button>
       <div className="schedule-content">
       {/* Left Calendar Section */}
         <div className="schedule-left">
           <div className="schedule-left-header">
+          {/* ... no change ... */}
             <button className="btn-outline" onClick={goToToday}>Today</button>
             <div className="month-row">
               <button className="btn-outline" onClick={previousMonth}>&#8249;</button>
@@ -166,18 +212,18 @@ const Schedule = () => {
           </div>
 
           <div className="weekday-row">
+          {/* ... no change ... */}
             {["M", "T", "W", "T", "F", "S", "S"].map((d) => (
               <div key={d} className="weekday">{d}</div>
             ))}
           </div>
 
           <div className="days-grid">
-            {/* Empty cells for days before month starts */}
+          {/* ... no change ... */}
             {[...Array(getFirstDayOfMonth(currentMonth, currentYear) === 0 ? 6 : getFirstDayOfMonth(currentMonth, currentYear) - 1)].map((_, i) => (
               <div key={`empty-${i}`} className="day-cell" style={{ visibility: 'hidden' }}></div>
             ))}
             
-            {/* Actual days of the month */}
             {[...Array(getDaysInMonth(currentMonth, currentYear))].map((_, i) => {
               const day = i + 1;
               const iso = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
@@ -199,6 +245,7 @@ const Schedule = () => {
 
           {/* Hover Task Preview */}
           {hoveredDate && getPendingTasks(hoveredDate).length > 0 && (
+            // ... no change ...
             <div className="hover-tasks">
               <h4>Pending Tasks for {formatHeading(hoveredDate)}</h4>
               {getPendingTasks(hoveredDate).map((task, idx) => (
@@ -216,7 +263,13 @@ const Schedule = () => {
             <h2 className="day-heading">{formatHeading(selectedDate)}</h2>
             <div className="events-list">
               {events[selectedDate] && events[selectedDate].length > 0 ? (
-                events[selectedDate].map((e, idx) => (
+                // --- 6. ADD A SORT TO THE RENDER ---
+                // This ensures newly added items appear in the correct time slot
+                [...events[selectedDate]].sort((a, b) => {
+                  const timeA = new Date(`1970/01/01 ${a.time}`);
+                  const timeB = new Date(`1970/01/01 ${b.time}`);
+                  return timeA - timeB;
+                }).map((e, idx) => (
                   <div key={idx} className="event-row">
                     <div className="event-left">
                       <div className="event-header">
@@ -238,6 +291,7 @@ const Schedule = () => {
                 ))
               ) : (
                 <div className="event-row">
+                  {/* ... no change ... */}
                   <div className="event-left">
                     <div className="event-meta">
                       <div className="event-title">No tasks for this day.</div>
