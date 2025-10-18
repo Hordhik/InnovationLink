@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import './SideBar.css';
+import React, { useState } from 'react';
 import { getDefaultProject } from './projectsConfig';
 import home from '../assets/Portal/SideBar/home.svg';
 import schedules from '../assets/Portal/SideBar/schedules.svg';
@@ -20,7 +20,7 @@ import settings from '../assets/Portal/SideBar/setting.svg';
 
 const SideBar = () => {
   const navigate = useNavigate();
-  const location = useLocation();
+  const location = useLocation(); // Already here, which is perfect
   const [hoveredItem, setHoveredItem] = useState(null);
   
   // Extract userType and project from URL (e.g., /S/handbook/home -> S, handbook)
@@ -38,6 +38,7 @@ const SideBar = () => {
   ];
 
   const essentialItems = [
+    // Your paths are already dynamic, which is great
     { name: 'Notifications', img: notifications, path: `/${safeUserType}/${safeProject}/notifications` },
     { name: 'Support Tickets', img: support, path: `/${safeUserType}/${safeProject}/support-tickets` },
     { name: 'Settings', img: settings, path: `/${safeUserType}/${safeProject}/settings` },
@@ -88,6 +89,35 @@ const SideBar = () => {
           {essentialItems.map((item) => {
             const isActive = location.pathname === item.path;
             
+            // --- This is the new logic ---
+            // If it's the Notifications item, handle toggle behavior
+            if (item.name === 'Notifications') {
+              const handleNotificationClick = (e) => {
+                e.preventDefault();
+                // If notifications are already open, trigger close animation
+                if (isActive) {
+                  // Dispatch custom event to trigger the closing animation
+                  window.dispatchEvent(new CustomEvent('closeNotifications'));
+                } else {
+                  // Otherwise, open notifications with background location
+                  navigate(item.path, { state: { backgroundLocation: location } });
+                }
+              };
+
+              return (
+                <div
+                  key={item.name}
+                  className={`essential-item ${isActive ? 'active' : ''}`}
+                  onClick={handleNotificationClick}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <img src={item.img} alt={item.name} />
+                  <p>{item.name}</p>
+                </div>
+              );
+            }
+
+            // Otherwise (for Support Tickets, Settings), render the normal div
             return (
               <div 
                 className={`essential-item ${isActive ? 'active' : ''}`} 
@@ -95,10 +125,11 @@ const SideBar = () => {
                 onClick={() => handleItemClick(item.path)}
                 style={{ cursor: 'pointer' }}
               >
-                <img src={item.img} alt="" />
+                <img src={item.img} alt={item.name} />
                 <p>{item.name}</p>
               </div>
             );
+            // --- End of new logic ---
           })}
         </div>
       </div>
