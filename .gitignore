@@ -51,5 +51,28 @@ build/
 
 # OS / Editor
 .DS_Store
+**/.DS_Store
 .idea/
 *.swp
+
+# Test and Debug files
+debug*.html
+test*.html
+*_test.html
+*_debug.html
+
+# Backup and Old files
+*_old.*
+*_backup.*
+*_original.*
+*_broken.*
+*_corrupted.*
+*_enhanced.*
+*_fixed.*
+*_clean.*
+*.bak
+*.backup
+
+# Bot backend unused files
+bot.log
+server.log
