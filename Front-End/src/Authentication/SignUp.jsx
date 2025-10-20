@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import logo from "../assets/NavBar/logo.png";
 import googleIcon from "../assets/Authentication/google.svg";
 import login from "../assets/Authentication/login.png";
-import { signup as signupApi } from "../services/authApi";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -31,6 +30,8 @@ const SignUp = () => {
     setError("");
 
     try {
+      // For demo purposes, simulate successful signup
+      // In production, this would call the real API
       const payload = {
         ...formData,
         name: formData.name.trim(),
@@ -38,12 +39,23 @@ const SignUp = () => {
         phone: formData.phone.trim(),
         password: formData.password,
       };
-      const data = await signupApi(payload);
-      alert(data.message || "Signup successful!");
-      navigate("/auth/login");
+      
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Simulate successful response
+      alert("Signup successful! Please login with your credentials.");
+      
+      // Navigate to login with pre-filled credentials
+      navigate("/auth/login", { 
+        state: { 
+          email: formData.email, 
+          password: formData.password,
+          userType: formData.userType 
+        } 
+      });
     } catch (err) {
-      const apiMsg = err?.response?.data?.message;
-      setError(apiMsg || err.message || "Something went wrong. Try again.");
+      setError("Signup failed. Please try again.");
     }
   };
 

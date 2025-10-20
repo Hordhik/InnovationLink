@@ -1,7 +1,34 @@
 import React from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+
+// Add CSS animations
+const styleSheet = document.createElement('style');
+styleSheet.textContent = `
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 0.9; }
+        50% { transform: scale(1.05); opacity: 1; }
+        100% { transform: scale(1); opacity: 0.9; }
+    }
+    
+    @keyframes slideIn {
+        from { 
+            opacity: 0; 
+            transform: translateX(100px); 
+        }
+        to { 
+            opacity: 1; 
+            transform: translateX(0); 
+        }
+    }
+`;
+if (!document.head.querySelector('style[data-event-card]')) {
+    styleSheet.setAttribute('data-event-card', 'true');
+    document.head.appendChild(styleSheet);
+}
 
 /**
  * EventCard Component - Displays a list of events with images or text placeholders
+ * Features authentication-based blur for logged-out users
  * 
  * @component
  * @param {Object} props - Component props
@@ -18,11 +45,21 @@ import React from 'react';
  * @returns {JSX.Element} Rendered event cards or empty state
  */
 const EventCard = ({ events = [] }) => {
+    const { user, loading } = useAuth();
+    const isLoggedIn = !!user;
+    const [showLoginModal, setShowLoginModal] = React.useState(false);
+
     /**
-     * Handles click events on event cards - opens event URL in new tab
+     * Handles click events on event cards - opens event URL in new tab or shows login modal
      * @param {Object} eventData - Event object containing URL
      */
     const handleEventClick = (eventData) => {
+        // Show login modal when logged out
+        if (!isLoggedIn) {
+            setShowLoginModal(true);
+            return;
+        }
+        
         if (!eventData?.url || eventData.url === '#') {
             return;
         }
@@ -194,7 +231,56 @@ const EventCard = ({ events = [] }) => {
     );
 
     /**
-     * Renders individual event card
+     * Renders the login modal for non-authenticated users
+     * @returns {JSX.Element} Login modal component
+     */
+    const renderLoginModal = () => {
+        if (!showLoginModal) return null;
+        
+        return (
+            <div style={styles.modalOverlay} onClick={() => setShowLoginModal(false)}>
+                <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                    <div style={styles.modalHeader}>
+                        <h3 style={styles.modalTitle}>🔒 Login Required</h3>
+                        <button 
+                            style={styles.closeButton}
+                            onClick={() => setShowLoginModal(false)}
+                        >
+                            ×
+                        </button>
+                    </div>
+                    <div style={styles.modalBody}>
+                        <p style={styles.modalMessage}>
+                            You need to be logged in to view full event details and access exclusive features.
+                        </p>
+                        <div style={styles.modalBenefits}>
+                            <div style={styles.modalBenefit}>✨ View complete event information</div>
+                            <div style={styles.modalBenefit}>🎯 Get personalized recommendations</div>
+                            <div style={styles.modalBenefit}>📅 Add events to your calendar</div>
+                            <div style={styles.modalBenefit}>🤝 Connect with other attendees</div>
+                        </div>
+                    </div>
+                    <div style={styles.modalActions}>
+                        <button 
+                            style={styles.modalLoginButton}
+                            onClick={() => window.location.href = '/auth/login'}
+                        >
+                            Login Now
+                        </button>
+                        <button 
+                            style={styles.modalSignupButton}
+                            onClick={() => window.location.href = '/auth/signup'}
+                        >
+                            Create Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    /**
+     * Renders individual event card with auth-aware styling and click behavior
      * @param {Object} eventData - Event data object
      * @param {number} index - Event index
      * @returns {JSX.Element} Event card component
@@ -202,9 +288,21 @@ const EventCard = ({ events = [] }) => {
     const renderEventCard = (eventData, index) => (
         <div 
             key={`${eventData.title}-${index}`}
-            style={styles.eventCard}
+            style={{
+                ...styles.eventCard,
+                cursor: 'pointer', // Always clickable
+                opacity: isLoggedIn ? 1 : 0.9,
+                position: 'relative'
+            }}
             onClick={() => handleEventClick(eventData)}
         >
+            {/* Click hint overlay for logged-out users */}
+            {!isLoggedIn && (
+                <div style={styles.clickHintOverlay}>
+                    <div style={styles.clickHint}>🔒 Click to Login</div>
+                </div>
+            )}
+            
             <div style={styles.eventContent}>
                 <h3 style={styles.eventTitle}>
                     {eventData.title}
@@ -216,7 +314,10 @@ const EventCard = ({ events = [] }) => {
                 </div>
                 
                 <p style={styles.eventDescription}>
-                    {eventData.description}
+                    {isLoggedIn 
+                        ? eventData.description 
+                        : `${eventData.description?.substring(0, 100)}...`
+                    }
                 </p>
                 
                 {renderCategoryBadge(eventData.category)}
@@ -232,15 +333,45 @@ const EventCard = ({ events = [] }) => {
         </div>
     );
 
+    // Early return for loading state
+    if (loading) {
+        return (
+            <div style={styles.loadingState}>
+                <div>Loading events...</div>
+            </div>
+        );
+    }
+
     // Early return for empty state
     if (!events.length) {
         return renderEmptyState();
     }
 
-    // Main render
+    // Main render with conditional blur and clickable content
     return (
-        <div>
-            {events.map((eventData, index) => renderEventCard(eventData, index))}
+        <div style={styles.eventsContainer}>
+            {/* Events content with conditional blur but enabled clicks */}
+            <div 
+                style={{
+                    ...styles.eventsContent,
+                    filter: isLoggedIn ? 'none' : 'blur(3px)', // Lighter blur for better readability
+                    pointerEvents: 'auto' // Always allow clicks
+                }}
+            >
+                {events.map((eventData, index) => renderEventCard(eventData, index))}
+            </div>
+            
+            {/* Floating instruction for logged-out users */}
+            {!isLoggedIn && (
+                <div style={styles.floatingInstruction}>
+                    <div style={styles.instructionCard}>
+                        💡 <strong>Click any event to login and view details</strong>
+                    </div>
+                </div>
+            )}
+            
+            {/* Login modal */}
+            {renderLoginModal()}
         </div>
     );
 };
@@ -344,6 +475,157 @@ const styles = {
         fontSize: '14px',
         color: '#888',
         marginTop: '10px'
+    },
+    
+    // New styles for interactive blur feature
+    eventsContainer: {
+        position: 'relative',
+        minHeight: '400px'
+    },
+    eventsContent: {
+        transition: 'filter 0.3s ease-in-out'
+    },
+    clickHintOverlay: {
+        position: 'absolute',
+        top: '10px',
+        right: '10px',
+        zIndex: 5
+    },
+    clickHint: {
+        backgroundColor: 'rgba(0, 123, 255, 0.9)',
+        color: 'white',
+        padding: '6px 12px',
+        borderRadius: '20px',
+        fontSize: '12px',
+        fontWeight: '600',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+        animation: 'pulse 2s infinite'
+    },
+    floatingInstruction: {
+        position: 'fixed',
+        top: '100px',
+        right: '20px',
+        zIndex: 15,
+        animation: 'slideIn 0.5s ease-out'
+    },
+    instructionCard: {
+        backgroundColor: '#fff3cd',
+        color: '#856404',
+        padding: '12px 16px',
+        borderRadius: '8px',
+        border: '1px solid #ffeaa7',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        fontSize: '14px',
+        maxWidth: '250px'
+    },
+    loadingState: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '200px',
+        fontSize: '16px',
+        color: '#666'
+    },
+    
+    // Modal styles for login prompt
+    modalOverlay: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+        backdropFilter: 'blur(3px)'
+    },
+    modalContent: {
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        maxWidth: '480px',
+        width: '90%',
+        maxHeight: '80vh',
+        overflow: 'auto',
+        boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25)',
+        animation: 'slideIn 0.3s ease-out'
+    },
+    modalHeader: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '20px 24px 16px',
+        borderBottom: '1px solid #e1e5e9'
+    },
+    modalTitle: {
+        margin: 0,
+        fontSize: '20px',
+        fontWeight: '600',
+        color: '#333'
+    },
+    closeButton: {
+        background: 'none',
+        border: 'none',
+        fontSize: '24px',
+        cursor: 'pointer',
+        color: '#666',
+        padding: '0',
+        width: '30px',
+        height: '30px',
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    modalBody: {
+        padding: '20px 24px'
+    },
+    modalMessage: {
+        fontSize: '16px',
+        color: '#555',
+        lineHeight: '1.5',
+        margin: '0 0 20px 0'
+    },
+    modalBenefits: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px'
+    },
+    modalBenefit: {
+        fontSize: '14px',
+        color: '#666',
+        paddingLeft: '4px'
+    },
+    modalActions: {
+        display: 'flex',
+        gap: '12px',
+        padding: '16px 24px 24px',
+        borderTop: '1px solid #e1e5e9'
+    },
+    modalLoginButton: {
+        flex: 1,
+        padding: '12px 24px',
+        backgroundColor: '#007bff',
+        color: 'white',
+        border: 'none',
+        borderRadius: '8px',
+        fontSize: '16px',
+        fontWeight: '600',
+        cursor: 'pointer',
+        transition: 'background-color 0.2s'
+    },
+    modalSignupButton: {
+        flex: 1,
+        padding: '12px 24px',
+        backgroundColor: 'transparent',
+        color: '#007bff',
+        border: '2px solid #007bff',
+        borderRadius: '8px',
+        fontSize: '16px',
+        fontWeight: '600',
+        cursor: 'pointer',
+        transition: 'all 0.2s'
     }
 };
 
