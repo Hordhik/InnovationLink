@@ -7,6 +7,7 @@ import logo from '../assets/NavBar/logo.png';
 import Axios from 'axios';
 import googleIcon from '../assets/Authentication/google.svg';
 import login from '../assets/Authentication/login.png';
+import { login as loginApi } from '../services/authApi';
 
 
 const LogIn = () => {
@@ -69,31 +70,41 @@ const LogIn = () => {
     setLoading(true);
 
     try {
-      // For now, use AuthContext login for the blur feature functionality
-      // This will work without requiring a backend API
+      // Try real API login first
+      const data = await loginApi({
+        identifier: formData.username,
+        password: formData.password,
+        userType,
+      });
+
+      // Store legacy tokens for compatibility
+      localStorage.setItem("il_token", data.token);
+      localStorage.setItem("il_role", userType);
+      if (data.user) {
+        localStorage.setItem("il_user", JSON.stringify(data.user));
+      }
+
+      // Also update AuthContext for blur feature
       await authLogin({
         email: formData.username,
         password: formData.password
       });
 
-      // Store some basic data for compatibility
-      localStorage.setItem("il_token", "demo-token-" + Date.now());
-      localStorage.setItem("il_role", userType);
-      localStorage.setItem("il_user", JSON.stringify({
-        email: formData.username,
-        userType: userType,
-        name: formData.username.split('@')[0]
-      }));
-
-      // Navigate based on user type or go to events page
-      const next = userType === 'investor' ? '/I/handbook/home' : '/S/handbook/home';
-      
-      // For demo purposes, let's navigate to events page where the blur feature works
-      navigate('/events');
+      const next = data.redirectPath || (data.user?.userType === 'investor' ? '/I/handbook/home' : '/S/handbook/home');
+      navigate(next);
       
     } catch (err) {
-      setError("Login failed. Please try again.");
-      console.error('Login error:', err);
+      // Fallback to AuthContext login if API fails
+      try {
+        await authLogin({
+          email: formData.username,
+          password: formData.password
+        });
+        navigate('/events');
+      } catch (authErr) {
+        const apiMsg = err?.response?.data?.message;
+        setError(apiMsg || err.message || "Login failed. Please check your credentials.");
+      }
     } finally {
       setLoading(false);
     }
