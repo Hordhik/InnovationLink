@@ -36,13 +36,29 @@ const getNowHHMM = () => {
   return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
 };
 
-const AddItemModal = ({ onClose, onSave, selectedDate }) => {
-  const [title, setTitle] = useState("");
+// Helper to convert 12-hour time to 24-hour format
+const convertTo24Hour = (time12) => {
+  if (!time12) return "";
+  const [timePart, ampm] = time12.split(" ");
+  let [hours, minutes] = timePart.split(":");
+  hours = parseInt(hours, 10);
+  
+  if (ampm === "PM" && hours !== 12) {
+    hours += 12;
+  } else if (ampm === "AM" && hours === 12) {
+    hours = 0;
+  }
+  
+  return `${String(hours).padStart(2, "0")}:${minutes}`;
+};
+
+const AddItemModal = ({ onClose, onSave, selectedDate, editingEvent }) => {
+  const [title, setTitle] = useState(editingEvent?.title || "");
   const [date, setDate] = useState(selectedDate);
-  const [time, setTime] = useState(getDefaultTime());
+  const [time, setTime] = useState(editingEvent ? convertTo24Hour(editingEvent.time) : getDefaultTime());
   const [timeMin, setTimeMin] = useState(() => (selectedDate === getTodayISO() ? getNowHHMM() : "00:00"));
-  const [description, setDescription] = useState("");
-  const [isUserEvent, setIsUserEvent] = useState(true);
+  const [description, setDescription] = useState(editingEvent?.description || "");
+  const [isUserEvent, setIsUserEvent] = useState(editingEvent?.user !== undefined ? editingEvent.user : true);
 
   // Update date in form if selectedDate on calendar changes
   useEffect(() => {
@@ -72,7 +88,7 @@ const AddItemModal = ({ onClose, onSave, selectedDate }) => {
       description,
       time: formatTo12Hour(time),
       user: isUserEvent,
-      done: false,
+      done: editingEvent?.done || false, // Preserve done status when editing
     };
 
     onSave(date, newEvent);
@@ -82,7 +98,7 @@ const AddItemModal = ({ onClose, onSave, selectedDate }) => {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h3>Add New Schedule Item</h3>
+          <h3>{editingEvent ? "Edit Schedule Item" : "Add New Schedule Item"}</h3>
           <button className="btn-icon" onClick={onClose}>
             <X size={20} />
           </button>
@@ -156,7 +172,7 @@ const AddItemModal = ({ onClose, onSave, selectedDate }) => {
               Cancel
             </button>
             <button type="submit" className="save">
-              Save Event
+              {editingEvent ? "Update Event" : "Save Event"}
             </button>
           </div>
         </form>
