@@ -28,7 +28,7 @@ app.add_middleware(
 )
 
 # Static events file path
-EVENTS_FILE = "frontend/events.json"
+EVENTS_FILE = "bot-frontend/events.json"
 
 def load_events_data() -> Dict[str, Any]:
     """Load events from the JSON file"""
@@ -159,7 +159,7 @@ async def health_check():
     }
 
 # Mount static files for frontend
-app.mount("/static", StaticFiles(directory="frontend"), name="static")
+app.mount("/static", StaticFiles(directory="bot-frontend"), name="static")
 
 # Serve the modern frontend at root
 @app.get("/")
@@ -189,4 +189,4 @@ if __name__ == "__main__":
     print("📱 Enhanced UI available at: http://localhost:8000/static/index_enhanced.html")
     print("📱 Original UI available at: http://localhost:8000/static/")
     print("🔌 API available at: http://localhost:8000/events")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8080)
