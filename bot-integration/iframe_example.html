@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Event Bot - Iframe Integration Example</title>
+    <style>
+        .event-bot-container {
+            width: 100%;
+            height: 100vh;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        /* Responsive iframe */
+        .responsive-iframe {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 75%; /* 4:3 Aspect Ratio */
+        }
+        
+        .responsive-iframe iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 12px;
+        }
+        
+        /* Custom styling for integration */
+        .integration-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="integration-header">
+        <h2>Discover Startup Events</h2>
+        <p>Find the latest conferences, meetups, and networking opportunities</p>
+    </div>
+    
+    <!-- Full height iframe -->
+    <iframe 
+        src="http://localhost:8000/" 
+        class="event-bot-container"
+        title="AI Event Bot"
+        loading="lazy">
+    </iframe>
+    
+    <!-- Alternative: Responsive iframe with aspect ratio -->
+    <!-- 
+    <div class="responsive-iframe">
+        <iframe 
+            src="http://localhost:8000/" 
+            title="AI Event Bot"
+            loading="lazy">
+        </iframe>
+    </div>
+    -->
+    
+    <script>
+        // Optional: Handle iframe communication
+        window.addEventListener('message', function(event) {
+            // Handle messages from the iframe if needed
+            if (event.origin === 'http://localhost:8000') {
+                console.log('Message from Event Bot:', event.data);
+                
+                // Example: Handle event selection
+                if (event.data.type === 'eventSelected') {
+                    console.log('User selected event:', event.data.event);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

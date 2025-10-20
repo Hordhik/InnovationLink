@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Innovation Link - Demo Integration</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 36px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .section {
+            margin-bottom: 60px;
+        }
+        
+        .section h2 {
+            color: #2c3e50;
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .demo-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .demo-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .demo-card h3 {
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+        
+        .demo-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .widget-demo-section {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+        
+        .widget-demo-section h2 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        
+        .integration-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .method-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .method-card h4 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+        }
+        
+        .method-card p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 60px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 28px;
+            }
+            
+            .header p {
+                font-size: 16px;
+            }
+            
+            .main-content {
+                padding: 20px 15px;
+            }
+            
+            .widget-demo-section {
+                padding: 20px;
+            }
+            
+            .demo-cards {
+                gap: 20px;
+            }
+            
+            .demo-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>🚀 Innovation Link</h1>
+        <p>Connecting Startups with Opportunities</p>
+    </header>
+
+    <main class="main-content">
+        <section class="section">
+            <div class="demo-cards">
+                <div class="demo-card">
+                    <h3>🎯 Our Mission</h3>
+                    <p>We help startups discover the latest government schemes, funding opportunities, and innovation programs to accelerate their growth journey.</p>
+                </div>
+                
+                <div class="demo-card">
+                    <h3>🤖 AI-Powered Updates</h3>
+                    <p>Our intelligent bot continuously monitors trusted sources to bring you the most relevant and up-to-date information about startup ecosystem.</p>
+                </div>
+                
+                <div class="demo-card">
+                    <h3>🌟 Real-time Data</h3>
+                    <p>Get instant notifications about new programs, application deadlines, and funding opportunities as they become available.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section widget-demo-section">
+            <h2>📊 Live Updates Dashboard</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 30px;">
+                This widget shows real-time startup and government program updates, powered by our AI bot. 
+                It's fully responsive and can be integrated into any website.
+            </p>
+            
+            <!-- STARTUP WIDGET INTEGRATION -->
+            <div id="startup-updates-widget"></div>
+            
+            <div class="integration-methods">
+                <div class="method-card">
+                    <h4>📱 Responsive Design</h4>
+                    <p>Automatically adapts to mobile, tablet, and desktop screens</p>
+                </div>
+                
+                <div class="method-card">
+                    <h4>🔄 Auto-Refresh</h4>
+                    <p>Updates every 5 minutes with the latest information</p>
+                </div>
+                
+                <div class="method-card">
+                    <h4>🎨 Customizable</h4>
+                    <p>Easy to customize colors, sizes, and styling to match your brand</p>
+                </div>
+                
+                <div class="method-card">
+                    <h4>⚡ Fast Loading</h4>
+                    <p>Optimized for performance with minimal impact on page speed</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 Innovation Link. Powered by AI Bot Technology.</p>
+        <p>Helping startups discover opportunities • Real-time updates • Intelligent curation</p>
+    </footer>
+
+    <!-- WIDGET INTEGRATION SCRIPT -->
+    <script src="startup-widget.js"></script>
+</body>
+</html>
