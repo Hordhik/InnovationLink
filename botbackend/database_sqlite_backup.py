@@ -1,11 +1,22 @@
-import sqlite3
+import mysql.connector
 from datetime import datetime
 from typing import List, Dict, Any
 import json
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 class DatabaseManager:
-    def __init__(self, db_path: str = "data/events.db"):
-        self.db_path = db_path
+    def __init__(self):
+        self.db_config = {
+            'host': os.getenv('DB_HOST', 'localhost'),
+            'user': os.getenv('DB_USER', 'root'),
+            'password': os.getenv('DB_PASSWORD', ''),
+            'database': os.getenv('DB_NAME', 'innovation_link'),
+            'port': int(os.getenv('DB_PORT', 3306))
+        }
         self.init_database()
     
     def init_database(self):
