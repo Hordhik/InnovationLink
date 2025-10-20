@@ -4,7 +4,7 @@
 
 .inbox-container {
   display: flex;
-  height: 100%;
+  height: calc(100vh - 80px);
 }
 
 .user-list-panel {
@@ -64,12 +64,15 @@
 }
 
 .messages-list {
-  flex-grow: 1;
   padding: 80px 40px 20px 40px;
-  overflow-y: scroll; 
   display: flex;
+  flex-grow: 1;
   flex-direction: column;
-  align-items: flex-end;
+  overflow-y: auto;
+}
+
+.messages-list-spacer {
+  margin-top: auto;
 }
 
 .no-messages-prompt {

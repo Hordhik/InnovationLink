@@ -103,6 +103,7 @@ const Inbox = () => {
           <span className="date-divider">{todayDate}</span>
         </div>
         <div className="messages-list">
+          <div className="messages-list-spacer"></div>
           {messages.length > 0 ? messages.map((message) => (
             <Message key={message.id} message={message} onDelete={handleDeleteMessage} />
           )) : (
