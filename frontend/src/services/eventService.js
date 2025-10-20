@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Base URL for your event API - pointing to your static server
-const API_BASE_URL = 'http://localhost:8000'; // Your static server running on port 8000
+// Base URL for your event API - pointing to bot backend
+const API_BASE_URL = 'http://localhost:8001'; // Bot backend FastAPI server running on port 8001
 
 class EventService {
   // Fetch all events from your platform
