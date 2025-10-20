@@ -8,7 +8,6 @@ A startup-investor connection platform with authentication and portal features.
 ### Structure:
 - **`Front-End/`** - React-based frontend application
 - **`back-end/`** - Node.js backend with authentication APIs
-- **`docker-compose.yml`** - Docker containerization setup
 
 ## 2. Event Bot Components (Migrated from innobotFresh)
 An intelligent event scraping and management system.
@@ -16,7 +15,6 @@ An intelligent event scraping and management system.
 ### Structure:
 - **`bot-backend/`** - Python Flask backend for event scraping
 - **`bot-frontend/`** - HTML/JS widgets for event display
-- **`bot-integration/`** - Integration examples and iframe widgets
 
 ## Key Files and Scripts
 
@@ -39,7 +37,6 @@ An intelligent event scraping and management system.
 - `MODERN_UI_FEATURES.md` - Modern UI component details
 - `QUICK_START.md` - Quick start guide
 - `REACT_PROPOSAL.md` - React integration proposal
-- `WIDGET_INTEGRATION.md` - Widget integration guide
 
 ## Integration Opportunities
 
@@ -52,7 +49,7 @@ An intelligent event scraping and management system.
 ### Development Workflow:
 1. **InnovationLink Development**: Use `Front-End/` and `back-end/` directories
 2. **Bot Development**: Use `bot-backend/`, `bot-frontend/`, and Python scripts
-3. **Integration Testing**: Use `bot-integration/` for testing combined functionality
+3. **Integration Testing**: Test combined functionality using bot widgets in the main platform
 
 ## Getting Started
 
@@ -79,11 +76,6 @@ cd bot-backend && python app.py
 
 # Run scraper
 python auto_scraper.py
-```
-
-### Docker Setup:
-```bash
-docker-compose up -d
 ```
 
 This merged structure allows for both independent development and integrated feature development between the two platforms.
