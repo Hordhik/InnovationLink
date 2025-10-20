@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import logo from '../../assets/NavBar/logo.png';
 import arrow from '../../assets/NavBar/register.svg';
 import './NavBar.css';
@@ -9,6 +10,7 @@ import { getSession } from '../../services/authApi.js';
 function NavBar() {
     const location = useLocation();
     const navigate = useNavigate();
+    const { user, logout } = useAuth();
 
     const NavOptions = [
         { name: "Home", path: "/home" },
@@ -18,6 +20,15 @@ function NavBar() {
     ];
 
     const [displayUser, setDisplayUser] = useState(() => getStoredUser());
+
+    useEffect(() => {
+        // Sync with AuthContext user state
+        if (user) {
+            setDisplayUser(user);
+        } else {
+            setDisplayUser(null);
+        }
+    }, [user]);
 
     useEffect(() => {
         let cancelled = false;
@@ -42,6 +53,7 @@ function NavBar() {
 
     const handleLogout = () => {
         clearAuth();
+        logout(); // Use AuthContext logout
         setDisplayUser(null);
         navigate('/');
     }

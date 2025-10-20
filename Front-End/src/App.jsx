@@ -1,5 +1,6 @@
 import './App.css';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 import NavBar from './Website/NavBar/NavBar';
 import Home from './Website/Home/Home';
 import Events from './Website/Events/Events';
@@ -20,6 +21,7 @@ function App() {
                            location.pathname.startsWith('/blog/'); // Show navbar on blog detail pages
 
   return (
+    <AuthProvider>
       <>
         {shouldShowNavbar && <NavBar />}
         <Routes>
@@ -43,9 +45,9 @@ function App() {
          <Route path="/S/:username/*" element={<Portal />} />
         <Route path="/I/:username/*" element={<Portal />} />
 
-
         </Routes>
       </>
+    </AuthProvider>
   )
 }
 

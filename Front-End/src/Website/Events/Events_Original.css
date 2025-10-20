@@ -1,0 +1,87 @@
+.events, .portal-events-page{
+    display: flex;
+    align-items: start;
+    gap: 50px;
+    padding: 20px 50px;
+    color: #000;
+}
+
+.filters {
+    display: flex;
+    flex-direction: column;
+    gap: 25px; 
+    width: 25%;
+}
+
+.filter {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.filter-name {
+    font-size: 16px;
+    font-weight: 400;
+    text-decoration: underline;
+}
+
+.options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.option {
+    padding: 8px 12px;
+    border: 1px solid #a0a0a0;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.option:hover {
+    background-color: #f0f0f0;
+    border-color: #333;
+}
+
+.option.active {
+    background-color: #000;
+    color: #fff;
+    border-color: #000;
+}
+
+.option.active::after {
+    content: '×';
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.events-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 60%;
+}
+
+/* Portal-specific styles */
+
+.portal-events-layout .filter-name {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.portal-events-layout .option:hover {
+    background-color: #e9ecef;
+    border-color: #007bff;
+}
+
+.portal-events-layout .option.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}

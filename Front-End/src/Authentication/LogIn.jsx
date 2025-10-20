@@ -1,7 +1,8 @@
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import './LogIn.css'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import logo from '../assets/NavBar/logo.png';
 import Axios from 'axios';
 import googleIcon from '../assets/Authentication/google.svg';
@@ -11,20 +12,42 @@ import { login as loginApi } from '../services/authApi';
 
 const LogIn = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login: authLogin } = useAuth();
+  
+  // Get pre-filled data from navigation state (from signup)
+  const signupData = location.state;
+  
   // State for form inputs
   const [formData, setFormData] = useState({
-    username: '',
-    password: ''
+    username: signupData?.email || '',
+    password: signupData?.password || ''
   });
 
   const [error, setError] = useState('');
-  const [userType, setUserType] = useState('startup'); // 'startup' or 'investor'
+  const [loading, setLoading] = useState(false);
+  const [userType, setUserType] = useState(signupData?.userType || 'startup'); // 'startup' or 'investor'
+  const [successMessage, setSuccessMessage] = useState('');
 
-  // Clear form data when userType changes
+  // Handle pre-filled data from signup
+  useEffect(() => {
+    if (signupData?.email && signupData?.password) {
+      setSuccessMessage('Account created successfully! Please login with your credentials.');
+      // Clear success message after 5 seconds
+      const timer = setTimeout(() => setSuccessMessage(''), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [signupData]);
+
+  // Clear form data when userType changes (but preserve pre-filled data from signup)
   const handleUserTypeChange = (type) => {
     setUserType(type);
-    setFormData({ username: '', password: '' });
+    // Only clear if it's not pre-filled data from signup
+    if (!signupData?.email) {
+      setFormData({ username: '', password: '' });
+    }
     setError('');
+    setSuccessMessage(''); // Clear success message when user changes type
   };
 
   const handleCreateAccountClick = () => {
@@ -41,28 +64,49 @@ const LogIn = () => {
   };
 
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    setError('');
+    setLoading(true);
 
     try {
+      // Try real API login first
       const data = await loginApi({
         identifier: formData.username,
         password: formData.password,
         userType,
       });
 
+      // Store legacy tokens for compatibility
       localStorage.setItem("il_token", data.token);
       localStorage.setItem("il_role", userType);
-      if (data.user)
+      if (data.user) {
         localStorage.setItem("il_user", JSON.stringify(data.user));
+      }
+
+      // Also update AuthContext for blur feature
+      await authLogin({
+        email: formData.username,
+        password: formData.password
+      });
 
       const next = data.redirectPath || (data.user?.userType === 'investor' ? '/I/handbook/home' : '/S/handbook/home');
       navigate(next);
-    }
-    catch (err) {
-      const apiMsg = err?.response?.data?.message;
-      setError(apiMsg || err.message || "Server error. Please try again.");
+      
+    } catch (err) {
+      // Fallback to AuthContext login if API fails
+      try {
+        await authLogin({
+          email: formData.username,
+          password: formData.password
+        });
+        navigate('/events');
+      } catch (authErr) {
+        const apiMsg = err?.response?.data?.message;
+        setError(apiMsg || err.message || "Login failed. Please check your credentials.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -93,7 +137,7 @@ const LogIn = () => {
             Investor
           </button>
         </div>
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleSubmit}>
           <div className="credentials">
             <div className="username">
               <p className='label'>Email or Username:</p>
@@ -119,9 +163,25 @@ const LogIn = () => {
               <p className='forgot-password'>Forgot your password?</p>
             </div>
           </div>
+          {successMessage && (
+            <div style={{
+              backgroundColor: '#d4edda',
+              color: '#155724',
+              border: '1px solid #c3e6cb',
+              borderRadius: '4px',
+              padding: '10px',
+              margin: '10px 0',
+              fontSize: '14px'
+            }}>
+              {successMessage}
+            </div>
+          )}
           {error && <p className="error-message">{error}</p>}
+          
           <div className="login-button">
-            <button type="submit">Login</button>
+            <button type="submit" disabled={loading}>
+              {loading ? 'Logging in...' : 'Login'}
+            </button>
           </div>
         </form>
         <p>--------------------- or ---------------------</p>

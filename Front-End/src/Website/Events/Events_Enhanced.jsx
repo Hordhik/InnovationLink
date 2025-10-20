@@ -49,24 +49,19 @@ const Events = () => {
       setLoading(true);
       setError(null);
       
-      console.log('🔄 Loading events from API...');
-      
       // Fetch events from your API
       const rawEvents = await EventService.getAllEvents();
-      console.log('📥 Raw events received:', rawEvents.length, 'events');
       
       // Transform events to match InnovationLink format
       const transformedEvents = EventService.transformEvents(rawEvents);
-      console.log('✅ Transformed events:', transformedEvents.length, 'events');
       
       setAllEvents(transformedEvents);
     } catch (err) {
-      console.error('❌ Error loading events:', err);
-      setError('Failed to load events from API. Showing fallback events.');
+      console.error('Error loading events:', err);
+      setError('Failed to load events. Showing sample events.');
       
       // Use fallback events
       const fallbackEvents = EventService.getFallbackEvents();
-      console.log('📦 Using fallback events:', fallbackEvents.length, 'events');
       setAllEvents(fallbackEvents);
     } finally {
       setLoading(false);
@@ -152,15 +147,6 @@ const Events = () => {
       </div>
     );
   }
-
-  // Debug information
-  console.log('🎯 Events component render:', {
-    loading,
-    error,
-    allEventsCount: allEvents.length,
-    filteredEventsCount: filteredEvents.length,
-    isPortalView
-  });
 
   return (
     <div className={isPortalView ? "portal-events-page" : "events"}>

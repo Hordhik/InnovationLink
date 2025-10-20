@@ -38,9 +38,18 @@ const SignUp = () => {
         phone: formData.phone.trim(),
         password: formData.password,
       };
+      
       const data = await signupApi(payload);
       alert(data.message || "Signup successful!");
-      navigate("/auth/login");
+      
+      // Navigate to login with pre-filled credentials
+      navigate("/auth/login", { 
+        state: { 
+          email: formData.email, 
+          password: formData.password,
+          userType: formData.userType 
+        } 
+      });
     } catch (err) {
       const apiMsg = err?.response?.data?.message;
       setError(apiMsg || err.message || "Something went wrong. Try again.");
