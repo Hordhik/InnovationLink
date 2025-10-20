@@ -24,6 +24,31 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Python
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+**/venv/
+.venv/
+**/.venv/
+env/
+**/env/
+.env
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+*.db
+*.sqlite3
+
 # OS / Editor
 .DS_Store
 .idea/
