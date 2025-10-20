@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './Notifications.css'; // Make sure this CSS file exists
-import { FiX, FiBell, FiCalendar, FiUserCheck, FiMessageSquare, FiSettings } from 'react-icons/fi';
+import { FiX, FiBell, FiCalendar, FiUserCheck, FiMessageSquare, FiSettings, FiCheck, FiCircle } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 // --- Initial Mock Data ---
@@ -71,6 +71,25 @@ const Notifications = () => {
     setNotifications(notifications.map(notif => ({ ...notif, read: true })));
   };
 
+  // Function to toggle read/unread status of a single notification
+  const toggleNotificationRead = (id) => {
+    setNotifications(notifications.map(notif => 
+      notif.id === id ? { ...notif, read: !notif.read } : notif
+    ));
+  };
+
+  // Function to mark a notification as read when clicked
+  const handleNotificationClick = (id, link) => {
+    // Mark as read
+    setNotifications(notifications.map(notif => 
+      notif.id === id ? { ...notif, read: true } : notif
+    ));
+    // Navigate to the link
+    if (link) {
+      navigate(link);
+    }
+  };
+
   // Filter notifications based on the active tab
   const filteredNotifications = activeTab === 'Unread'
     ? notifications.filter(notif => !notif.read)
@@ -116,16 +135,31 @@ const Notifications = () => {
         <div className="notification-list">
           {filteredNotifications.length > 0 ? (
             filteredNotifications.map((notif) => (
-              <a href={notif.link} key={notif.id} className="notification-item">
-                {!notif.read && <div className="unread-dot"></div>}
-                <div className="notification-icon">
-                  {notif.icon}
+              <div key={notif.id} className="notification-item-wrapper">
+                <div 
+                  className="notification-item"
+                  onClick={() => handleNotificationClick(notif.id, notif.link)}
+                >
+                  {!notif.read && <div className="unread-dot"></div>}
+                  <div className="notification-icon">
+                    {notif.icon}
+                  </div>
+                  <div className="notification-content">
+                    <p className="notification-text">{notif.text}</p>
+                    <p className="notification-time">{notif.time}</p>
+                  </div>
                 </div>
-                <div className="notification-content">
-                  <p className="notification-text">{notif.text}</p>
-                  <p className="notification-time">{notif.time}</p>
-                </div>
-              </a>
+                <button
+                  className="notification-read-toggle"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleNotificationRead(notif.id);
+                  }}
+                  title={notif.read ? "Mark as unread" : "Mark as read"}
+                >
+                  {notif.read ? <FiCircle size={16} /> : <FiCheck size={16} />}
+                </button>
+              </div>
             ))
           ) : (
             /* 4. Empty State */
