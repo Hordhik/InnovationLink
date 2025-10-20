@@ -354,7 +354,7 @@ const EventCard = ({ events = [] }) => {
             <div 
                 style={{
                     ...styles.eventsContent,
-                    filter: isLoggedIn ? 'none' : 'blur(1px)', // Lighter blur so users can see events exist
+                    filter: isLoggedIn ? 'none' : 'blur(3px)', // Lighter blur for better readability
                     pointerEvents: 'auto' // Always allow clicks
                 }}
             >

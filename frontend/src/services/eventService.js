@@ -7,40 +7,21 @@ class EventService {
   // Fetch all events from your platform
   static async getAllEvents() {
     try {
-      console.log('🔄 EventService.getAllEvents() - Making API call to:', `${API_BASE_URL}/events`);
       const response = await axios.get(`${API_BASE_URL}/events`);
-      console.log('✅ EventService.getAllEvents() - API Response received:', response.status, response.statusText);
       
       // Handle the response structure: {"events": [...], "count": 23}
       const data = response.data;
-      console.log('📦 EventService.getAllEvents() - Response data structure:', {
-        hasEvents: !!data.events,
-        eventsCount: data.events?.length,
-        totalCount: data.count,
-        isArray: Array.isArray(data)
-      });
-      
       if (data && data.events) {
-        console.log('✅ Returning events array with', data.events.length, 'events');
         return data.events; // Return just the events array
       } else if (Array.isArray(data)) {
-        console.log('✅ Returning array data with', data.length, 'items');
         return data; // If it's already an array
       } else {
-        console.warn('❌ Unexpected API response structure:', data);
-        console.log('🔄 Falling back to sample events');
+        console.warn('Unexpected API response structure:', data);
         return this.getFallbackEvents();
       }
     } catch (error) {
-      console.error('❌ EventService.getAllEvents() - Error fetching events:', error.message);
-      console.error('❌ Error details:', {
-        code: error.code,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        url: error.config?.url
-      });
+      console.error('Error fetching events:', error);
       // Fallback to sample data if API is unavailable
-      console.log('🔄 Falling back to sample events due to error');
       return this.getFallbackEvents();
     }
   }
