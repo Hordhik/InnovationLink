@@ -193,6 +193,7 @@
   padding: 12px 0;
   width: 100%;
   border-bottom: 1px solid #f3f3f3;
+  position: relative;
 }
 
 .event-left {
@@ -201,6 +202,74 @@
   gap: 12px;
   width: 100%;
   justify-content: space-between;
+  flex: 1;
+}
+
+/* 3-dot menu styles */
+.event-menu-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-left: 12px;
+}
+
+.event-menu-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  transition: all 0.2s ease;
+}
+
+.event-menu-btn:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.event-menu-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 140px;
+  z-index: 10;
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.event-menu-item {
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #374151;
+  transition: background 0.2s ease;
+  text-align: left;
+}
+
+.event-menu-item:hover {
+  background-color: #f9fafb;
+}
+
+.event-menu-item-delete {
+  color: #ef4444;
+}
+
+.event-menu-item-delete:hover {
+  background-color: #fef2f2;
 }
 
 .event-meta {

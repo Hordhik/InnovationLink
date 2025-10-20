@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Plus, User } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Plus, User, MoreVertical, Edit2, Trash2 } from "lucide-react";
 import "./Schedule.css";
 import AddItemModal from "./AddItemModal"; // <--- 1. IMPORT THE NEW MODAL
 
@@ -84,10 +84,31 @@ const Schedule = () => {
   );
   const [hoveredDate, setHoveredDate] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false); // <--- 2. ADD MODAL STATE
+  const [openMenuIndex, setOpenMenuIndex] = useState(null); // Track which menu is open
+  const [editingEvent, setEditingEvent] = useState(null); // Track event being edited: { date, index, event }
 
   // --- 3. ADD SAVE HANDLER ---
   const handleSaveEvent = (date, newEvent) => {
     setEvents(prevEvents => {
+      // If we're editing an existing event
+      if (editingEvent) {
+        const updatedEvents = [...(prevEvents[editingEvent.date] || [])];
+        updatedEvents[editingEvent.index] = newEvent;
+        
+        // Sort events by time
+        updatedEvents.sort((a, b) => {
+          const timeA = new Date(`1970/01/01 ${a.time}`);
+          const timeB = new Date(`1970/01/01 ${b.time}`);
+          return timeA - timeB;
+        });
+
+        return {
+          ...prevEvents,
+          [editingEvent.date]: updatedEvents
+        };
+      }
+
+      // Otherwise, add a new event
       const dayEvents = prevEvents[date] || [];
       const updatedDayEvents = [...dayEvents, newEvent];
 
@@ -104,11 +125,10 @@ const Schedule = () => {
       };
     });
     setIsModalOpen(false); // Close modal after saving
+    setEditingEvent(null); // Clear editing state
   };
-  // -----------------------------
 
   const toggleEventDone = (date, eventIndex) => {
-    // ... no change
     setEvents(prevEvents => ({
       ...prevEvents,
       [date]: prevEvents[date].map((event, idx) => 
@@ -117,8 +137,49 @@ const Schedule = () => {
     }));
   };
 
+  const handleDeleteEvent = (date, eventIndex) => {
+    setEvents(prevEvents => ({
+      ...prevEvents,
+      [date]: prevEvents[date].filter((_, idx) => idx !== eventIndex)
+    }));
+    setOpenMenuIndex(null); // Close the menu after deleting
+  };
+
+  const handleEditEvent = (date, eventIndex) => {
+    // Get the event data to edit
+    const eventToEdit = events[date][eventIndex];
+    
+    // Set the editing state
+    setEditingEvent({
+      date: date,
+      index: eventIndex,
+      event: eventToEdit
+    });
+    
+    // Close the menu and open the modal
+    setOpenMenuIndex(null);
+    setIsModalOpen(true);
+  };
+
+  const toggleMenu = (index) => {
+    setOpenMenuIndex(openMenuIndex === index ? null : index);
+  };
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (openMenuIndex !== null && !event.target.closest('.event-menu-container')) {
+        setOpenMenuIndex(null);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [openMenuIndex]);
+
   const goToToday = () => {
-    // ... no change
     const now = new Date();
     setCurrentMonth(now.getMonth());
     setCurrentYear(now.getFullYear());
@@ -126,7 +187,6 @@ const Schedule = () => {
   };
 
   const previousMonth = () => {
-    // ... no change
     if (currentMonth === 0) {
       setCurrentMonth(11);
       setCurrentYear(currentYear - 1);
@@ -136,7 +196,6 @@ const Schedule = () => {
   };
 
   const nextMonth = () => {
-    // ... no change
     if (currentMonth === 11) {
       setCurrentMonth(0);
       setCurrentYear(currentYear + 1);
@@ -146,37 +205,31 @@ const Schedule = () => {
   };
 
   const getDaysInMonth = (month, year) => {
-    // ... no change
     return new Date(year, month + 1, 0).getDate();
   };
 
   const getFirstDayOfMonth = (month, year) => {
-    // ... no change
     return new Date(year, month, 1).getDay();
   };
 
   const isDatePast = (day, month, year) => {
-    // ... no change
     const checkDate = new Date(year, month, day);
     const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     return checkDate < todayDate;
   };
 
   const getMonthName = (month) => {
-    // ... no change
     const months = ["January", "February", "March", "April", "May", "June", 
                     "July", "August", "September", "October", "November", "December"];
     return months[month];
   };
 
   const getPendingTasks = (date) => {
-    // ... no change
     if (!events[date]) return [];
     return events[date].filter(event => !event.done);
   };
 
   const formatHeading = (isoDate) =>
-    // ... no change
     new Date(isoDate).toLocaleDateString("en-US", {
       weekday: "long",
       month: "long",
@@ -188,9 +241,13 @@ const Schedule = () => {
       {/* --- 4. RENDER THE MODAL (conditionally) --- */}
       {isModalOpen && (
         <AddItemModal 
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => {
+            setIsModalOpen(false);
+            setEditingEvent(null); // Clear editing state when closing
+          }}
           onSave={handleSaveEvent}
-          selectedDate={selectedDate}
+          selectedDate={editingEvent ? editingEvent.date : selectedDate}
+          editingEvent={editingEvent ? editingEvent.event : null}
         />
       )}
       {/* ------------------------------------------- */}
@@ -202,7 +259,6 @@ const Schedule = () => {
       {/* Left Calendar Section */}
         <div className="schedule-left">
           <div className="schedule-left-header">
-          {/* ... no change ... */}
             <button className="btn-outline" onClick={goToToday}>Today</button>
             <div className="month-row">
               <button className="btn-outline" onClick={previousMonth}>&#8249;</button>
@@ -212,14 +268,12 @@ const Schedule = () => {
           </div>
 
           <div className="weekday-row">
-          {/* ... no change ... */}
             {["M", "T", "W", "T", "F", "S", "S"].map((d) => (
               <div key={d} className="weekday">{d}</div>
             ))}
           </div>
 
           <div className="days-grid">
-          {/* ... no change ... */}
             {[...Array(getFirstDayOfMonth(currentMonth, currentYear) === 0 ? 6 : getFirstDayOfMonth(currentMonth, currentYear) - 1)].map((_, i) => (
               <div key={`empty-${i}`} className="day-cell" style={{ visibility: 'hidden' }}></div>
             ))}
@@ -245,7 +299,6 @@ const Schedule = () => {
 
           {/* Hover Task Preview */}
           {hoveredDate && getPendingTasks(hoveredDate).length > 0 && (
-            // ... no change ...
             <div className="hover-tasks">
               <h4>Pending Tasks for {formatHeading(hoveredDate)}</h4>
               {getPendingTasks(hoveredDate).map((task, idx) => (
@@ -287,11 +340,36 @@ const Schedule = () => {
                       </div>
                       <div className="event-time">{e.time}</div>
                     </div>
+                    <div className="event-menu-container">
+                      <button 
+                        className="event-menu-btn"
+                        onClick={() => toggleMenu(idx)}
+                      >
+                        <MoreVertical size={16} />
+                      </button>
+                      {openMenuIndex === idx && (
+                        <div className="event-menu-dropdown">
+                          <button 
+                            className="event-menu-item"
+                            onClick={() => handleEditEvent(selectedDate, idx)}
+                          >
+                            <Edit2 size={14} />
+                            <span>Edit</span>
+                          </button>
+                          <button 
+                            className="event-menu-item event-menu-item-delete"
+                            onClick={() => handleDeleteEvent(selectedDate, idx)}
+                          >
+                            <Trash2 size={14} />
+                            <span>Delete</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))
               ) : (
                 <div className="event-row">
-                  {/* ... no change ... */}
                   <div className="event-left">
                     <div className="event-meta">
                       <div className="event-title">No tasks for this day.</div>
