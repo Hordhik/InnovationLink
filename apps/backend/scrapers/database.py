@@ -4,7 +4,7 @@ from typing import List, Dict, Any
 import json
 
 class DatabaseManager:
-    def __init__(self, db_path: str = "events.db"):
+    def __init__(self, db_path: str = "../../../data/events.db"):
         self.db_path = db_path
         self.init_database()
     

@@ -28,7 +28,7 @@ app.add_middleware(
 )
 
 # Static events file path
-EVENTS_FILE = "bot-frontend/events.json"
+EVENTS_FILE = "../static/events.json"
 
 def load_events_data() -> Dict[str, Any]:
     """Load events from the JSON file"""
@@ -159,7 +159,7 @@ async def health_check():
     }
 
 # Mount static files for frontend
-app.mount("/static", StaticFiles(directory="bot-frontend"), name="static")
+app.mount("/static", StaticFiles(directory="../static"), name="static")
 
 # Serve the modern frontend at root
 @app.get("/")
