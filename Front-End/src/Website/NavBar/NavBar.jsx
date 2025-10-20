@@ -35,9 +35,12 @@ function NavBar() {
         (async () => {
             try {
                 const data = await getSession();
-                if (!cancelled && data?.user) setDisplayUser(data.user);
-            } catch {
-                // not logged in; ignore
+                if (!cancelled && data?.user) {
+                    setDisplayUser(data.user);
+                }
+            } catch (error) {
+                // Handle any unexpected errors
+                console.error('Session check failed:', error);
             }
         })();
         return () => { cancelled = true; };

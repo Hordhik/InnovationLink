@@ -31,14 +31,25 @@ export async function signup({ userType, name, email, password, phone }) {
 export async function getSession() {
     const token = getToken();
     if (!token) {
-        const error = new Error('No auth token');
-        error.status = 401;
+        // Return null instead of throwing an error when no token exists
+        return null;
+    }
+    
+    try {
+        const { data } = await api.get('/api/auth/session', {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return data; // { authenticated: true, user }
+    } catch (error) {
+        // If the token is invalid or expired, clear it and return null
+        if (error.response?.status === 401) {
+            localStorage.removeItem('il_token');
+            localStorage.removeItem('il_user');
+            localStorage.removeItem('il_role');
+            return null;
+        }
         throw error;
     }
-    const { data } = await api.get('/api/auth/session', {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    });
-    return data; // { authenticated: true, user }
 }

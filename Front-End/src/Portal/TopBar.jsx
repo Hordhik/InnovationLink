@@ -16,14 +16,19 @@ function TopBar() {
         (async () => {
             try {
                 const data = await getSession();
-                if (!cancelled && data?.user) {
-                    setDisplayUser(data.user);
+                if (!cancelled) {
+                    if (data?.user) {
+                        setDisplayUser(data.user);
+                    } else {
+                        // No valid session, but don't redirect - let user browse public content
+                        setDisplayUser(null);
+                    }
                 }
             } catch (err) {
-                // On 401/403, clear and redirect to login
+                // On unexpected errors, clear auth but don't redirect
                 if (!cancelled) {
-                    clearAuth();
-                    navigate('/auth/login');
+                    console.error('Session validation failed:', err);
+                    setDisplayUser(null);
                 }
             }
         })();
