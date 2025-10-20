@@ -1,0 +1,104 @@
+
+.investor-card {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 16px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 16px 20px;
+}
+
+.investor-avatar {
+  grid-area: avatar;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #495057;
+}
+
+.investor-info {
+  grid-area: info;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.investor-info h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #212529;
+}
+
+.investor-info p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #6c757d;
+}
+
+.investor-stats {
+  grid-area: stats;
+  text-align: right;
+  font-size: 0.9rem;
+  color: #495057;
+}
+
+.investor-stats div {
+  margin-bottom: 4px;
+}
+
+.investor-thesis {
+  grid-area: thesis;
+  font-size: 1rem;
+  color: #343a40;
+  line-height: 1.5;
+}
+
+.card-bottom {
+  grid-area: bottom;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.investor-tags span {
+  background-color: #f1f3f5;
+  color: #343a40;
+  padding: 5px 12px;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-right: 8px;
+  display: inline-block;
+  margin-top: 8px;
+}
+
+.investor-actions button {
+  padding: 10px 18px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  margin-left: 8px;
+}
+
+.btn-primary {
+  background-color: #0d6efd;
+  color: white;
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: #333;
+  border: 1px solid #ccc;
+}

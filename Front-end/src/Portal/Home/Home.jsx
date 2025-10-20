@@ -12,7 +12,7 @@ const Home = () => {
     <div
       className="home-container"
     >
-      {userType === 'I' ? <InvestorHome /> : <StartupHome />}
+      {userType === 'S' ? <InvestorHome /> : <StartupHome />}
     </div>
   );
 };
