@@ -63,11 +63,29 @@ export default function StartupProfile() {
     const idx = (typeof idxOrObj === 'number') ? idxOrObj : (idxOrObj && typeof idxOrObj.idx === 'number' ? idxOrObj.idx : null);
 
     if (isFounder) {
-      // update founder field instead of team member
+      // update founder-specific fields instead of team member
       if (isEditing) {
-        setEdit(prev => ({ ...prev, founder: memberData?.name || prev.founder || '' }));
+        setEdit(prev => ({
+          ...prev,
+          founder: memberData?.name ?? prev.founder ?? '',
+          ...(memberData?.role !== undefined ? { founderRole: memberData.role } : {}),
+          ...(memberData?.photo !== undefined ? { founderPhoto: memberData.photo } : {}),
+          ...(memberData?.equity !== undefined ? { founderEquity: memberData.equity } : {}),
+          ...(Array.isArray(memberData?.experiences) ? { founderExperiences: memberData.experiences } : {}),
+          ...(memberData?.study !== undefined ? { founderStudy: memberData.study } : {}),
+          ...(memberData?.about !== undefined ? { founderAbout: memberData.about } : {}),
+        }));
       } else {
-        handleProfileUpdate({ founder: memberData?.name || profileData.founder || '' });
+        const updates = {
+          founder: memberData?.name ?? profileData.founder ?? '',
+          ...(memberData?.role !== undefined ? { founderRole: memberData.role } : {}),
+          ...(memberData?.photo !== undefined ? { founderPhoto: memberData.photo } : {}),
+          ...(memberData?.equity !== undefined ? { founderEquity: memberData.equity } : {}),
+          ...(Array.isArray(memberData?.experiences) ? { founderExperiences: memberData.experiences } : {}),
+          ...(memberData?.study !== undefined ? { founderStudy: memberData.study } : {}),
+          ...(memberData?.about !== undefined ? { founderAbout: memberData.about } : {}),
+        };
+        handleProfileUpdate(updates);
       }
     } else if (idx !== null && typeof idx === 'number') {
       if (isEditing) {
@@ -96,6 +114,17 @@ export default function StartupProfile() {
     copy[idx] = copy[idx] || { name: '' };
     copy[idx].name = val;
     return { ...prev, team: copy };
+  });
+
+  const moveTeamMember = (fromIdx, toIdx) => setEdit(prev => {
+    const list = Array.isArray(prev.team) ? prev.team.slice() : [];
+    if (fromIdx == null || toIdx == null) return prev;
+    if (fromIdx < 0 || fromIdx >= list.length) return prev;
+    if (toIdx < 0 || toIdx >= list.length) return prev;
+    if (fromIdx === toIdx) return prev;
+    const [item] = list.splice(fromIdx, 1);
+    list.splice(toIdx, 0, item);
+    return { ...prev, team: list };
   });
 
   const handleChange = (field) => (e) => setEdit(prev => ({ ...prev, [field]: e.target.value }));
@@ -129,6 +158,12 @@ export default function StartupProfile() {
       setEdit({
         name: profileData.name || '',
         founder: profileData.founder || '',
+        founderRole: profileData.founderRole || '',
+        founderPhoto: profileData.founderPhoto || '',
+        founderEquity: profileData.founderEquity || '',
+        founderExperiences: (profileData.founderExperiences && profileData.founderExperiences.length) ? [...profileData.founderExperiences] : [],
+        founderStudy: profileData.founderStudy || '',
+        founderAbout: profileData.founderAbout || '',
         description: profileData.description || '',
         email: profileData.email || '',
         phone: profileData.phone || '',
@@ -143,7 +178,7 @@ export default function StartupProfile() {
   const editStateProps = {
     edit, setEdit, fileInputRef, openMember, closeMember,
     memberEditing, setMemberEditing, memberDraft, setMemberDraft,
-    addTeamMember, removeTeamMember, changeTeamMember, saveMemberEdits,
+    addTeamMember, removeTeamMember, changeTeamMember, moveTeamMember, saveMemberEdits,
     handleLogoUpload, handleChange, handleSave: () => handleProfileUpdate(edit), handleCancel,
     onStartEdit: () => setIsEditing(true), tags, team, contact
   };

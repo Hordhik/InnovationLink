@@ -86,9 +86,9 @@
 .logo-preview {
     width: 90px;
     height: 90px;
-    border-radius: 50%;
-    object-fit: cover;
-    background-color: #f3f4f6;
+    border-radius: 8px; /* not circular – keep original corners */
+    object-fit: contain; /* preserve logo aspect without cropping */
+    background-color: #ffffff; /* neutral backdrop for transparent logos */
     border: 3px solid #e5e7eb;
 }
 

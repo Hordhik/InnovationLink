@@ -4,7 +4,17 @@ import './TeamMemberModal.css';
 const TeamMemberModal = ({ focusedMemberIndex, isEditing, profileData, edit, memberEditing, memberDraft, setMemberEditing, setMemberDraft, closeMember, saveMemberEdits, changeTeamMember, openMember }) => {
   if (!focusedMemberIndex) return null;
   const { idx, isFounder } = focusedMemberIndex;
-  const member = isFounder ? { name: profileData.founder, role: profileData.founderRole || 'Founder' } : ((isEditing ? edit.team && edit.team[idx] : profileData.team && profileData.team[idx]) || {});
+  const member = isFounder
+    ? {
+        name: isEditing ? (edit?.founder ?? '') : (profileData?.founder ?? ''),
+        role: isEditing ? (edit?.founderRole ?? 'Founder') : (profileData?.founderRole ?? 'Founder'),
+        photo: isEditing ? (edit?.founderPhoto ?? '') : (profileData?.founderPhoto ?? ''),
+        equity: isEditing ? (edit?.founderEquity ?? '') : (profileData?.founderEquity ?? ''),
+        experiences: isEditing ? (edit?.founderExperiences ?? []) : (profileData?.founderExperiences ?? []),
+        study: isEditing ? (edit?.founderStudy ?? '') : (profileData?.founderStudy ?? ''),
+        about: isEditing ? (edit?.founderAbout ?? '') : (profileData?.founderAbout ?? ''),
+      }
+    : ((isEditing ? edit.team && edit.team[idx] : profileData.team && profileData.team[idx]) || {});
 
   // helper to load file to dataURL
   const fileToDataUrl = (file) => new Promise((resolve, reject) => {
@@ -32,7 +42,7 @@ const TeamMemberModal = ({ focusedMemberIndex, isEditing, profileData, edit, mem
           <h4>{member.name || 'Team Member'}</h4>
           <div style={{display:'flex', gap:8}}>
             {!memberEditing && <button className="btn btn-ghost" onClick={() => { setMemberEditing(true); setMemberDraft(member || {}); }}>Edit</button>}
-            <button className="btn btn-ghost" onClick={closeMember}>Close</button>
+            <button className="modal-close" aria-label="Close" title="Close" onClick={closeMember}>×</button>
           </div>
         </div>
 
@@ -42,7 +52,7 @@ const TeamMemberModal = ({ focusedMemberIndex, isEditing, profileData, edit, mem
                   {member.photo ? <img src={member.photo} alt={member.name} className="member-photo" /> : <div className="member-photo-placeholder">{(member.name||'?').charAt(0).toUpperCase()}</div>}
                 </div>
                 <div className="member-name" style={{marginTop:12}}>{member.name}</div>
-                <div className="member-role" style={{marginTop:6}}>{member.role || (isFounder ? 'Founder' : '—')}</div>
+                <div className="member-role" style={{marginTop:6}}>{(isFounder ? (member.role || 'Founder') : (member.role || '—'))}</div>
 
                 <div className="section">
                   <div className="section-title">EQUITY</div>
@@ -72,15 +82,48 @@ const TeamMemberModal = ({ focusedMemberIndex, isEditing, profileData, edit, mem
             ) : (
           <div style={{marginTop:12}}>
             <label className="form-label">Name</label>
-            <input className="form-input" value={memberDraft?.name || ''} onChange={(e) => setMemberDraft(d => ({ ...d, name: e.target.value }))} readOnly={isFounder} />
+            <input className="form-input" value={memberDraft?.name || ''} onChange={(e) => setMemberDraft(d => ({ ...d, name: e.target.value }))} />
             <label className="form-label" style={{marginTop:8}}>Photo</label>
             <input className="form-input" type="file" accept="image/*" onChange={handlePhotoChange} />
             <label className="form-label" style={{marginTop:8}}>Role / Title</label>
             <input className="form-input" value={memberDraft?.role || ''} onChange={(e) => setMemberDraft(d => ({ ...d, role: e.target.value }))} />
             <label className="form-label" style={{marginTop:8}}>Equity</label>
             <input className="form-input" value={memberDraft?.equity || ''} onChange={(e) => setMemberDraft(d => ({ ...d, equity: e.target.value }))} />
-            <label className="form-label" style={{marginTop:8}}>Past Experiences (comma separated)</label>
-            <input className="form-input" value={(memberDraft?.experiences || []).join(', ')} onChange={(e) => setMemberDraft(d => ({ ...d, experiences: e.target.value.split(',').map(s => s.trim()).filter(Boolean) }))} />
+            <label className="form-label" style={{marginTop:8}}>Past Experiences</label>
+            <div style={{display:'flex', flexDirection:'column', gap:8}}>
+              {(memberDraft?.experiences && memberDraft.experiences.length ? memberDraft.experiences : ['']).map((val, i) => (
+                <div key={`exp-${i}`} style={{display:'flex', gap:8, alignItems:'center'}}>
+                  <input
+                    className="form-input"
+                    value={val || ''}
+                    onChange={(e) => setMemberDraft(d => {
+                      const arr = Array.isArray(d?.experiences) ? [...d.experiences] : [];
+                      arr[i] = e.target.value;
+                      return { ...(d||{}), experiences: arr };
+                    })}
+                    placeholder="e.g., Google"
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    onClick={() => setMemberDraft(d => {
+                      const arr = Array.isArray(d?.experiences) ? [...d.experiences] : [];
+                      arr.splice(i, 1);
+                      return { ...(d||{}), experiences: arr };
+                    })}
+                    aria-label="Remove experience"
+                    title="Remove"
+                  >−</button>
+                </div>
+              ))}
+              <div>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setMemberDraft(d => ({ ...(d||{}), experiences: [...(Array.isArray(d?.experiences) ? d.experiences : []), ''] }))}
+                >+ Add experience</button>
+              </div>
+            </div>
             <label className="form-label" style={{marginTop:8}}>Study</label>
             <input className="form-input" value={memberDraft?.study || ''} onChange={(e) => setMemberDraft(d => ({ ...d, study: e.target.value }))} />
             <label className="form-label" style={{marginTop:8}}>About</label>
@@ -88,7 +131,7 @@ const TeamMemberModal = ({ focusedMemberIndex, isEditing, profileData, edit, mem
 
             <div style={{display:'flex', justifyContent:'flex-end', gap:8, marginTop:12}}>
               <button className="btn btn-secondary" onClick={() => { setMemberEditing(false); setMemberDraft(null); }}>Cancel</button>
-              <button className="btn btn-primary" onClick={() => saveMemberEdits(isFounder ? { idx: null, isFounder } : idx, memberDraft)} disabled={isFounder}>Save</button>
+              <button className="btn btn-primary" onClick={() => saveMemberEdits(isFounder ? { idx: null, isFounder } : idx, memberDraft)}>Save</button>
             </div>
           </div>
         )}
