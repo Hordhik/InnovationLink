@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { getStoredUser } from '../../../auth.js';
+import { getStoredUser } from '../../../auth';
 import { getProfile as apiGetProfile, saveProfile as apiSaveProfile } from '../../../services/startupProfileApi';
 import { setMyTeam as apiSetMyTeam, getMyTeam as apiGetMyTeam } from '../../../services/teamApi';
 import StartupProfileForm from "./StartupProfileForm";
@@ -113,24 +113,37 @@ export default function StartupProfile() {
           domain: p.domain || '',
           logo: p.logo || '',
         });
-        // Also persist founder as a team member entry
+        // Also persist founder along with any team members provided in the form
         const founderName = (formValues.founder || formValues.founderName || p.founder || '').trim();
-        if (founderName) {
+        const founderMember = founderName ? {
+          name: founderName,
+          role: (formValues.founderRole || 'Founder'),
+          photo: formValues.founderPhoto || '',
+          equity: formValues.founderEquity || '',
+          experiences: Array.isArray(formValues.founderExperiences) ? formValues.founderExperiences : [],
+          study: formValues.founderStudy || '',
+          about: formValues.founderAbout || ''
+        } : null;
+        const formTeam = Array.isArray(formValues.team) ? formValues.team.map(m => ({
+          name: m?.name || '',
+          role: m?.role || m?.designation || '',
+          equity: m?.equity || '',
+          experiences: Array.isArray(m?.experiences) ? m.experiences : [],
+          study: m?.study || '',
+          about: m?.about || '',
+          photo: m?.photo || ''
+        })) : [];
+        const combined = (founderMember ? [founderMember] : []).concat(formTeam).filter(x => x && x.name);
+        if (combined.length) {
           try {
-            const founderMember = {
-              name: founderName,
-              role: (formValues.founderRole || 'Founder'),
-              photo: formValues.founderPhoto || '',
-              equity: formValues.founderEquity || '',
-              experiences: Array.isArray(formValues.founderExperiences) ? formValues.founderExperiences : [],
-              study: formValues.founderStudy || '',
-              about: formValues.founderAbout || ''
-            };
-            const teamResp = await apiSetMyTeam([founderMember]);
+            // De-duplicate by name (founder first)
+            const seen = new Set();
+            const deduped = combined.filter(m => { const k = m.name.trim().toLowerCase(); if (!k || seen.has(k)) return false; seen.add(k); return true; });
+            const teamResp = await apiSetMyTeam(deduped);
             const members = Array.isArray(teamResp?.members) ? teamResp.members : [];
             setProfileData(prev => ({ ...prev, team: members }));
           } catch (teamErr) {
-            console.error('Founder team insert failed:', teamErr);
+            console.error('Initial team insert failed:', teamErr);
           }
         }
         setIsProfileCreated(true);
@@ -229,7 +242,7 @@ export default function StartupProfile() {
   };
   const closeMember = () => setFocusedMemberIndex(null);
 
-  const saveMemberEdits = (idxOrObj, memberData) => {
+  const saveMemberEdits = async (idxOrObj, memberData) => {
     // idxOrObj can be a number index or an object { idx, isFounder }
     const isFounder = typeof idxOrObj === 'object' && idxOrObj && !!idxOrObj.isFounder;
     const idx = (typeof idxOrObj === 'number') ? idxOrObj : (idxOrObj && typeof idxOrObj.idx === 'number' ? idxOrObj.idx : null);
@@ -247,9 +260,59 @@ export default function StartupProfile() {
           ...(memberData?.study !== undefined ? { founderStudy: memberData.study } : {}),
           ...(memberData?.about !== undefined ? { founderAbout: memberData.about } : {}),
         }));
+        // Also persist immediately so changes are not lost if user doesn't press the main Save
+        try {
+          const newFounderName = memberData?.name ?? edit.founder ?? profileData.founder ?? '';
+          await apiSaveProfile({
+            startupName: edit.name || profileData.name || '',
+            founderName: newFounderName || '',
+            description: edit.description ?? profileData.description ?? '',
+            address: edit.address ?? profileData.address ?? '',
+            phone: edit.phone ?? profileData.phone ?? '',
+            domain: edit.domain ?? profileData.domain ?? '',
+            logo: edit.logo ?? profileData.logo ?? '',
+          });
+          // Reflect the new founder details in profileData immediately for UI correctness in edit mode
+          setProfileData(prev => ({
+            ...prev,
+            founder: newFounderName,
+            ...(memberData?.role !== undefined ? { founderRole: memberData.role } : {}),
+            ...(memberData?.photo !== undefined ? { founderPhoto: memberData.photo } : {}),
+            ...(memberData?.equity !== undefined ? { founderEquity: memberData.equity } : {}),
+            ...(Array.isArray(memberData?.experiences) ? { founderExperiences: memberData.experiences } : {}),
+            ...(memberData?.study !== undefined ? { founderStudy: memberData.study } : {}),
+            ...(memberData?.about !== undefined ? { founderAbout: memberData.about } : {}),
+          }));
+        } catch (e) {
+          console.error('Persist founder (edit mode) profile failed:', e);
+          setError(e?.response?.data?.message || e?.message || 'Failed to save founder in profile');
+        }
+        try {
+          const newFounderName = memberData?.name ?? edit.founder ?? profileData.founder ?? '';
+          const founderMember = {
+            name: newFounderName,
+            role: memberData?.role ?? edit?.founderRole ?? profileData?.founderRole ?? 'Founder',
+            photo: memberData?.photo ?? edit?.founderPhoto ?? profileData?.founderPhoto ?? '',
+            equity: memberData?.equity ?? edit?.founderEquity ?? profileData?.founderEquity ?? '',
+            experiences: Array.isArray(memberData?.experiences) ? memberData.experiences : (Array.isArray(edit?.founderExperiences) ? edit.founderExperiences : (Array.isArray(profileData?.founderExperiences) ? profileData.founderExperiences : [])),
+            study: memberData?.study ?? edit?.founderStudy ?? profileData?.founderStudy ?? '',
+            about: memberData?.about ?? edit?.founderAbout ?? profileData?.founderAbout ?? '',
+          };
+          const currentTeam = Array.isArray(edit?.team) ? edit.team.map(m => ({ ...m })) : (Array.isArray(profileData?.team) ? profileData.team.map(m => ({ ...m })) : []);
+          const combined = [founderMember, ...currentTeam];
+          const seen = new Set();
+          const deduped = combined.filter(m => { const k = (m?.name || '').trim().toLowerCase(); if (!k || seen.has(k)) return false; seen.add(k); return true; });
+          const teamResp = await apiSetMyTeam(deduped);
+          const members = Array.isArray(teamResp?.members) ? teamResp.members : [];
+          setProfileData(prev => ({ ...prev, team: members }));
+        } catch (e) {
+          console.error('Persist founder (edit mode) team failed:', e);
+          setError(e?.response?.data?.message || e?.message || 'Failed to save founder in team');
+        }
       } else {
+        const newFounderName = memberData?.name ?? profileData.founder ?? '';
         const updates = {
-          founder: memberData?.name ?? profileData.founder ?? '',
+          founder: newFounderName,
           ...(memberData?.role !== undefined ? { founderRole: memberData.role } : {}),
           ...(memberData?.photo !== undefined ? { founderPhoto: memberData.photo } : {}),
           ...(memberData?.equity !== undefined ? { founderEquity: memberData.equity } : {}),
@@ -258,6 +321,45 @@ export default function StartupProfile() {
           ...(memberData?.about !== undefined ? { founderAbout: memberData.about } : {}),
         };
         handleProfileUpdate(updates);
+        // Persist founder changes immediately when not in overall edit mode
+        try {
+          // 1) Save founder name into startup profile
+          const profPayload = {
+            startupName: profileData.name || '',
+            founderName: newFounderName || '',
+            description: profileData.description || '',
+            address: profileData.address || '',
+            phone: profileData.phone || '',
+            domain: profileData.domain || '',
+            logo: profileData.logo || '',
+          };
+          await apiSaveProfile(profPayload);
+        } catch (e) {
+          console.error('Persist founder to profile failed:', e);
+          setError(e?.response?.data?.message || e?.message || 'Failed to save founder in profile');
+        }
+        try {
+          // 2) Save founder details into team
+          const founderMember = {
+            name: newFounderName,
+            role: memberData?.role ?? profileData?.founderRole ?? 'Founder',
+            photo: memberData?.photo ?? profileData?.founderPhoto ?? '',
+            equity: memberData?.equity ?? profileData?.founderEquity ?? '',
+            experiences: Array.isArray(memberData?.experiences) ? memberData.experiences : (Array.isArray(profileData?.founderExperiences) ? profileData.founderExperiences : []),
+            study: memberData?.study ?? profileData?.founderStudy ?? '',
+            about: memberData?.about ?? profileData?.founderAbout ?? '',
+          };
+          const currentTeam = Array.isArray(profileData?.team) ? profileData.team.map(m => ({ ...m })) : [];
+          const combined = [founderMember, ...currentTeam];
+          const seen = new Set();
+          const deduped = combined.filter(m => { const k = (m?.name || '').trim().toLowerCase(); if (!k || seen.has(k)) return false; seen.add(k); return true; });
+          const teamResp = await apiSetMyTeam(deduped);
+          const members = Array.isArray(teamResp?.members) ? teamResp.members : [];
+          setProfileData(prev => ({ ...prev, team: members }));
+        } catch (e) {
+          console.error('Persist founder to team failed:', e);
+          setError(e?.response?.data?.message || e?.message || 'Failed to save founder in team');
+        }
       }
     } else if (idx !== null && typeof idx === 'number') {
       if (isEditing) {
@@ -266,11 +368,54 @@ export default function StartupProfile() {
           copy[idx] = { ...copy[idx], ...memberData };
           return { ...prev, team: copy };
         });
+        // Also persist immediately so changes are not lost if user doesn't press the main Save
+        try {
+          const founderName = (edit?.founder ?? profileData?.founder ?? '').trim();
+          const founderMember = founderName ? {
+            name: founderName,
+            role: (edit?.founderRole ?? profileData?.founderRole) || 'Founder',
+            photo: (edit?.founderPhoto ?? profileData?.founderPhoto) || '',
+            equity: (edit?.founderEquity ?? profileData?.founderEquity) || '',
+            experiences: Array.isArray(edit?.founderExperiences) ? edit.founderExperiences : (Array.isArray(profileData?.founderExperiences) ? profileData.founderExperiences : []),
+            study: (edit?.founderStudy ?? profileData?.founderStudy) || '',
+            about: (edit?.founderAbout ?? profileData?.founderAbout) || '',
+          } : null;
+          const currentTeam = Array.isArray(edit?.team) ? edit.team.map(m => ({ ...m })) : [];
+          // reflect the just-edited change at idx
+          if (idx >= 0 && idx < currentTeam.length) currentTeam[idx] = { ...currentTeam[idx], ...memberData };
+          const combined = (founderMember ? [founderMember] : []).concat(currentTeam).filter(m => m && m.name);
+          const seen = new Set();
+          const deduped = combined.filter(m => { const k = (m?.name || '').trim().toLowerCase(); if (!k || seen.has(k)) return false; seen.add(k); return true; });
+          const teamResp = await apiSetMyTeam(deduped);
+          const members = Array.isArray(teamResp?.members) ? teamResp.members : [];
+          setProfileData(prev => ({ ...prev, team: members }));
+        } catch (e) { console.error('Persist team (edit mode) failed:', e); }
       } else {
         const currentTeam = (profileData.team && profileData.team.length) ? profileData.team.map(m => ({ ...m })) : [];
         const newTeam = currentTeam.slice();
         newTeam[idx] = { ...newTeam[idx], ...memberData };
         handleProfileUpdate({ team: newTeam });
+        // Persist team change immediately when not in overall edit mode
+        try {
+          const founderName = (profileData?.founder || '').trim();
+          const founderMember = founderName ? {
+            name: founderName,
+            role: profileData?.founderRole || 'Founder',
+            photo: profileData?.founderPhoto || '',
+            equity: profileData?.founderEquity || '',
+            experiences: Array.isArray(profileData?.founderExperiences) ? profileData.founderExperiences : [],
+            study: profileData?.founderStudy || '',
+            about: profileData?.founderAbout || '',
+          } : null;
+          const combined = (founderMember ? [founderMember] : []).concat(newTeam).filter(m => m && m.name);
+          const seen = new Set();
+          const deduped = combined.filter(m => { const k = (m?.name || '').trim().toLowerCase(); if (!k || seen.has(k)) return false; seen.add(k); return true; });
+          const teamResp = await apiSetMyTeam(deduped);
+          const members = Array.isArray(teamResp?.members) ? teamResp.members : [];
+          setProfileData(prev => ({ ...prev, team: members }));
+        } catch (e) {
+          console.error('Persist team member failed:', e);
+        }
       }
     }
 

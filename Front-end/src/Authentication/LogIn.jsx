@@ -126,24 +126,28 @@ const LogIn = () => {
         <form onSubmit={handleSubmit}>
           <div className="credentials">
             <div className="username">
-              <p className='label'>Email or Username:</p>
+              <label className='label' htmlFor="login-username">Email or Username:</label>
               <input
+                id="login-username"
                 type="text"
                 name="username"
                 value={formData.username}
                 onChange={handleInputChange}
                 placeholder={`Enter your email or username...`}
+                autoComplete="username"
                 required
               />
             </div>
             <div className="password">
-              <p className='label'>Password:</p>
+              <label className='label' htmlFor="login-password">Password:</label>
               <input
+                id="login-password"
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
                 placeholder="Enter your password..."
+                autoComplete="current-password"
                 required
               />
               <p className='forgot-password'>Forgot your password?</p>

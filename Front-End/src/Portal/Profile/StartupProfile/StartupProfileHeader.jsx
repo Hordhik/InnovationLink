@@ -66,45 +66,45 @@ const StartupProfileHeader = ({ profileData, isEditing, editStateProps }) => {
   return (
     <>
       <div className="profile-left">
-  <div className="profile-left-card" ref={leftCardRef}>
+        <div className="profile-left-card" ref={leftCardRef}>
           <div className="header-card-inner center">
             <div className="logo-card">
-            {isEditing ? (
-              <img src={p.edit?.logo || profileData.logo || 'https://placehold.co/160x160/eef2ff/4f46e5?text=Logo'} alt="logo" className="logo-image" />
-            ) : (
-              <img src={profileData.logo || 'https://placehold.co/160x160/eef2ff/4f46e5?text=Logo'} alt="logo" className="logo-image" />
-            )}
-          </div>
+              {isEditing ? (
+                <img src={p.edit?.logo || profileData.logo || 'https://placehold.co/160x160/eef2ff/4f46e5?text=Logo'} alt="logo" className="logo-image" />
+              ) : (
+                <img src={profileData.logo || 'https://placehold.co/160x160/eef2ff/4f46e5?text=Logo'} alt="logo" className="logo-image" />
+              )}
+            </div>
 
             <div className="header-meta">
-            {isEditing ? (
-              <>
-                <input className="inline-input" value={p.edit?.name || ''} onChange={p.handleChange('name')} />
-                <input className="inline-input small" value={p.edit?.founder || ''} onChange={p.handleChange('founder')} placeholder="Founder" />
-                <input className="inline-input small" value={p.edit?.address || ''} onChange={p.handleChange('address')} placeholder="Location / Address" />
-              </>
-            ) : (
-              <>
-                {(profileData.name || '').trim() && (
-                  <div className="meta-name" title={profileData.name}>{profileData.name}</div>
-                )}
-                {(profileData.founder || '').trim() && (
-                  <div className="meta-founder"><strong>Founder:</strong> {profileData.founder}</div>
-                )}
-                {(profileData.address || '').trim() && (
-                  <div className="meta-location" title={profileData.address}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <path d="M12 21s-7-5.686-7-11a7 7 0 1 1 14 0c0 5.314-7 11-7 11Z" stroke="#64748b" strokeWidth="1.5" fill="none"/>
-                      <circle cx="12" cy="10" r="2.5" stroke="#64748b" strokeWidth="1.5" fill="none"/>
-                    </svg>
-                    <span>{profileData.address}</span>
-                  </div>
-                )}
-              </>
-            )}
+              {isEditing ? (
+                <>
+                  <input className="inline-input" name="name" aria-label="Startup name" value={p.edit?.name || ''} onChange={p.handleChange('name')} />
+                  <input className="inline-input small" name="founder" aria-label="Founder" value={p.edit?.founder || ''} onChange={p.handleChange('founder')} placeholder="Founder" />
+                  <input className="inline-input small" name="address" aria-label="Address" value={p.edit?.address || ''} onChange={p.handleChange('address')} placeholder="Location / Address" />
+                </>
+              ) : (
+                <>
+                  {(profileData.name || '').trim() && (
+                    <div className="meta-name" title={profileData.name}>{profileData.name}</div>
+                  )}
+                  {(profileData.founder || '').trim() && (
+                    <div className="meta-founder"><strong>Founder:</strong> {profileData.founder}</div>
+                  )}
+                  {(profileData.address || '').trim() && (
+                    <div className="meta-location" title={profileData.address}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M12 21s-7-5.686-7-11a7 7 0 1 1 14 0c0 5.314-7 11-7 11Z" stroke="#64748b" strokeWidth="1.5" fill="none" />
+                        <circle cx="12" cy="10" r="2.5" stroke="#64748b" strokeWidth="1.5" fill="none" />
+                      </svg>
+                      <span>{profileData.address}</span>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
-          <div className="left-actions big" style={{marginTop:6}}>
+          <div className="left-actions big" style={{ marginTop: 6 }}>
             <button className="btn btn-feedback big">Feedback</button>
             <button className="btn btn-connect big">Connect</button>
           </div>
@@ -116,12 +116,12 @@ const StartupProfileHeader = ({ profileData, isEditing, editStateProps }) => {
           <h2 className="project-title">Project Description</h2>
           <div className="description-inner">
             {isEditing ? (
-              <textarea className="inline-textarea" value={p.edit?.description || ''} onChange={p.handleChange('description')} />
+              <textarea className="inline-textarea" name="description" aria-label="Project description" value={p.edit?.description || ''} onChange={p.handleChange('description')} />
             ) : (
               <>
                 <div ref={descRef} className="startup-desc large clamp-5" style={{ lineHeight: 1.7 }}>{profileData.description || 'No description provided yet.'}</div>
                 {showReadMore && (
-                  <div style={{marginTop:10}}>
+                  <div style={{ marginTop: 10 }}>
                     <button className="btn btn-ghost" onClick={() => setOpenDescModal(true)}>Read more</button>
                   </div>
                 )}
@@ -131,12 +131,12 @@ const StartupProfileHeader = ({ profileData, isEditing, editStateProps }) => {
 
           <div className="tags-box">
             {isEditing ? (
-              <input className="inline-input" value={p.edit?.domain || ''} onChange={p.handleChange('domain')} placeholder="Domains (comma separated)" />
+              <input className="inline-input" name="domain" aria-label="Domains" value={p.edit?.domain || ''} onChange={p.handleChange('domain')} placeholder="Domains (comma separated)" />
             ) : (
               (() => {
                 const domainStr = p.edit?.domain ?? profileData.domain ?? '';
                 const arr = String(domainStr).split(',').map(s => s.trim()).filter(Boolean);
-                return arr.length ? arr.map((t,i)=> <span key={`${t}-${i}`} className="domain-tag">{t}</span>) : <span className="muted">No domain</span>;
+                return arr.length ? arr.map((t, i) => <span key={`${t}-${i}`} className="domain-tag">{t}</span>) : <span className="muted">No domain</span>;
               })()
             )}
           </div>
@@ -144,8 +144,8 @@ const StartupProfileHeader = ({ profileData, isEditing, editStateProps }) => {
           <div className="desc-contact">
             {isEditing ? (
               <>
-                <input className="inline-input" value={p.edit?.email || ''} onChange={p.handleChange('email')} placeholder="Email" />
-                <input className="inline-input" value={p.edit?.phone || ''} onChange={p.handleChange('phone')} placeholder="Phone" />
+                <input className="inline-input" name="email" aria-label="Email" value={p.edit?.email || ''} onChange={p.handleChange('email')} placeholder="Email" />
+                <input className="inline-input" name="phone" aria-label="Phone" value={p.edit?.phone || ''} onChange={p.handleChange('phone')} placeholder="Phone" />
               </>
             ) : (
               null /* email hidden in public view */
@@ -156,9 +156,9 @@ const StartupProfileHeader = ({ profileData, isEditing, editStateProps }) => {
       {openDescModal && (
         <div className="desc-modal-backdrop" onClick={() => setOpenDescModal(false)}>
           <div className="desc-modal-card" onClick={(e) => e.stopPropagation()}>
-            <h3 style={{marginTop:0}}>Project Description</h3>
-            <div style={{marginTop:8, color:'#334155', lineHeight: 1.7}}>{profileData.description || 'No description provided yet.'}</div>
-            <div style={{display:'flex', justifyContent:'flex-end', marginTop:12}}>
+            <h3 style={{ marginTop: 0 }}>Project Description</h3>
+            <div style={{ marginTop: 8, color: '#334155', lineHeight: 1.7 }}>{profileData.description || 'No description provided yet.'}</div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
               <button className="btn btn-secondary" onClick={() => setOpenDescModal(false)}>Close</button>
             </div>
           </div>

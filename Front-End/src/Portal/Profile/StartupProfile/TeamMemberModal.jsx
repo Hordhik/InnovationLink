@@ -144,20 +144,49 @@ const TeamMemberModal = ({ focusedMemberIndex, isEditing, profileData, edit, mem
           </div>
         ) : (
           <div style={{ marginTop: 12 }}>
-            <label className="form-label">Name</label>
-            <input className="form-input" value={memberDraft?.name || ''} onChange={(e) => setMemberDraft(d => ({ ...d, name: e.target.value }))} />
-            <label className="form-label" style={{ marginTop: 8 }}>Photo</label>
-            <input className="form-input" type="file" accept="image/*" onChange={handlePhotoChange} />
-            <label className="form-label" style={{ marginTop: 8 }}>Role / Title</label>
-            <input className="form-input" value={memberDraft?.role || ''} onChange={(e) => setMemberDraft(d => ({ ...d, role: e.target.value }))} />
-            <label className="form-label" style={{ marginTop: 8 }}>Equity</label>
-            <input className="form-input" value={memberDraft?.equity || ''} onChange={(e) => setMemberDraft(d => ({ ...d, equity: e.target.value }))} />
+            <label className="form-label" htmlFor={`member-name-${isFounder ? 'founder' : idx}`}>Name</label>
+            <input
+              id={`member-name-${isFounder ? 'founder' : idx}`}
+              className="form-input"
+              name="name"
+              value={memberDraft?.name || ''}
+              onChange={(e) => setMemberDraft(d => ({ ...d, name: e.target.value }))}
+              autoComplete="name"
+            />
+            <label className="form-label" style={{ marginTop: 8 }} htmlFor={`member-photo-${isFounder ? 'founder' : idx}`}>Photo</label>
+            <input
+              id={`member-photo-${isFounder ? 'founder' : idx}`}
+              className="form-input"
+              type="file"
+              name="photo"
+              accept="image/*"
+              onChange={handlePhotoChange}
+            />
+            <label className="form-label" style={{ marginTop: 8 }} htmlFor={`member-role-${isFounder ? 'founder' : idx}`}>Role / Title</label>
+            <input
+              id={`member-role-${isFounder ? 'founder' : idx}`}
+              className="form-input"
+              name="role"
+              value={memberDraft?.role || ''}
+              onChange={(e) => setMemberDraft(d => ({ ...d, role: e.target.value }))}
+              autoComplete="organization-title"
+            />
+            <label className="form-label" style={{ marginTop: 8 }} htmlFor={`member-equity-${isFounder ? 'founder' : idx}`}>Equity</label>
+            <input
+              id={`member-equity-${isFounder ? 'founder' : idx}`}
+              className="form-input"
+              name="equity"
+              value={memberDraft?.equity || ''}
+              onChange={(e) => setMemberDraft(d => ({ ...d, equity: e.target.value }))}
+            />
             <label className="form-label" style={{ marginTop: 8 }}>Past Experiences</label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {(memberDraft?.experiences && memberDraft.experiences.length ? memberDraft.experiences : ['']).map((val, i) => (
                 <div key={`exp-${i}`} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                   <input
                     className="form-input"
+                    id={`member-exp-${isFounder ? 'founder' : idx}-${i}`}
+                    name={`experience-${i}`}
                     value={val || ''}
                     onChange={(e) => setMemberDraft(d => {
                       const arr = Array.isArray(d?.experiences) ? [...d.experiences] : [];
@@ -165,6 +194,7 @@ const TeamMemberModal = ({ focusedMemberIndex, isEditing, profileData, edit, mem
                       return { ...(d || {}), experiences: arr };
                     })}
                     placeholder="e.g., Google"
+                    aria-label={`Experience ${i + 1}`}
                   />
                   <button
                     type="button"
@@ -187,14 +217,27 @@ const TeamMemberModal = ({ focusedMemberIndex, isEditing, profileData, edit, mem
                 >+ Add experience</button>
               </div>
             </div>
-            <label className="form-label" style={{ marginTop: 8 }}>Study</label>
-            <input className="form-input" value={memberDraft?.study || ''} onChange={(e) => setMemberDraft(d => ({ ...d, study: e.target.value }))} />
-            <label className="form-label" style={{ marginTop: 8 }}>About</label>
-            <textarea className="form-input" rows={4} value={memberDraft?.about || ''} onChange={(e) => setMemberDraft(d => ({ ...d, about: e.target.value }))} />
+            <label className="form-label" style={{ marginTop: 8 }} htmlFor={`member-study-${isFounder ? 'founder' : idx}`}>Study</label>
+            <input
+              id={`member-study-${isFounder ? 'founder' : idx}`}
+              className="form-input"
+              name="study"
+              value={memberDraft?.study || ''}
+              onChange={(e) => setMemberDraft(d => ({ ...d, study: e.target.value }))}
+            />
+            <label className="form-label" style={{ marginTop: 8 }} htmlFor={`member-about-${isFounder ? 'founder' : idx}`}>About</label>
+            <textarea
+              id={`member-about-${isFounder ? 'founder' : idx}`}
+              className="form-input"
+              name="about"
+              rows={4}
+              value={memberDraft?.about || ''}
+              onChange={(e) => setMemberDraft(d => ({ ...d, about: e.target.value }))}
+            />
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
-              <button className="btn btn-secondary" onClick={() => { setMemberEditing(false); setMemberDraft(null); }}>Cancel</button>
-              <button className="btn btn-primary" onClick={() => saveMemberEdits(isFounder ? { idx: null, isFounder } : idx, memberDraft)}>Save</button>
+              <button type="button" className="btn btn-secondary" onClick={() => { setMemberEditing(false); setMemberDraft(null); }}>Cancel</button>
+              <button type="button" className="btn btn-primary" onClick={() => saveMemberEdits(isFounder ? { idx: null, isFounder } : idx, memberDraft)}>Save</button>
             </div>
           </div>
         )}

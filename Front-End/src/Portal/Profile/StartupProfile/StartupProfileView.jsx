@@ -97,6 +97,7 @@ const StartupProfileView = ({ profileData, isEditing, editStateProps }) => {
           {teamForRender && teamForRender.length ? (() => {
             // Determine if a synthetic founder tile was injected at the beginning
             const founderOffset = (teamForRender.length && teamForRender[0] && teamForRender[0]._founder) ? 1 : 0;
+            const founderNameLC = (profileData?.founder || '').trim().toLowerCase();
             const displayList = showAllTeam ? teamForRender : teamForRender.slice(0, 6 + founderOffset);
             return (
               <>
@@ -104,7 +105,9 @@ const StartupProfileView = ({ profileData, isEditing, editStateProps }) => {
                   // Since displayList preserves order from teamForRender, use i directly
                   const origIdx = i;
                   const dataIdx = m && m._founder ? null : (i - founderOffset);
-                  const isFounder = !!(m && m._founder);
+                  // Treat as founder either if we injected a synthetic founder tile
+                  // OR if this team member's name matches the founder name (case-insensitive)
+                  const isFounder = !!(m && (m._founder || ((m.name || '').trim().toLowerCase() === founderNameLC)));
                   const memberName = (isFounder ? (isEditing ? (p.edit?.founder ?? m.name) : m.name) : (p.edit.team && p.edit.team[dataIdx] && p.edit.team[dataIdx].name) || m.name) || '?';
                   const memberRole = (isFounder ? (isEditing ? (p.edit?.founderRole ?? 'Founder') : (m.role || profileData.founderRole || 'Founder')) : (p.edit.team && p.edit.team[dataIdx] && p.edit.team[dataIdx].role) || m.role) || '';
                   return (

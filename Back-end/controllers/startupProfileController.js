@@ -1,5 +1,34 @@
 const StartupProfile = require('../models/startupProfileModel');
 const User = require('../models/userModel');
+const Team = require('../models/teamModel');
+const db = require('../config/db');
+
+async function ensureFounderMember({ userId, username, company_name, founder }) {
+    try {
+        const name = (founder || '').toString().trim();
+        if (!name) return;
+        // Check if founder already exists in team by case-insensitive name
+        const existing = await Team.findByUsername(username);
+        const has = Array.isArray(existing) && existing.some(m => (m?.name || '').trim().toLowerCase() === name.toLowerCase());
+        if (has) return;
+        await Team.create({
+            user_id: userId,
+            username,
+            company_name,
+            photo: null,
+            photo_mime: null,
+            name,
+            designation: 'Founder',
+            equity: null,
+            past_experiences: null,
+            study: null,
+            about: null,
+        });
+    } catch (e) {
+        // don't block profile save on team founder issues
+        console.warn('ensureFounderMember warning:', e?.message || e);
+    }
+}
 
 exports.getProfile = async (req, res) => {
     try {
@@ -60,6 +89,8 @@ exports.saveProfile = async (req, res) => {
 
         const existing = await StartupProfile.findByUsername(username);
         if (existing) {
+            const prevFounder = existing.founder || null;
+            const nextFounder = founder ?? existing.founder ?? null;
             const updated = await StartupProfile.updateByUsername(username, {
                 company_name,
                 ...(logoBuf ? { logo: logoBuf, logo_mime: logoMime } : {}),
@@ -74,6 +105,23 @@ exports.saveProfile = async (req, res) => {
             });
             if (!updated) return res.status(500).json({ message: 'Failed to update profile' });
             const profile = await StartupProfile.findByUsername(username);
+            // Best-effort: ensure founder is listed in team_members
+            if (profile?.company_name) {
+                await ensureFounderMember({ userId, username, company_name: profile.company_name, founder: profile.founder || founder });
+                // If founder name changed, rename the existing team member row too (case-insensitive match)
+                if (prevFounder && nextFounder && prevFounder.trim().toLowerCase() !== nextFounder.trim().toLowerCase()) {
+                    try {
+                        await db.query('UPDATE team_members SET name = ?, designation = COALESCE(designation, ?) WHERE username = ? AND LOWER(name) = LOWER(?)', [
+                            nextFounder.trim(),
+                            'Founder',
+                            username,
+                            prevFounder.trim(),
+                        ]);
+                    } catch (e) {
+                        console.warn('Founder rename warning:', e?.message || e);
+                    }
+                }
+            }
             if (profile?.logo) {
                 try {
                     const b64 = Buffer.from(profile.logo).toString('base64');
@@ -99,6 +147,10 @@ exports.saveProfile = async (req, res) => {
             domain,
         });
         const profile = await StartupProfile.findByUsername(username);
+        // Best-effort: ensure founder is listed in team_members
+        if (profile?.company_name) {
+            await ensureFounderMember({ userId, username, company_name: profile.company_name, founder: profile.founder || founder });
+        }
         if (profile?.logo) {
             try {
                 const b64 = Buffer.from(profile.logo).toString('base64');

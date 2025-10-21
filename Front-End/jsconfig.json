@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "checkJs": false,
+        "jsx": "react-jsx",
+        "forceConsistentCasingInFileNames": true,
+        "baseUrl": "src"
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist"
+    ]
+}
