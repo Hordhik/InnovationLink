@@ -21,6 +21,13 @@ function NavBar() {
 
     const [displayUser, setDisplayUser] = useState(() => getStoredUser());
 
+    const getPortalPath = (user) => {
+        if (!user) return '/';
+        const role = user.userType === 'investor' ? 'I' : 'S';
+        const username = user.username || user.name || 'handbook';
+        return `/${role}/${username}/home`;
+    };
+
     useEffect(() => {
         // Sync with AuthContext user state
         if (user) {
@@ -58,7 +65,7 @@ function NavBar() {
         clearAuth();
         logout(); // Use AuthContext logout
         setDisplayUser(null);
-        navigate('/');
+        navigate('/home');
     }
 
     return (
@@ -68,6 +75,16 @@ function NavBar() {
                     <img src={logo} alt="Logo" />
                 </div>
                 <div className="Nav-options">
+                                            {displayUser && (
+                                                    <>
+                                                        <Link key="portal" to={getPortalPath(displayUser)} className={`Nav-option ${location.pathname.startsWith('/S') || location.pathname.startsWith('/I') ? 'active' : ''}`}>
+                                                            Portal
+                                                        </Link>
+                                                        <Link key="public" to={`/home?public=true`} className={`Nav-option ${location.pathname === '/home' ? 'active' : ''}`}>
+                                                            View public site
+                                                        </Link>
+                                                    </>
+                                            )}
                     {NavOptions.map((option) => (
                         <Link
                             key={option.name}

@@ -268,8 +268,9 @@ const Schedule = () => {
           </div>
 
           <div className="weekday-row">
-            {["M", "T", "W", "T", "F", "S", "S"].map((d) => (
-              <div key={d} className="weekday">{d}</div>
+          {/* ... no change ... */}
+            {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
+              <div key={`weekday-${i}-${d}`} className="weekday">{d}</div>
             ))}
           </div>
 

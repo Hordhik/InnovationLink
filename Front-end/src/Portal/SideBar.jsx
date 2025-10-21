@@ -60,7 +60,6 @@ const SideBar = () => {
     <div className='sidebar'>
       <div className="main-project">
         <div className="main">
-          <p>MAIN</p>
           <div className="main-items">
             {mainItems.map((item) => {
               const isActive = location.pathname === item.path;

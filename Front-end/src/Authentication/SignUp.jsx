@@ -6,6 +6,7 @@ import logo from "../assets/NavBar/logo.png";
 import googleIcon from "../assets/Authentication/google.svg";
 import login from "../assets/Authentication/login.png";
 import { signup as signupApi } from "../services/authApi";
+import { setAuth } from '../auth.js';
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -40,16 +41,20 @@ const SignUp = () => {
       };
       
       const data = await signupApi(payload);
+      // If backend returned created user and token, store it locally
+      if (data?.user) {
+        // some backends might return token; use it if present
+        setAuth({ token: data?.token || null, user: data.user, role: data.user?.role || formData.userType });
+      }
       alert(data.message || "Signup successful!");
-      
-      // Navigate to login with pre-filled credentials
-      navigate("/auth/login", { 
-        state: { 
-          email: formData.email, 
-          password: formData.password,
-          userType: formData.userType 
-        } 
-      });
+      // Redirect into the portal for startups so they can complete profile on first login
+      if (formData.userType === 'startup') {
+        const username = (data?.user?.username || data?.user?.name || formData.name).toString().replace(/\s+/g, '').slice(0,40);
+        navigate(`/S/${username}/profile`);
+      } else {
+        const username = (data?.user?.username || data?.user?.name || formData.name).toString().replace(/\s+/g, '').slice(0,40);
+        navigate(`/I/${username}/profile`);
+      }
     } catch (err) {
       const apiMsg = err?.response?.data?.message;
       setError(apiMsg || err.message || "Something went wrong. Try again.");
