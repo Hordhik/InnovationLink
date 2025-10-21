@@ -8,7 +8,7 @@ exports.register = async (req, res) => {
   try {
     const raw = req.body || {};
     // Support legacy payloads that send `name` instead of `username`
-    const username = (raw.username ?? raw.name ?? '').toString().trim();
+  const username = (raw.username ?? raw.name ?? '').toString().trim();
     const email = (raw.email ?? '').toString().trim();
     const phone = (raw.phone ?? '').toString().trim();
     const password = (raw.password ?? '').toString();
@@ -25,6 +25,11 @@ exports.register = async (req, res) => {
     if (!userType) missing.push('userType');
     if (missing.length) {
       return res.status(400).json({ message: `${missing.join(', ')} ${missing.length > 1 ? 'are' : 'is'} required` });
+    }
+
+    // Enforce no spaces in username
+    if (/\s/.test(username)) {
+      return res.status(400).json({ message: 'Username cannot contain spaces. Please use letters, numbers, underscores, or hyphens.' });
     }
 
     // check if email exists
@@ -102,10 +107,7 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // check userType
-    if (userType && user.userType !== userType) {
-      return res.status(403).json({ message: `User is not a ${userType}` });
-    }
+    // Do not block login on userType mismatch; the actual userType will be used downstream
 
     // sign token
     if (!process.env.JWT_SECRET) {
@@ -124,13 +126,29 @@ exports.login = async (req, res) => {
       return res.status(500).json({ message: "Authentication error" });
     }
 
-    const portal = user.userType === 'investor' ? 'I' : 'S';
-    const redirectPath = `/${portal}/handbook/home`;
+  const portal = user.userType === 'investor' ? 'I' : 'S';
+  const redirectPath = `/${portal}/home`;
+
+    // Derive a friendly display name from profile tables
+    let profileName = '';
+    try {
+      if (user.userType === 'startup') {
+        const startup = await Startup.findByUserId(user.id);
+        profileName = startup?.name || '';
+      } else if (user.userType === 'investor') {
+        const investor = await Investor.findByUserId(user.id);
+        profileName = investor?.name || '';
+      }
+    } catch (nameErr) {
+      // Non-fatal; fall back to username
+      console.warn('Profile name lookup failed:', nameErr.message);
+    }
+    const safeName = profileName || user.username || user.email;
 
     res.json({
       message: "Login successful",
       token,
-      user: { id: user.id, username: user.username, email: user.email, userType: user.userType },
+      user: { id: user.id, username: user.username, name: safeName, email: user.email, userType: user.userType },
       redirectPath
     });
   } catch (err) {
@@ -151,9 +169,24 @@ exports.session = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+    // Attach friendly name from profile tables
+    let profileName = '';
+    try {
+      if (user.userType === 'startup') {
+        const startup = await Startup.findByUserId(user.id);
+        profileName = startup?.name || '';
+      } else if (user.userType === 'investor') {
+        const investor = await Investor.findByUserId(user.id);
+        profileName = investor?.name || '';
+      }
+    } catch (nameErr) {
+      console.warn('Session profile name lookup failed:', nameErr.message);
+    }
+    const safeName = profileName || user.username || user.email;
+
     res.json({
       authenticated: true,
-      user: { id: user.id, username: user.username, email: user.email, userType: user.userType }
+      user: { id: user.id, username: user.username, name: safeName, email: user.email, userType: user.userType }
     });
   } catch (err) {
     console.error('Session Error:', err);

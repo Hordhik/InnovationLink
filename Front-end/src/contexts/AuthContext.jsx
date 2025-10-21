@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 const AuthContext = createContext();
 
@@ -12,67 +12,16 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        // Check for existing session/token
-        const checkAuthStatus = () => {
-            try {
-                const token = localStorage.getItem('auth_token');
-                const userInfo = localStorage.getItem('user_info');
-                
-                if (token && userInfo) {
-                    // Parse stored user info
-                    const parsedUser = JSON.parse(userInfo);
-                    setUser(parsedUser);
-                } else {
-                    setUser(null);
-                }
-            } catch (error) {
-                console.error('Error checking auth status:', error);
-                // Clear invalid data
-                localStorage.removeItem('auth_token');
-                localStorage.removeItem('user_info');
-                setUser(null);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        checkAuthStatus();
-    }, []);
+    const [loading] = useState(false);
 
     /**
      * Login function - stores token and user info
      * @param {Object} credentials - Login credentials
      * @returns {Promise<Object>} Login response
      */
-    const login = async (credentials) => {
-        try {
-            setLoading(true);
-            
-            // Create user data from credentials
-            const userData = {
-                id: Date.now().toString(), // Generate a simple ID
-                email: credentials.email,
-                name: credentials.email.split('@')[0], // Use email prefix as name
-                role: 'user'
-            };
-            
-            // Store auth data
-            localStorage.setItem('auth_token', 'auth-token-' + Date.now());
-            localStorage.setItem('user_info', JSON.stringify(userData));
-
-            // Update state
-            setUser(userData);
-
-            return { success: true, user: userData };
-        } catch (error) {
-            console.error('Login error:', error);
-            throw error;
-        } finally {
-            setLoading(false);
-        }
+    const login = async (_credentials) => {
+        // Frontend no longer simulates auth; rely on backend
+        return { success: true };
     };
 
 
@@ -81,8 +30,7 @@ export const AuthProvider = ({ children }) => {
      * Logout function - clears all auth data
      */
     const logout = () => {
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('user_info');
+        // Frontend-only context doesn’t hold auth anymore
         setUser(null);
     };
 
@@ -91,16 +39,14 @@ export const AuthProvider = ({ children }) => {
      * @returns {boolean} Authentication status
      */
     const isAuthenticated = () => {
-        return !!user && !!localStorage.getItem('auth_token');
+        return !!user; // downstream code prefers JWT helpers in auth.js
     };
 
     /**
      * Get authentication token
      * @returns {string|null} Auth token
      */
-    const getToken = () => {
-        return localStorage.getItem('auth_token');
-    };
+    const getToken = () => null;
 
     const value = {
         user,

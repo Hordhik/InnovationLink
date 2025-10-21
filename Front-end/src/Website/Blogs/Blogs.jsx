@@ -17,19 +17,16 @@ const Blogs = () => {
     const query = new URLSearchParams(location.search);
     const loginRequired = query.get('loginRequired') === 'true';
     const pathParts = location.pathname.split('/').filter(Boolean);
-    const firstSegment = pathParts[0]; // "S", "I", or "blogs"
-    const isPortalView = firstSegment === 'S' || firstSegment === 'I';
-    const currentProject = isPortalView ? firstSegment : '';
+  const firstSegment = pathParts[0]; // "S", "I", or "blogs"
+  const isPortalView = firstSegment === 'S' || firstSegment === 'I';
   // Function to handle clicking a state option
   const handleOptionClick = (option) => {
     // If the clicked option is already selected, unselect it. Otherwise, select it.
     setSelectedOption(prevSelectedOption => prevSelectedOption === option ? null : option);
   };
 
-  // Read local blogs saved via profile quick-posts. We read on render so newly-created
-  // posts (saved to localStorage) appear when this component mounts.
-  const localBlogs = JSON.parse(localStorage.getItem('localBlogs') || '[]');
-  const combinedBlogs = [...localBlogs, ...blogData];
+  // For now, don't persist blogs locally; rely on static blogData or backend later
+  const combinedBlogs = [...blogData];
 
   const user = getStoredUser();
 
@@ -39,10 +36,10 @@ const Blogs = () => {
         <div className="portal-blog-header">
           {/* These buttons are styled to look like your image.
               Using <Link> is better for navigation in React Router. */}
-          <Link to={`/${currentProject}/my-blogs`} className="portal-button">
+          <Link to={`/${firstSegment}/blogs`} className="portal-button">
             Your Blogs
           </Link>
-          <Link to={user ? `/${currentProject}/blogs/new` : '/auth/login'} className="portal-button new-blog">
+          <Link to={user ? `/${firstSegment}/blogs` : '/auth/login'} className="portal-button new-blog">
             + Add Blog
           </Link>
         </div>
@@ -100,7 +97,7 @@ const Blogs = () => {
         </div>
       </div>
     <div style={{display: 'flex', justifyContent:'flex-end', marginBottom: 12}}>
-      <Link to={getStoredUser() ? '/blogs/new' : '/auth/login'} className="portal-button new-blog">+ Add Blog</Link>
+      <Link to={getStoredUser() ? '/blogs' : '/auth/login?redirect=/blogs&loginRequired=true'} className="portal-button new-blog">+ Add Blog</Link>
     </div>
     <div className="blog-list">
       {combinedBlogs.map((blog) => (

@@ -16,63 +16,27 @@ export default function StartupProfile() {
   const [memberEditing, setMemberEditing] = useState(false);
   const [memberDraft, setMemberDraft] = useState(null);
 
-  // Helper to derive per-user storage keys
-  const getStorageKeys = () => {
-    const user = getStoredUser();
-    const id = user?.username || user?.name || 'anonymous';
-    return {
-      id,
-      profileKey: `startupProfile:${id}`,
-      createdKey: `startupProfileCreated:${id}`,
-      user
-    };
-  };
-
+  // Initialize with basic info from the authenticated user; no frontend persistence
   useEffect(() => {
-    try {
-      const { profileKey, createdKey, user } = getStorageKeys();
-      const saved = localStorage.getItem(profileKey);
-      if (saved) {
-        const data = JSON.parse(saved) || {};
-        setProfileData(data);
-        // Consider a profile created only if it has some minimal fields or created flag exists
-        const createdFlag = localStorage.getItem(createdKey);
-        const hasData = Boolean((data.name && data.name.trim()) || (data.description && data.description.trim()) || (Array.isArray(data.team) && data.team.length));
-        setIsProfileCreated(Boolean(createdFlag) || hasData);
-      } else {
-        // No saved profile for this user: prefill some fields from user and show the form
-        if (user) {
-          setProfileData(prev => ({ ...prev, name: user.name || user.username || '', email: user.email || '' }));
-        }
-        setIsProfileCreated(false);
-      }
-    } catch (e) {
-      // on error, fall back to form
-      setIsProfileCreated(false);
+    const user = getStoredUser();
+    if (user) {
+      setProfileData(prev => ({ ...prev, name: user.name || user.username || '', email: user.email || '' }));
     }
+    // Keep isProfileCreated true and let backend integration handle real persistence later
+    setIsProfileCreated(true);
   }, []);
 
   const handleProfileCreate = (formValues) => {
+    // No local storage: just update in-memory state till backend is wired
     setProfileData(formValues);
     setIsProfileCreated(true);
     setIsEditing(false);
-    try {
-      const { profileKey, createdKey } = getStorageKeys();
-      localStorage.setItem(profileKey, JSON.stringify(formValues));
-      localStorage.setItem(createdKey, '1');
-    } catch {}
   };
 
   const handleProfileUpdate = (updated) => {
     const merged = { ...profileData, ...updated };
     setProfileData(merged);
     setIsEditing(false);
-    try {
-      const { profileKey, createdKey } = getStorageKeys();
-      localStorage.setItem(profileKey, JSON.stringify(merged));
-      // Ensure created flag is set once updated
-      localStorage.setItem(createdKey, '1');
-    } catch {}
   };
 
   const openMember = (idx, isFounder = false) => {
@@ -208,9 +172,7 @@ export default function StartupProfile() {
     onStartEdit: () => setIsEditing(true), tags, team, contact
   };
 
-  if (!isProfileCreated) {
-    return <StartupProfileForm onProfileCreate={handleProfileCreate} initialData={profileData} />;
-  }
+  // Always render the profile view (no first-time local persistence)
 
   return (
     <div className="startup-profile">

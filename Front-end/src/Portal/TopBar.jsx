@@ -3,40 +3,41 @@ import './TopBar.css'; // Assuming you have a CSS file for styling
 import logo from '../assets/NavBar/logo.png'; // Adjust the path to your logo image
 import profile from '../assets/Portal/profile.png'; // Adjust the path to your user icon
 import { useNavigate } from 'react-router-dom';
-import { getStoredUser, clearAuth } from '../auth.js';
+import { getStoredUser, clearAuth, getToken } from '../auth.js';
+import { useAuth } from '../contexts/AuthContext';
 import { getSession } from '../services/authApi.js';
 
 function TopBar() {
     const navigate = useNavigate();
+    const { logout: contextLogout } = useAuth();
     const [displayUser, setDisplayUser] = useState(() => getStoredUser());
 
     useEffect(() => {
         let cancelled = false;
-        // Validate the session in background
+        // Validate the session in background, but ignore after logout
         (async () => {
             try {
+                const tokenAtStart = getToken?.();
+                if (!tokenAtStart) { setDisplayUser(null); return; }
                 const data = await getSession();
-                if (!cancelled) {
-                    if (data?.user) {
-                        setDisplayUser(data.user);
-                    } else {
-                        // No valid session, but don't redirect - let user browse public content
-                        setDisplayUser(null);
-                    }
+                const tokenNow = getToken?.();
+                if (!cancelled && tokenNow && tokenNow === tokenAtStart && data?.user) {
+                    setDisplayUser(data.user);
                 }
             } catch (err) {
-                // On unexpected errors, clear auth but don't redirect
                 if (!cancelled) {
                     console.error('Session validation failed:', err);
-                    setDisplayUser(null);
                 }
             }
         })();
         return () => { cancelled = true; };
-    }, [navigate]);
+    }, []);
 
     const handleLogout = () => {
+        // Clear both API auth (il_*) and UI auth (auth_*) stores
         clearAuth();
+        try { contextLogout?.(); } catch {}
+        setDisplayUser(null);
         navigate('/home');
     };
     return (
@@ -49,7 +50,7 @@ function TopBar() {
                 <div className="details">
                     <img src={profile} alt="Profile" />
                     <div className="names">
-                        <p className='name'>{displayUser?.username || displayUser?.email || 'User'}</p>
+                        <p className='name'>{displayUser?.username || displayUser?.name || displayUser?.email || 'User'}</p>
                         <p className='id'>{displayUser?.username ? `@${displayUser.username}` : ''}</p>
                     </div>
                 </div>

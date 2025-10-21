@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getToken } from '../auth.js';
+import { getToken, setAuth } from '../auth.js';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
@@ -41,6 +41,10 @@ export async function getSession() {
                 Authorization: `Bearer ${token}`,
             },
         });
+        // Refresh stored user for consistent display across components
+        if (data?.user) {
+            try { setAuth({ user: data.user }); } catch {}
+        }
         return data; // { authenticated: true, user }
     } catch (error) {
         // If the token is invalid or expired, clear it and return null

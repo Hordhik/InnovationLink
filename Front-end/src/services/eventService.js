@@ -1,13 +1,18 @@
 import axios from 'axios';
+import { getToken } from '../auth.js';
 
-// Base URL for your event API - pointing to bot backend
-const API_BASE_URL = 'http://localhost:8001'; // Bot backend FastAPI server running on port 8001
+// Base URL for your event API - configurable via VITE_BOT_API_URL, else default to localhost
+const API_BASE_URL = (import.meta?.env?.VITE_BOT_API_URL || 'http://localhost:8001').replace(/\/$/, '');
 
 class EventService {
   // Fetch all events from your platform
   static async getAllEvents() {
     try {
-      const response = await axios.get(`${API_BASE_URL}/events`);
+      const token = getToken();
+      const response = await axios.get(`${API_BASE_URL}/events`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        withCredentials: false,
+      });
       
       // Handle the response structure: {"events": [...], "count": 23}
       const data = response.data;
@@ -35,7 +40,11 @@ class EventService {
       if (filters.category) params.append('category', filters.category);
       if (filters.search) params.append('search', filters.search);
       
-      const response = await axios.get(`${API_BASE_URL}/events?${params}`);
+      const token = getToken();
+      const response = await axios.get(`${API_BASE_URL}/events?${params}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        withCredentials: false,
+      });
       
       // Handle the response structure: {"events": [...], "count": 23}
       const data = response.data;

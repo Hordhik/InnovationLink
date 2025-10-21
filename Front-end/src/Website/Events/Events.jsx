@@ -3,6 +3,7 @@ import './Events.css';
 import EventCard from './EventCard';
 import { useLocation } from 'react-router-dom';
 import EventService from '../../services/eventService';
+import { getToken } from '../../auth.js';
 
 // Enhanced filter data - we'll dynamically populate these based on your events
 const states = [
@@ -34,10 +35,12 @@ const Events = () => {
   const [searchTerm, setSearchTerm] = useState('');
   
   const location = useLocation();
-  
-  // Check if we're in portal view
-  const pathParts = location.pathname.split('/');
-  const isPortalView = pathParts.length >= 3 && pathParts[2] === 'events' && pathParts[1] !== 'events';
+  // Determine portal vs public view by first URL segment and child path
+  const parts = location.pathname.split('/').filter(Boolean); // e.g. ['S','events'] or ['events']
+  const first = parts[0];
+  const second = parts[1];
+  const isPortalView = (first === 'S' || first === 'I') && second === 'events';
+  const isLoggedIn = !!getToken();
 
   // Load events on component mount
   useEffect(() => {
@@ -52,7 +55,7 @@ const Events = () => {
       console.log('🔄 Loading events from API...');
       
       // Fetch events from your API
-      const rawEvents = await EventService.getAllEvents();
+  const rawEvents = await EventService.getAllEvents();
       console.log('📥 Raw events received:', rawEvents.length, 'events');
       
       // Transform events to match InnovationLink format
@@ -62,6 +65,7 @@ const Events = () => {
       setAllEvents(transformedEvents);
     } catch (err) {
       console.error('❌ Error loading events:', err);
+      // Keep UX neutral; avoid implying auth failure if backend is offline or CORS blocks
       setError('Failed to load events from API. Showing fallback events.');
       
       // Use fallback events
@@ -159,7 +163,8 @@ const Events = () => {
     error,
     allEventsCount: allEvents.length,
     filteredEventsCount: filteredEvents.length,
-    isPortalView
+    isPortalView,
+    isLoggedIn
   });
 
   return (

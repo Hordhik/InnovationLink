@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import logo from '../../assets/NavBar/logo.png';
 import arrow from '../../assets/NavBar/register.svg';
 import './NavBar.css';
-import { getStoredUser, clearAuth } from '../../auth.js';
+import { getStoredUser, clearAuth, getToken } from '../../auth.js';
 import { getSession } from '../../services/authApi.js';
 
 function NavBar() {
@@ -19,39 +19,33 @@ function NavBar() {
         { name: "About", path: "/about" }
     ];
 
-    const [displayUser, setDisplayUser] = useState(() => getStoredUser());
+    // Derive auth state from JWT for accuracy with backend
+    const [sessionUser, setSessionUser] = useState(null);
+    const isLoggedIn = !!getToken();
 
-    const getPortalPath = (user) => {
-        if (!user) return '/';
-        const role = user.userType === 'investor' ? 'I' : 'S';
-        const username = user.username || user.name || 'handbook';
-        return `/${role}/${username}/home`;
-    };
-
-    useEffect(() => {
-        // Sync with AuthContext user state
-        if (user) {
-            setDisplayUser(user);
-        } else {
-            setDisplayUser(null);
-        }
-    }, [user]);
+    // Keep a light fallback from localStorage for immediate paint
+    const backendUser = useMemo(() => getStoredUser(), [user]);
 
     useEffect(() => {
         let cancelled = false;
         (async () => {
             try {
                 const data = await getSession();
-                if (!cancelled && data?.user) {
-                    setDisplayUser(data.user);
+                if (!cancelled) {
+                    setSessionUser(data?.user || null);
                 }
-            } catch (error) {
-                // Handle any unexpected errors
-                console.error('Session check failed:', error);
+            } catch (e) {
+                if (!cancelled) setSessionUser(null);
             }
         })();
         return () => { cancelled = true; };
-    }, []);
+    }, [isLoggedIn]);
+    const getPortalPath = (u) => {
+        const src = sessionUser || u;
+        if (!src) return '/';
+        const role = src.userType === 'investor' ? 'I' : 'S';
+        return `/${role}/home`;
+    };
 
     const handleLoginClick = () => {
         navigate('/auth/login');
@@ -63,8 +57,7 @@ function NavBar() {
 
     const handleLogout = () => {
         clearAuth();
-        logout(); // Use AuthContext logout
-        setDisplayUser(null);
+        logout(); // AuthContext logout clears UI auth
         navigate('/home');
     }
 
@@ -75,31 +68,27 @@ function NavBar() {
                     <img src={logo} alt="Logo" />
                 </div>
                 <div className="Nav-options">
-                                            {displayUser && (
-                                                    <>
-                                                        <Link key="portal" to={getPortalPath(displayUser)} className={`Nav-option ${location.pathname.startsWith('/S') || location.pathname.startsWith('/I') ? 'active' : ''}`}>
-                                                            Portal
-                                                        </Link>
-                                                        <Link key="public" to={`/home?public=true`} className={`Nav-option ${location.pathname === '/home' ? 'active' : ''}`}>
-                                                            View public site
-                                                        </Link>
-                                                    </>
-                                            )}
-                    {NavOptions.map((option) => (
-                        <Link
-                            key={option.name}
-                            to={option.path}
-                            className={`Nav-option ${location.pathname === option.path ? 'active' : ''}`}
-                        >
-                            {option.name}
+                    {isLoggedIn ? (
+                        <Link key="portal" to={getPortalPath(backendUser)} className={`Nav-option ${location.pathname.startsWith('/S') || location.pathname.startsWith('/I') ? 'active' : ''}`}>
+                            Portal
                         </Link>
-                    ))}
+                    ) : (
+                        NavOptions.map((option) => (
+                            <Link
+                                key={option.name}
+                                to={option.path}
+                                className={`Nav-option ${location.pathname === option.path ? 'active' : ''}`}
+                            >
+                                {option.name}
+                            </Link>
+                        ))
+                    )}
                 </div>
                 <div className="Signin-options">
-                    {displayUser ? (
+                    {isLoggedIn ? (
                         <>
                             <div className="Signin-option login">
-                                {displayUser.username || displayUser.email}
+                                {(sessionUser?.name || sessionUser?.username) ?? (backendUser?.name || backendUser?.username) ?? backendUser?.email ?? user?.email}
                             </div>
                             <div className="Signup-option register" onClick={handleLogout}>
                                 Log out

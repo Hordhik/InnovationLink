@@ -23,25 +23,24 @@ const SideBar = () => {
   const location = useLocation(); // Already here, which is perfect
   const [hoveredItem, setHoveredItem] = useState(null);
   
-  // Extract userType and project from URL (e.g., /S/handbook/home -> S, handbook)
-  const [userType, currentProject] = location.pathname.split('/').slice(1, 3);
+  // Extract userType from URL (e.g., /S/home -> S)
+  const [userType] = location.pathname.split('/').slice(1, 2);
   const safeUserType = userType || 'S';
-  const safeProject = currentProject || getDefaultProject();
 
   const mainItems = [
-    { name: 'Home', img1: home,img2: home2, path: `/${safeUserType}/${safeProject}/home` },
-    { name: 'Schedules', img1: schedules,img2: schedules2, path: `/${safeUserType}/${safeProject}/schedules` },
-    { name: 'Inbox', img1: inbox,img2: inbox2, path: `/${safeUserType}/${safeProject}/inbox` },
-    { name: 'Blogs', img1: blogs,img2: blogs2, path: `/${safeUserType}/${safeProject}/blogs` },
-    { name: 'Events', img1: events,img2: events2, path: `/${safeUserType}/${safeProject}/events` },
-    { name: 'Profile', img1: profile,img2: profile2, path: `/${safeUserType}/${safeProject}/profile` },
+  { name: 'Home', img1: home,img2: home2, path: `/${safeUserType}/home` },
+  { name: 'Schedules', img1: schedules,img2: schedules2, path: `/${safeUserType}/schedules` },
+  { name: 'Inbox', img1: inbox,img2: inbox2, path: `/${safeUserType}/inbox` },
+  { name: 'Blogs', img1: blogs,img2: blogs2, path: `/${safeUserType}/blogs` },
+  { name: 'Events', img1: events,img2: events2, path: `/${safeUserType}/events` },
+  { name: 'Profile', img1: profile,img2: profile2, path: `/${safeUserType}/profile` },
   ];
 
   const essentialItems = [
     // Your paths are already dynamic, which is great
-    { name: 'Notifications', img: notifications, path: `/${safeUserType}/${safeProject}/notifications` },
-    { name: 'Support Tickets', img: support, path: `/${safeUserType}/${safeProject}/support-tickets` },
-    { name: 'Settings', img: settings, path: `/${safeUserType}/${safeProject}/settings` },
+  { name: 'Notifications', img: notifications, path: `/${safeUserType}/notifications` },
+  { name: 'Support Tickets', img: support, path: `/${safeUserType}/support-tickets` },
+  { name: 'Settings', img: settings, path: `/${safeUserType}/settings` },
   ];
 
   const handleItemClick = (path) => {

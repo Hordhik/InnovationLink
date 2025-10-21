@@ -32,6 +32,11 @@ const SignUp = () => {
     setError("");
 
     try {
+      // Frontend validation: disallow spaces in username (name field used as username)
+      if (/\s/.test(formData.name)) {
+        setError('Username cannot contain spaces. Please remove spaces or use _ or -');
+        return;
+      }
       const payload = {
         ...formData,
         name: formData.name.trim(),
@@ -49,11 +54,9 @@ const SignUp = () => {
       alert(data.message || "Signup successful!");
       // Redirect into the portal for startups so they can complete profile on first login
       if (formData.userType === 'startup') {
-        const username = (data?.user?.username || data?.user?.name || formData.name).toString().replace(/\s+/g, '').slice(0,40);
-        navigate(`/S/${username}/profile`);
+        navigate(`/S/profile`);
       } else {
-        const username = (data?.user?.username || data?.user?.name || formData.name).toString().replace(/\s+/g, '').slice(0,40);
-        navigate(`/I/${username}/profile`);
+        navigate(`/I/profile`);
       }
     } catch (err) {
       const apiMsg = err?.response?.data?.message;

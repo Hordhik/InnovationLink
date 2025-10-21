@@ -19,12 +19,12 @@ function App() {
   // Small components to map legacy URL shapes to the canonical portal routes
   const LegacyStartupRedirect = () => {
     const { username } = useParams();
-    return <Navigate to={`/S/${username}/home`} replace />;
+    return <Navigate to={`/S/home`} replace />;
   };
 
   const LegacyInvestorRedirect = () => {
     const { username } = useParams();
-    return <Navigate to={`/I/${username}/home`} replace />;
+    return <Navigate to={`/I/home`} replace />;
   };
 
   // If a logged-in user tries to visit public site routes, redirect them into their portal.
@@ -34,8 +34,7 @@ function App() {
     // If authenticated (by user object or token), redirect to portal home.
     if (!user && !token) return children;
     const role = getStoredRole() || (user?.userType === 'investor' ? 'I' : 'S') || 'S';
-    const username = user?.username || user?.name || 'handbook';
-    const dest = `/${role}/${username}/home`;
+    const dest = `/${role}/home`;
     return <Navigate to={dest} replace />;
   };
 
@@ -63,10 +62,10 @@ function App() {
           <Route path="/auth/signup" element={<SignUp />} />
           
           {/* Legacy auth routes - redirect to new structure */}
-          
-          {/* Dynamic routes for both startups and investors using username as project */}
-         <Route path="/S/:username/*" element={<Portal />} />
-        <Route path="/I/:username/*" element={<Portal />} />
+
+          {/* Dynamic routes for both startups and investors (no username in URL) */}
+          <Route path="/S/*" element={<Portal />} />
+          <Route path="/I/*" element={<Portal />} />
 
         </Routes>
       </>

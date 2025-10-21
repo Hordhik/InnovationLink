@@ -13,11 +13,9 @@ import Blog from '../Website/Blogs/Blog';
 import Events from '../Website/Events/Events';
 import Inbox from './Inbox/Inbox';
 import Schedule from './Schedule/Schedule';
-import { getDefaultProject } from './projectsConfig';
 import Notifications from './Notifications/Notifications'; // Corrected import path
 
 function Portal() {
-  const defaultProject = getDefaultProject();
   const userType = window.location.pathname.split('/')[1] || 'S';
   
   const location = useLocation();
@@ -37,27 +35,25 @@ function Portal() {
         <div className='portal-main-content'>
           {/* MAIN ROUTES: Renders the background page */}
           <Routes location={backgroundLocation || location}>
-            <Route path="/" element={<Navigate to={`/${defaultProject}/home`} replace />} />
-            <Route path="/home" element={<Home />} />
-            <Route path="/schedules" element={<Schedule/>} />
-            <Route path="/inbox" element={<Inbox />} />
-            <Route path="/blogs" element={<Blogs />} />
-            <Route path="/blog/:id" element={<Blog />} />
-            <Route path="handbook/blogs" element={<Blogs />} />
-            <Route path="handbook/blog/:id" element={<Blog />} />
-            <Route path="/events" element={<Events />} />
-            <Route path="/profile" element={userType === 'I' ? <InvestorProfile /> : <StartupProfile />} />
+            <Route index element={<Navigate to={`home`} replace />} />
+            <Route path="home" element={<Home />} />
+            <Route path="schedules" element={<Schedule/>} />
+            <Route path="inbox" element={<Inbox />} />
+            <Route path="blogs" element={<Blogs />} />
+            <Route path="blog/:id" element={<Blog />} />
+            <Route path="events" element={<Events />} />
+            <Route path="profile" element={userType === 'I' ? <InvestorProfile /> : <StartupProfile />} />
             {/* This route is no longer needed here.
-              <Route path="/notifications" element={<Notifications onClose={() => setNotificationsOpen(false)} />} /> 
+              <Route path="notifications" element={<Notifications onClose={() => setNotificationsOpen(false)} />} /> 
             */}
-            <Route path="/support-tickets" element={<div>Support Tickets Content</div>} />
-            <Route path="/settings" element={<div>Settings Content</div>} />
+            <Route path="support-tickets" element={<div>Support Tickets Content</div>} />
+            <Route path="settings" element={<div>Settings Content</div>} />
           </Routes>
 
           {/* MODAL ROUTE: Renders *only* if backgroundLocation is set */}
           {backgroundLocation && (
             <Routes>
-              <Route path="/notifications" element={<Notifications />} />
+              <Route path="notifications" element={<Notifications />} />
             </Routes>
           )}
 

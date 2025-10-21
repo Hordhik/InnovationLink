@@ -1,21 +1,36 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './StartupCard.css';
 import eyes from "../../assets/Portal/StartupCard/eyes.svg"
 import statues from "../../assets/Portal/StartupCard/status-up.svg"
+import { getSession } from '../../services/authApi.js';
+import { getToken } from '../../auth.js';
 
 const StartupCard = () => {
   const tags = ['HealthTech', 'RuralTech', 'SaaS', 'Clean Energy'];
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        if (!getToken()) return;
+        const data = await getSession();
+        if (!cancelled && data?.user) setUser(data.user);
+      } catch {}
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   return (
     <div className="startup-card">
       <div className="card-header">
         <div className="startup-info">
           <div className="avatar">
-            <img src="https://ui-avatars.com/api/?name=Innovation+Link" alt="Innovation Link" />
+            <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || user?.username || 'Innovation Link')}`} alt={user?.name || user?.username || 'Innovation Link'} />
           </div>
           <div className="text-info">
-            <p className="startup-name">Innovation Link</p>
-            <p className="founder-name">Founder: <span>Chandra Sekhar</span></p>
+            <p className="startup-name">{user?.name || user?.username || 'Innovation Link'}</p>
+            <p className="founder-name">Founder: <span>{user?.username || 'Founder'}</span></p>
             {/* <p className="location-team">Location: <span>Vijaywda</span></p> */}
             <p className="team-size">Team size: <span>4-10</span></p>
           </div>

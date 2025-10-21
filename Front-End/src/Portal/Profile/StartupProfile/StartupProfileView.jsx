@@ -84,8 +84,7 @@ const StartupProfileView = ({ profileData, isEditing, editStateProps }) => {
                 const user = getStoredUser();
                 if (!user) return navigate('/auth/login');
                 const role = user.userType === 'investor' ? 'I' : 'S';
-                const username = user.username || user.name || 'handbook';
-                navigate(`/${role}/${username}/blogs`);
+                navigate(`/${role}/blogs`);
               }}
             >View all</a>
           </div>

@@ -90,8 +90,9 @@ const LogIn = () => {
         password: formData.password
       });
 
-      const next = data.redirectPath || (data.user?.userType === 'investor' ? '/I/handbook/home' : '/S/handbook/home');
-      navigate(next);
+  const role = (data.user?.userType === 'investor' || userType === 'investor') ? 'I' : 'S';
+  const next = data.redirectPath || `/${role}/home`;
+  navigate(next);
       
     } catch (err) {
       // Fallback to AuthContext login if API fails
@@ -100,7 +101,8 @@ const LogIn = () => {
           email: formData.username,
           password: formData.password
         });
-        navigate('/events');
+  const role = (userType === 'investor') ? 'I' : 'S';
+  navigate(`/${role}/home`);
       } catch (authErr) {
         const apiMsg = err?.response?.data?.message;
         setError(apiMsg || err.message || "Login failed. Please check your credentials.");

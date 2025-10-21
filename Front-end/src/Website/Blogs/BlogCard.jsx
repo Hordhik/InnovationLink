@@ -12,11 +12,10 @@ const BlogCard = ({ blog, hideMeta = false, hideImage = false, clampLines, class
   const handleBlogClick = (blogId) => {
     const pathParts = location.pathname.split('/').filter(Boolean);
     const firstSegment = pathParts[0]; // "S" or "I" or "blogs"
-    const username = pathParts[1]; // only exists in portal routes
     const isPortalView = firstSegment === 'S' || firstSegment === 'I';
 
-    if (isPortalView && username) {
-      navigate(`/${firstSegment}/${username}/handbook/blog/${blogId}`);
+    if (isPortalView) {
+      navigate(`/${firstSegment}/blog/${blogId}`);
     } else {
       navigate(`/blog/${blogId}`);
     }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { getToken } from '../../auth.js';
 
 // Add CSS animations
 const styleSheet = document.createElement('style');
@@ -45,8 +45,9 @@ if (!document.head.querySelector('style[data-event-card]')) {
  * @returns {JSX.Element} Rendered event cards or empty state
  */
 const EventCard = ({ events = [] }) => {
-    const { user, loading } = useAuth();
-    const isLoggedIn = !!user;
+    // Determine logged-in state from JWT token to avoid stale context issues
+    const isLoggedIn = !!getToken();
+    const loading = false;
     const [showLoginModal, setShowLoginModal] = React.useState(false);
 
     /**
