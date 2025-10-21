@@ -24,7 +24,55 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Python
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+**/venv/
+.venv/
+**/.venv/
+env/
+**/env/
+.env
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+*.db
+*.sqlite3
+
 # OS / Editor
 .DS_Store
+**/.DS_Store
 .idea/
 *.swp
+
+# Test and Debug files
+debug*.html
+test*.html
+*_test.html
+*_debug.html
+
+# Backup and Old files
+*_old.*
+*_backup.*
+*_original.*
+*_broken.*
+*_corrupted.*
+*_enhanced.*
+*_fixed.*
+*_clean.*
+*.bak
+*.backup
+
+# Bot backend unused files
+bot.log
+server.log

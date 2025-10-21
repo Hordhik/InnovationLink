@@ -1,0 +1,78 @@
+/* TeamMemberModal styles */
+.member-modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.28); /* slightly lighter backdrop */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:1200;
+  padding:28px;
+}
+
+.modal-card{
+  width:min(560px, 96%);
+  max-height:90vh;
+  overflow:auto;
+  background:var(--card-bg);
+  border-radius:14px;
+  padding:20px 22px;
+  box-shadow:0 20px 50px rgba(2,6,23,0.28);
+  border: 1px solid rgba(15,23,36,0.04);
+}
+
+/* cross icon button for closing */
+.modal-close{
+  background:transparent;
+  border:none;
+  cursor:pointer;
+  font-size:20px;
+  line-height:1;
+  color:#64748b; /* muted */
+}
+.modal-close:hover{ color: var(--primary); }
+
+.member-panel-card h4{ margin:0; font-size:1.1rem }
+.member-panel-card .member-detail-row{ color:#334155; font-size:0.95rem; margin-bottom:6px }
+.member-panel-card .member-detail-row ul{ margin:6px 0 0 18px }
+.member-panel-card .form-label{ display:block; font-size:0.85rem; color:var(--muted); margin-bottom:6px }
+.member-panel-card .form-input{ width:100%; padding:8px 10px; border:1px solid #e6eef8; border-radius:8px }
+
+/* member profile preview layout */
+.member-profile-grid{ display:flex; gap:18px }
+.member-profile-left{ width:200px; display:flex; flex-direction:column; align-items:center; gap:8px }
+.member-photo-wrap{ width:120px; height:120px; border-radius:999px; background:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 18px rgba(2,6,23,0.12); overflow:hidden }
+.member-photo{ width:100%; height:100%; object-fit:cover }
+.member-photo-placeholder{ width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--accent); background:#eef2ff }
+.member-name{ font-weight:700; font-size:1.05rem }
+.member-role{ color:var(--primary); font-weight:600 }
+.member-profile-right{ flex:1 }
+.experience-pill{ background:#f8fafc; border-radius:8px; padding:10px 12px; color:#0b1220 }
+
+/* stacked preview card matching the design */
+.member-preview-card{ width:100%; max-width:520px; margin:0 auto; padding:22px; border-radius:12px; background:var(--card-bg); box-shadow:0 12px 40px rgba(2,6,23,0.08); display:flex; flex-direction:column; align-items:center }
+.member-photo-ring{ padding:6px; border-radius:999px; background:linear-gradient(180deg, #fff, #f1f5f9); border:6px solid #fff }
+.section{ width:100%; margin-top:14px }
+.section-title{ color:#94a3b8; font-weight:700; letter-spacing:1px; margin-bottom:8px }
+.equity-row{ display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f1f5f9; padding-top:10px }
+.equity-value{ color:var(--primary); font-weight:800 }
+.experiences-list{ display:flex; flex-direction:column; gap:10px }
+.experience-pill{ background:#f3f6fb; padding:10px 12px; border-radius:8px }
+.member-photo{ width:130px; height:130px; }
+
+/* team avatars larger and wrap */
+.team-avatars{ display:flex; flex-wrap:wrap; gap:14px; align-items:center }
+.avatar-circle{ width:88px; height:88px; border-radius:50%; background:#eef2ff; color:var(--accent); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.25rem }
+.team-see-more{ margin-left:8px; color:var(--primary); cursor:pointer; font-weight:700 }
+.study{ color:#334155 }
+.about{ color:#334155; margin-top:6px; line-height:1.5 }
+
+/* Buttons inside modal */
+.member-panel-card .btn-ghost{ background:transparent; color:var(--primary); }
+.member-panel-card .btn-primary{ padding:8px 12px }
+
+/* small screens modal adjustments */
+@media (max-width:520px){
+  .modal-card{ padding:14px }
+  .member-panel-card .form-input{ padding:8px }
+}
