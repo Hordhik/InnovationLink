@@ -16,22 +16,39 @@ export default function StartupProfile() {
   const [memberEditing, setMemberEditing] = useState(false);
   const [memberDraft, setMemberDraft] = useState(null);
 
+  // Helper to derive per-user storage keys
+  const getStorageKeys = () => {
+    const user = getStoredUser();
+    const id = user?.username || user?.name || 'anonymous';
+    return {
+      id,
+      profileKey: `startupProfile:${id}`,
+      createdKey: `startupProfileCreated:${id}`,
+      user
+    };
+  };
+
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('startupProfile');
+      const { profileKey, createdKey, user } = getStorageKeys();
+      const saved = localStorage.getItem(profileKey);
       if (saved) {
-        setProfileData(JSON.parse(saved) || {});
-        setIsProfileCreated(true);
+        const data = JSON.parse(saved) || {};
+        setProfileData(data);
+        // Consider a profile created only if it has some minimal fields or created flag exists
+        const createdFlag = localStorage.getItem(createdKey);
+        const hasData = Boolean((data.name && data.name.trim()) || (data.description && data.description.trim()) || (Array.isArray(data.team) && data.team.length));
+        setIsProfileCreated(Boolean(createdFlag) || hasData);
       } else {
-        const user = getStoredUser();
+        // No saved profile for this user: prefill some fields from user and show the form
         if (user) {
           setProfileData(prev => ({ ...prev, name: user.name || user.username || '', email: user.email || '' }));
-          const createdFlag = localStorage.getItem('startupProfileCreated');
-          if (!createdFlag) setIsProfileCreated(false);
         }
+        setIsProfileCreated(false);
       }
     } catch (e) {
-      // ignore
+      // on error, fall back to form
+      setIsProfileCreated(false);
     }
   }, []);
 
@@ -39,15 +56,23 @@ export default function StartupProfile() {
     setProfileData(formValues);
     setIsProfileCreated(true);
     setIsEditing(false);
-    try { localStorage.setItem('startupProfile', JSON.stringify(formValues)); } catch {}
-    try { localStorage.setItem('startupProfileCreated', '1'); } catch {}
+    try {
+      const { profileKey, createdKey } = getStorageKeys();
+      localStorage.setItem(profileKey, JSON.stringify(formValues));
+      localStorage.setItem(createdKey, '1');
+    } catch {}
   };
 
   const handleProfileUpdate = (updated) => {
     const merged = { ...profileData, ...updated };
     setProfileData(merged);
     setIsEditing(false);
-    try { localStorage.setItem('startupProfile', JSON.stringify(merged)); } catch {}
+    try {
+      const { profileKey, createdKey } = getStorageKeys();
+      localStorage.setItem(profileKey, JSON.stringify(merged));
+      // Ensure created flag is set once updated
+      localStorage.setItem(createdKey, '1');
+    } catch {}
   };
 
   const openMember = (idx, isFounder = false) => {
