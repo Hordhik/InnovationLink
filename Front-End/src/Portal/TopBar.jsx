@@ -32,7 +32,7 @@ function TopBar() {
 
     const handleLogout = () => {
         clearAuth();
-        navigate('/auth/login');
+        navigate('/home');
     };
     return (
         <div className='top-bar'>

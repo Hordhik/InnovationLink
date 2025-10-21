@@ -4,6 +4,7 @@ import BlogCard from './BlogCard';
 import BlogCardShort from './BlogCardShort';
 import { blogData } from './blogData';
 import { useLocation, Link } from 'react-router-dom';
+import { getStoredUser } from '../../auth.js';
 
 const Blogs = () => {
   const options = [
@@ -13,6 +14,8 @@ const Blogs = () => {
   const [selectedOption, setSelectedOption] = useState(null);
   // const { id } = useParams();
     const location = useLocation();
+    const query = new URLSearchParams(location.search);
+    const loginRequired = query.get('loginRequired') === 'true';
     const pathParts = location.pathname.split('/').filter(Boolean);
     const firstSegment = pathParts[0]; // "S", "I", or "blogs"
     const isPortalView = firstSegment === 'S' || firstSegment === 'I';
@@ -23,6 +26,13 @@ const Blogs = () => {
     setSelectedOption(prevSelectedOption => prevSelectedOption === option ? null : option);
   };
 
+  // Read local blogs saved via profile quick-posts. We read on render so newly-created
+  // posts (saved to localStorage) appear when this component mounts.
+  const localBlogs = JSON.parse(localStorage.getItem('localBlogs') || '[]');
+  const combinedBlogs = [...localBlogs, ...blogData];
+
+  const user = getStoredUser();
+
   if (isPortalView) {
     return (
       <div className="portal-blogs-page">
@@ -32,7 +42,7 @@ const Blogs = () => {
           <Link to={`/${currentProject}/my-blogs`} className="portal-button">
             Your Blogs
           </Link>
-          <Link to={`/${currentProject}/blogs/new`} className="portal-button new-blog">
+          <Link to={user ? `/${currentProject}/blogs/new` : '/auth/login'} className="portal-button new-blog">
             + Add Blog
           </Link>
         </div>
@@ -56,11 +66,8 @@ const Blogs = () => {
             </div>
           </div>
           <div className="blog-list portal-blog-list">
-            {blogData.map((blog) => (
+            {combinedBlogs.map((blog) => (
               <BlogCard key={blog.id} blog={blog} />
-            ))}
-            {blogData.map((blog) => (
-              <BlogCard key={`duplicate-${blog.id}`} blog={blog} />
             ))}
           </div>
         </div>
@@ -70,6 +77,11 @@ const Blogs = () => {
 
   return (
     <div className="Blogs">
+      {loginRequired && !user && (
+        <div className="login-banner">
+          <strong>Want to post?</strong> Please log in to create and manage your blogs. You can still explore public posts.
+        </div>
+      )}
        <div className="filters">
         {/* State Filter */}
         <div className="filter">
@@ -87,22 +99,19 @@ const Blogs = () => {
           </div>
         </div>
       </div>
-        <div className="blog-list">
-            {blogData.map((blog) => (
-                <BlogCard key={blog.id} blog={blog} />
-            ))}
-            {blogData.map((blog) => (
-                <BlogCard key={`website-duplicate-${blog.id}`} blog={blog} />
-            ))}
+    <div style={{display: 'flex', justifyContent:'flex-end', marginBottom: 12}}>
+      <Link to={getStoredUser() ? '/blogs/new' : '/auth/login'} className="portal-button new-blog">+ Add Blog</Link>
+    </div>
+    <div className="blog-list">
+      {combinedBlogs.map((blog) => (
+        <BlogCard key={blog.id} blog={blog} />
+      ))}
         </div>
         <div className="most-viewd">
             <p className='title'>Most Popular</p>
-            {blogData.slice(0, 3).map((blog) => (
-                <BlogCardShort key={blog.id} blog={blog} />
-            ))}
-            {blogData.slice(0, 3).map((blog) => (
-                <BlogCardShort key={blog.id} blog={blog} />
-            ))}
+      {combinedBlogs.slice(0, 3).map((blog) => (
+        <BlogCardShort key={`popular-${blog.id}`} blog={blog} />
+      ))}
         </div>
     </div>
   )
