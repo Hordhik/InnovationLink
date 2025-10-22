@@ -275,9 +275,11 @@
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: filter .2s ease, box-shadow .2s ease, background .2s ease;
+    display: inline-block;
+    transition: filter .2s ease, box-shadow .2s ease, background .2s ease, transform .08s ease;
 }
 .login-page .login .login-button button:hover{filter:brightness(.95);box-shadow:0 8px 16px rgba(0,0,0,.25)}
+.login-page .login .login-button button:active{transform:translateY(1px) scale(0.985)}
 .login-page .login .login-button button[disabled]{opacity:.8;cursor:not-allowed}
 
 /* Socials */
@@ -301,7 +303,11 @@
     border-radius:8px;
     padding:8px 10px;
 }
-.form-tip svg{width:16px;height:16px;color:#f59e0b;flex:0 0 16px;filter:drop-shadow(0 0 4px rgba(245,158,11,.55));animation:glowPulse 2.2s ease-in-out infinite}
+.form-tip svg{width:14px;height:14px;color:#f59e0b;flex:0 0 14px;filter:drop-shadow(0 0 4px rgba(245,158,11,.55));animation:glowPulse 2.2s ease-in-out infinite}
+
+/* Red border when tip is popped/attention state */
+.form-tip.tip-pop{border-color:#e74c3c;background:rgba(231,76,60,0.06);animation:tipPop .25s ease-out 1}
+@keyframes tipPop{0%{transform:scale(1)}50%{transform:scale(1.03)}100%{transform:scale(1)}}
 
 @keyframes glowPulse{
     0%{filter:drop-shadow(0 0 2px rgba(245,158,11,.35))}

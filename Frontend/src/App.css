@@ -13,3 +13,5 @@ p{
 body{
   padding: 0 50px;
 }
+
+/* Global toast styles removed; TopBar handles portal toasts. */

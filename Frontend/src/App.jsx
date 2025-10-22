@@ -1,5 +1,6 @@
 import './App.css';
 import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
+import { useState } from 'react';
 import { AuthProvider } from './contexts/AuthContext';
 import { getStoredUser, getStoredRole, getToken } from './auth';
 import NavBar from './Website/NavBar/NavBar';
@@ -15,6 +16,7 @@ import Portal from './Portal/Portal';
 
 function App() {
   const location = useLocation();
+  // Global toast removed to prevent duplicates and route refresh side-effects.
 
   // Small components to map legacy URL shapes to the canonical portal routes
   const LegacyStartupRedirect = () => {
@@ -50,9 +52,12 @@ function App() {
     return children;
   };
 
+  // Global toast intentionally removed; TopBar owns toast display in portal.
+
   return (
     <AuthProvider>
       <>
+        {/* Global toast removed to avoid duplicates. */}
         {shouldShowNavbar && <NavBar />}
         <Routes>
           <Route path="/startup/:username/*" element={<LegacyStartupRedirect />} />

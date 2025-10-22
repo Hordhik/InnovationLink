@@ -24,7 +24,6 @@ const LogIn = () => {
   });
 
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const [userType, setUserType] = useState(signupData?.userType || null); // null until user selects 'startup' or 'investor'
   const [successMessage, setSuccessMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -41,13 +40,20 @@ const LogIn = () => {
 
   // Clear form data when userType changes (but preserve pre-filled data from signup)
   const handleUserTypeChange = (type) => {
-    setUserType(type);
-    // Only clear if it's not pre-filled data from signup
-    if (!signupData?.email) {
-      setFormData({ username: '', password: '' });
-    }
     setError('');
     setSuccessMessage(''); // Clear success message when user changes type
+    setFormData(prev => {
+      // If switching from no selection to a selection, keep existing inputs
+      if (!userType) {
+        return prev;
+      }
+      // If switching between startup <-> investor, clear inputs
+      if (userType && userType !== type) {
+        return { username: '', password: '' };
+      }
+      return prev;
+    });
+    setUserType(type);
   };
 
   const handleCreateAccountClick = () => {
@@ -62,8 +68,6 @@ const LogIn = () => {
     }));
     if (error) setError('');
   };
-
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -71,17 +75,13 @@ const LogIn = () => {
       setError('Please select Startup or Investor.');
       return;
     }
-    setLoading(true);
-
     try {
-      // Real API login only; no silent fallback on failure
       const data = await loginApi({
         identifier: formData.username,
         password: formData.password,
         userType,
       });
 
-      // Store token and user on success
       localStorage.setItem("il_token", data.token);
       localStorage.setItem("il_role", data.user?.userType === 'investor' ? 'investor' : 'startup');
       if (data.user) {
@@ -90,13 +90,12 @@ const LogIn = () => {
 
       const role = (data.user?.userType === 'investor') ? 'I' : 'S';
       const next = data.redirectPath || `/${role}/home`;
-      navigate(next);
+      const displayName = data.user?.name || data.user?.username || data.user?.email || 'User';
+      navigate(next, { state: { toast: { message: `Welcome back, ${displayName}!`, type: 'success', duration: 2200 } } });
 
     } catch (err) {
       const apiMsg = err?.response?.data?.message;
       setError(apiMsg || err.message || "Login failed. Please check your credentials.");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -107,11 +106,9 @@ const LogIn = () => {
       </div>
       <div className="login">
         <img className="brand" src={logo} alt="InnovationLink" />
-
         <h1 className="login-title">Welcome back</h1>
-  <p className="login-subtitle">{userType ? `Login as ${userType === 'investor' ? 'Investor' : 'Startup'} to continue` : 'Select Startup or Investor to continue'}</p>
+        <p className="login-subtitle">{userType ? `Login as ${userType === 'investor' ? 'Investor' : 'Startup'} to continue` : 'Select Startup or Investor to continue'}</p>
 
-        {/* User type toggle */}
         <div className="user-type-toggle" role="tablist" aria-label="Select user type">
           <button
             type="button"
@@ -209,9 +206,7 @@ const LogIn = () => {
           {error && <p className="error-message" role="alert">{error}</p>}
 
           <div className="login-button">
-            <button type="submit" disabled={loading} aria-busy={loading} aria-disabled={loading}>
-              {loading ? 'Logging in…' : 'Login'}
-            </button>
+            <button type="submit">Login</button>
           </div>
         </form>
 

@@ -8,6 +8,7 @@
     font-size: 14px;
     background: #EDEFF3;
     border-bottom: 2px solid #C5C8CC;
+    position: relative; /* allow absolute toast positioning */
 }
 
 .top-bar img{
@@ -60,4 +61,45 @@
     border: 1px solid #9FB2CC;
     background: #E0E4EB;
     color: #1E1E1E;
+}
+
+/* Toast under username on the right */
+.topbar-toast{
+    position:fixed; /* ensure it's always visible above content */
+    right:24px;
+    top: var(--toast-top, 84px); /* adjustable; default below the top bar */
+    z-index: 1000;
+    animation: slideInRight .25s ease-out;
+    cursor: pointer; /* indicate it's clickable */
+}
+.topbar-toast.leaving{ animation: slideOutRight .22s ease-in forwards; }
+.toast-card{
+    background:#111;
+    color:#fff;
+    border:1px solid rgba(0,0,0,0.2);
+    border-radius:10px;
+    padding:10px 14px;
+    box-shadow:0 10px 24px rgba(0,0,0,.18);
+    font-size:13px;
+    max-width: 280px;
+}
+.toast-card.toast-success{ border-color: rgba(0,123,255,0.35); }
+.toast-card.toast-info{ border-color: rgba(0,123,255,0.35); }
+/* Inline timer/progress bar for TopBar toast */
+.topbar-toast .toast-progress{
+    height:3px;
+    background: linear-gradient(90deg, #007bff, #3b82f6);
+    border-radius:0 0 8px 8px;
+    margin-top:6px;
+    width:100%;
+    animation: toastProgress var(--toast-duration, 2200ms) linear forwards;
+}
+@keyframes toastProgress{from{width:100%}to{width:0%}}
+@keyframes slideInRight{
+    0%{opacity:0; transform:translateX(16px)}
+    100%{opacity:1; transform:translateX(0)}
+}
+@keyframes slideOutRight{
+    0%{opacity:1; transform:translateX(0)}
+    100%{opacity:0; transform:translateX(16px)}
 }

@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import "./LogIn.css";
 import "./SignUp.css";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/NavBar/logo.png";
+import { toast } from 'react-toastify';
 // import googleIcon from "../assets/Authentication/google.svg";
 import login from "../assets/Authentication/login.png";
 import { signup as signupApi } from "../services/authApi";
@@ -19,6 +20,10 @@ const SignUp = () => {
   });
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const namePattern = /^[A-Za-z0-9_-]+$/;
+  const nameInputRef = useRef(null);
+  const tipRef = useRef(null);
 
   const handleLoginClick = () => {
     navigate("/auth/login");
@@ -29,21 +34,50 @@ const SignUp = () => {
   };
 
   const setUserType = (type) => {
-    setFormData(prev => ({ ...prev, userType: type }));
+    setFormData(prev => {
+      // If switching between startup and investor after a selection, clear the form fields
+      if (prev.userType && prev.userType !== type) {
+        return {
+          userType: type,
+          name: "",
+          email: "",
+          phone: "",
+          password: "",
+        };
+      }
+      // On first selection, keep whatever the user has typed
+      return { ...prev, userType: type };
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSubmitted(true);
     if (!formData.userType) {
-      setError('Please select Startup or Investor.');
+      // Pop the inline tip instead of showing a bottom error
+      if (tipRef.current) {
+        const el = tipRef.current;
+        el.classList.remove('tip-pop');
+        void el.offsetWidth; // reflow to restart animation
+        el.classList.add('tip-pop');
+      }
       return;
     }
 
     try {
-      // Frontend validation: disallow spaces in username (name field used as username)
-      if (/\s/.test(formData.name)) {
-        setError('Username cannot contain spaces. Please remove spaces or use _ or -');
+      // Validate username: allow only letters, numbers, underscores, hyphens
+      const usernameOk = namePattern.test(formData.name.trim());
+      if (!usernameOk) {
+        // Re-trigger error animation on every invalid submit
+        if (nameInputRef.current) {
+          const el = nameInputRef.current;
+          el.classList.remove('error-pulse');
+          // Force reflow to restart CSS animation
+          void el.offsetWidth;
+          el.classList.add('error-pulse');
+        }
+        // Show inline error only (no bottom error message)
         return;
       }
       const payload = {
@@ -55,16 +89,15 @@ const SignUp = () => {
       };
       
       const data = await signupApi(payload);
-      // If backend returned created user and token, store it locally
       if (data?.user) {
-        // some backends might return token; use it if present
         setAuth({ token: data?.token || null, user: data.user, role: data.user?.role || formData.userType });
       }
-      // Directly redirect into the portal for startups/investors (no blocking alert)
+      const displayName = data?.user?.name || data?.user?.username || data?.user?.email || formData.name || 'User';
+      const toast = { message: `Welcome to InnovationLink, ${displayName}!`, type: 'success', duration: 2200 };
       if (formData.userType === 'startup') {
-        navigate(`/S/profile`);
+        navigate(`/S/profile`, { state: { toast } });
       } else {
-        navigate(`/I/profile`);
+        navigate(`/I/profile`, { state: { toast } });
       }
     } catch (err) {
       const apiMsg = err?.response?.data?.message;
@@ -79,10 +112,9 @@ const SignUp = () => {
       </div>
       <div className="signup-container">
         <img src={logo} alt="InnovationLink" />
-  <h1 className="signup-title">Create your account</h1>
-  <p className="signup-subtitle">{formData.userType ? `Join as ${formData.userType === 'investor' ? 'Investor' : 'Startup'}` : 'Please select Startup or Investor to get started'}</p>
+        <h1 className="signup-title">Create your account</h1>
+        <p className="signup-subtitle">{formData.userType ? `Join as ${formData.userType === 'investor' ? 'Investor' : 'Startup'}` : 'Please select Startup or Investor to get started'}</p>
 
-        {/* User type toggle (replaces dropdown) */}
         <div className="user-type-toggle" role="tablist" aria-label="Select user type">
           <button
             type="button"
@@ -106,7 +138,7 @@ const SignUp = () => {
 
         <form className="credentials" onSubmit={handleSubmit}>
           {!formData.userType && (
-            <div className="form-tip" role="note" aria-live="polite">
+            <div className="form-tip" role="note" aria-live="polite" ref={tipRef}>
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <circle cx="12" cy="10" r="6" fill="currentColor" opacity=".18" />
                 <path d="M9 18h6"/>
@@ -120,7 +152,23 @@ const SignUp = () => {
           )}
           <div className="username">
             <label htmlFor="name" className="label">Name</label>
-            <input type="text" id="name" name="name" placeholder="Your name / username" value={formData.name} onChange={handleChange} required />
+            <input
+              type="text"
+              id="name"
+              name="name"
+              placeholder="Your name / username"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              ref={nameInputRef}
+              className={(submitted && formData.name.trim() && !namePattern.test(formData.name.trim())) ? 'input-error' : ''}
+            />
+            {(formData.name.trim() && !namePattern.test(formData.name.trim())) && !submitted && (
+              <small className="note-warning">Username cannot contain spaces. Please use letters, numbers, underscores, or hyphens.</small>
+            )}
+            {(submitted && formData.name.trim() && !namePattern.test(formData.name.trim())) && (
+              <small className="note-error">Username cannot contain spaces. Please use letters, numbers, underscores, or hyphens.</small>
+            )}
           </div>
           <div className="email">
             <label htmlFor="email" className="label">Email</label>

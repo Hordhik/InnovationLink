@@ -85,6 +85,30 @@
     box-shadow: 0 0 0 3px rgba(0,123,255,0.12);
 }
 
+/* Input error styling for invalid username on submit */
+.input-error{
+    border-color:#e74c3c !important;
+    box-shadow:0 0 0 3px rgba(231,76,60,0.12);
+}
+
+/* Add this transient class to re-trigger the animation on each invalid submit */
+.error-pulse{
+    animation: popError .24s ease-out 1;
+}
+
+@keyframes popError{
+    0%{transform:scale(1)}
+    50%{transform:scale(1.015); box-shadow:0 0 0 4px rgba(231,76,60,0.18)}
+    100%{transform:scale(1); box-shadow:0 0 0 3px rgba(231,76,60,0.12)}
+}
+
+/* Inline error message under the Name field */
+.note-error{
+    color:#e74c3c;
+    font-size:12px;
+    margin-top:4px;
+}
+
 .signup-page .signup-container .login-button{
     width: min(355px, 78vw);
     margin: 0 auto; /* center the button container */
@@ -99,12 +123,21 @@
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: filter .2s ease, box-shadow .2s ease, background .2s ease;
+    transition: filter .2s ease, box-shadow .2s ease, background .2s ease, transform .08s ease;
 }
 
 .signup-page .signup-container .login-button button:hover {
     filter: brightness(.95);
     box-shadow: 0 8px 16px rgba(0,0,0,.25);
+}
+
+.signup-page .signup-container .login-button button:active{
+    transform: translateY(1px) scale(0.985);
+}
+
+/* Optional: disabled state if needed elsewhere */
+.signup-page .signup-container .login-button button[disabled]{
+    opacity:.85;cursor:not-allowed;
 }
 
 .signup-page .signup-container .alternatives {
@@ -251,10 +284,34 @@
 .signup-title{margin:6px 0 0;font-size:28px;font-weight:700;color:#111;text-align:center}
 .signup-subtitle{margin:0 0 8px;font-size:14px;color:#555;text-align:center}
 
+/* Inline warning under Name field for spaces */
+.note-warning{
+    color:#b45309;
+    font-size:12px;
+    margin-top:4px;
+}
+
 /* Mobile: stack with image below and semi-transparent */
 @media (max-width: 980px){
     .signup-page{display:flex;flex-direction:column;min-height:100vh}
     .signup-page .signup-container{order:1;margin:32px auto;background:#fff}
     .signup-page .image{order:2;display:block;opacity:0.35;width:100%}
     .signup-page .image img{height:auto;max-height:40vh;object-fit:contain;padding:0;margin:0 auto}
+}
+
+/* Signup-only tweaks for the user-type tip */
+.signup-page .form-tip svg{
+    width:14px;height:14px;flex:0 0 14px;
+    animation: glowPulseSoft 2.2s ease-in-out infinite;
+}
+.form-tip.tip-pop{
+    animation: tipPop .25s ease-out 1;
+    border-color:#e74c3c; /* red border on pop */
+    background: rgba(231,76,60,0.06); /* subtle red tint */
+}
+@keyframes tipPop{ 0%{transform:scale(1)} 50%{transform:scale(1.03)} 100%{transform:scale(1)} }
+@keyframes glowPulseSoft{
+    0%{filter:drop-shadow(0 0 2px rgba(245,158,11,.28))}
+    50%{filter:drop-shadow(0 0 6px rgba(245,158,11,.7))}
+    100%{filter:drop-shadow(0 0 2px rgba(245,158,11,.28))}
 }

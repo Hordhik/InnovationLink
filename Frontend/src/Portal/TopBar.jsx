@@ -1,20 +1,26 @@
-import React, { useEffect, useState } from 'react'
-import './TopBar.css'; // Assuming you have a CSS file for styling
-import logo from '../assets/NavBar/logo.png'; // Adjust the path to your logo image
-import profile from '../assets/Portal/profile.png'; // Adjust the path to your user icon
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import './TopBar.css';
+import logo from '../assets/NavBar/logo.png';
+import profile from '../assets/Portal/profile.png';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getStoredUser, clearAuth, getToken } from '../auth.js';
 import { useAuth } from '../contexts/AuthContext';
 import { getSession } from '../services/authApi.js';
 
 function TopBar() {
     const navigate = useNavigate();
+    const location = useLocation();
     const { logout: contextLogout } = useAuth();
     const [displayUser, setDisplayUser] = useState(() => getStoredUser());
+    const [toast, setToast] = useState("");
+    const [toastType, setToastType] = useState('success');
+    const [toastDuration, setToastDuration] = useState(2200);
+    const [showToast, setShowToast] = useState(false);
+    const [toastLeaving, setToastLeaving] = useState(false);
+    const toastConsumedKey = useRef(null);
 
     useEffect(() => {
         let cancelled = false;
-        // Validate the session in background, but ignore after logout
         (async () => {
             try {
                 const tokenAtStart = getToken?.();
@@ -33,8 +39,62 @@ function TopBar() {
         return () => { cancelled = true; };
     }, []);
 
+    useEffect(() => {
+        let clearStateTimer;
+        const ts = location.state?.toast;
+        if (ts && toastConsumedKey.current !== location.key) {
+            let duration = 2200;
+            if (typeof ts === 'string') {
+                setToast(ts);
+                setToastType('success');
+                setToastDuration(duration);
+            } else if (typeof ts === 'object') {
+                duration = Number(ts.duration) || 2200;
+                setToast(ts.message || '');
+                setToastType(ts.type || 'success');
+                setToastDuration(duration);
+            }
+            setShowToast(true);
+            setToastLeaving(false);
+            toastConsumedKey.current = location.key;
+            clearStateTimer = setTimeout(() => {
+                navigate(location.pathname, {
+                    replace: true,
+                    state: location.state ? { ...location.state, toast: null } : undefined,
+                });
+            }, 0);
+        }
+        return () => { if (clearStateTimer) clearTimeout(clearStateTimer); };
+    }, [location.state, location.key, navigate, location.pathname]);
+
+    useEffect(() => {
+        if (showToast) {
+            const hideTimer = setTimeout(() => {
+                setToastLeaving(true);
+            }, toastDuration);
+
+            return () => clearTimeout(hideTimer);
+        }
+    }, [showToast, toastDuration]);
+
+    useEffect(() => {
+        if (!showToast) return;
+        
+        const handleGlobalClick = () => {
+            setToastLeaving(true);
+        };
+        
+        const timer = setTimeout(() => {
+            document.addEventListener('click', handleGlobalClick);
+        }, 100);
+        
+        return () => {
+            clearTimeout(timer);
+            document.removeEventListener('click', handleGlobalClick);
+        };
+    }, [showToast]);
+
     const handleLogout = () => {
-        // Clear both API auth (il_*) and UI auth (auth_*) stores
         clearAuth();
         try { contextLogout?.(); } catch {}
         setDisplayUser(null);
@@ -58,6 +118,25 @@ function TopBar() {
                     <button className='log-out-button' onClick={handleLogout}>Log Out</button>
                 </div>
             </div>
+            {showToast && (
+                <div
+                    className={`topbar-toast${toastLeaving ? ' leaving' : ''}`}
+                    role="status"
+                    aria-live="polite"
+                    style={{ '--toast-duration': `${toastDuration}ms`, '--toast-top': '84px' }}
+                    onAnimationEnd={(e) => {
+                        if (toastLeaving && e.animationName === 'slideOutRight') {
+                            setShowToast(false);
+                            setToastLeaving(false);
+                        }
+                    }}
+                >
+                    <div className={`toast-card toast-${toastType}`}>
+                        {toast}
+                        <div className="toast-progress" />
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
