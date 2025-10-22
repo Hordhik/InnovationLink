@@ -4,7 +4,6 @@ import './LogIn.css'
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import logo from '../assets/NavBar/logo.png';
-import Axios from 'axios';
 import googleIcon from '../assets/Authentication/google.svg';
 import login from '../assets/Authentication/login.png';
 import { login as loginApi } from '../services/authApi';
@@ -28,6 +27,7 @@ const LogIn = () => {
   const [loading, setLoading] = useState(false);
   const [userType, setUserType] = useState(signupData?.userType || 'startup'); // 'startup' or 'investor'
   const [successMessage, setSuccessMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   // Handle pre-filled data from signup
   useEffect(() => {
@@ -102,14 +102,20 @@ const LogIn = () => {
   return (
     <div className="login-page">
       <div className="image">
-        <img src={login} alt="Login" />
+        <img src={login} alt="Illustration for login" />
       </div>
       <div className="login">
-        <img src={logo} alt="Login" />
+        <img className="brand" src={logo} alt="InnovationLink" />
+
+        <h1 className="login-title">Welcome back</h1>
+        <p className="login-subtitle">Login as {userType === 'investor' ? 'Investor' : 'Startup'} to continue</p>
+
         {/* User type toggle */}
-        <div className="user-type-toggle">
+        <div className="user-type-toggle" role="tablist" aria-label="Select user type">
           <button
             type="button"
+            role="tab"
+            aria-selected={userType === 'startup'}
             className={`toggle-button ${userType === 'startup' ? 'active' : ''}`}
             onClick={() => handleUserTypeChange('startup')}
           >
@@ -117,73 +123,90 @@ const LogIn = () => {
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={userType === 'investor'}
             className={`toggle-button ${userType === 'investor' ? 'active' : ''}`}
             onClick={() => handleUserTypeChange('investor')}
           >
             Investor
           </button>
         </div>
-        <form onSubmit={handleSubmit}>
+
+        <form onSubmit={handleSubmit} className="login-form" noValidate>
           <div className="credentials">
             <div className="username">
-              <label className='label' htmlFor="login-username">Email or Username:</label>
+              <label className='label' htmlFor="login-username">Email or Username</label>
               <input
                 id="login-username"
                 type="text"
                 name="username"
                 value={formData.username}
                 onChange={handleInputChange}
-                placeholder={`Enter your email or username...`}
+                placeholder={`Enter your email or username`}
                 autoComplete="username"
                 required
               />
             </div>
             <div className="password">
-              <label className='label' htmlFor="login-password">Password:</label>
-              <input
-                id="login-password"
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                placeholder="Enter your password..."
-                autoComplete="current-password"
-                required
-              />
-              <p className='forgot-password'>Forgot your password?</p>
+              <label className='label' htmlFor="login-password">Password</label>
+              <div className="password-input">
+                <input
+                  id="login-password"
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  placeholder="Enter your password"
+                  autoComplete="current-password"
+                  required
+                />
+                <button
+                  type="button"
+                  className="show-toggle"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  onClick={() => setShowPassword((s) => !s)}
+                >
+                  {showPassword ? (
+                    // Eye closed icon
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-5 0-9.27-3.11-11-8 1.02-2.77 2.86-5.05 5.06-6.58"/>
+                      <path d="M1 1l22 22"/>
+                      <path d="M9.88 9.88A3 3 0 0 0 12 15a3 3 0 0 0 2.12-.88"/>
+                      <path d="M14.12 14.12 9.88 9.88"/>
+                    </svg>
+                  ) : (
+                    // Eye open icon
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  )}
+                </button>
+              </div>
+              <p className='forgot-password' role="link" tabIndex={0}>Forgot your password?</p>
             </div>
           </div>
+
           {successMessage && (
-            <div style={{
-              backgroundColor: '#d4edda',
-              color: '#155724',
-              border: '1px solid #c3e6cb',
-              borderRadius: '4px',
-              padding: '10px',
-              margin: '10px 0',
-              fontSize: '14px'
-            }}>
+            <div className="alert success" role="status">
               {successMessage}
             </div>
           )}
-          {error && <p className="error-message">{error}</p>}
+          {error && <p className="error-message" role="alert">{error}</p>}
 
           <div className="login-button">
-            <button type="submit" disabled={loading}>
-              {loading ? 'Logging in...' : 'Login'}
+            <button type="submit" disabled={loading} aria-busy={loading} aria-disabled={loading}>
+              {loading ? 'Logging in…' : 'Login'}
             </button>
           </div>
         </form>
-        <p>--------------------- or ---------------------</p>
+
+        <div className="or-sep" aria-hidden="true">
+          <span>or</span>
+        </div>
         <div className="alternatives">
-          <button>
+          <button title="Continue with Google" aria-label="Continue with Google">
             <img src={googleIcon} alt="Google" />
-          </button>
-          <button>
-            <img src={googleIcon} alt="Facebook" />
-          </button>
-          <button>
-            <img src={googleIcon} alt="Facebook" />
           </button>
         </div>
         <p className='create-account'>Don't have an account? <span onClick={handleCreateAccountClick}>Create one</span></p>
