@@ -188,10 +188,15 @@ export default function StartupProfile() {
       // Persist team including founder entry (even if team not edited)
       const sourceTeam = Array.isArray(edit?.team) ? edit.team : (Array.isArray(profileData?.team) ? profileData.team : []);
       const founderName = (edit?.founder ?? profileData?.founder ?? '').trim();
+      const teamPhotoForFounder = (() => {
+        const all = Array.isArray(sourceTeam) ? sourceTeam : [];
+        const match = all.find(m => (m?.name || '').trim().toLowerCase() === founderName.toLowerCase());
+        return match?.photo || '';
+      })();
       const founderMember = founderName ? {
         name: founderName,
         role: (edit?.founderRole ?? profileData?.founderRole ?? 'Founder'),
-        photo: (edit?.founderPhoto ?? profileData?.founderPhoto ?? ''),
+        photo: (edit?.founderPhoto ?? profileData?.founderPhoto ?? teamPhotoForFounder ?? ''),
         equity: (edit?.founderEquity ?? profileData?.founderEquity ?? ''),
         experiences: Array.isArray(edit?.founderExperiences) ? edit.founderExperiences : (Array.isArray(profileData?.founderExperiences) ? profileData.founderExperiences : []),
         study: (edit?.founderStudy ?? profileData?.founderStudy ?? ''),
@@ -288,17 +293,24 @@ export default function StartupProfile() {
           setError(e?.response?.data?.message || e?.message || 'Failed to save founder in profile');
         }
         try {
-          const newFounderName = memberData?.name ?? edit.founder ?? profileData.founder ?? '';
+          const oldFounderName = (edit.founder ?? profileData.founder ?? '').trim();
+          const newFounderName = (memberData?.name ?? oldFounderName).trim();
+          const currentTeam = Array.isArray(edit?.team) ? edit.team.map(m => ({ ...m })) : (Array.isArray(profileData?.team) ? profileData.team.map(m => ({ ...m })) : []);
+          const findTeamPhotoByName = (nm) => {
+            if (!nm) return '';
+            const mm = currentTeam.find(m => (m?.name || '').trim().toLowerCase() === nm.toLowerCase());
+            return mm?.photo || '';
+          };
+          const teamPhoto = findTeamPhotoByName(newFounderName) || findTeamPhotoByName(oldFounderName);
           const founderMember = {
             name: newFounderName,
             role: memberData?.role ?? edit?.founderRole ?? profileData?.founderRole ?? 'Founder',
-            photo: memberData?.photo ?? edit?.founderPhoto ?? profileData?.founderPhoto ?? '',
+            photo: memberData?.photo ?? edit?.founderPhoto ?? profileData?.founderPhoto ?? teamPhoto ?? '',
             equity: memberData?.equity ?? edit?.founderEquity ?? profileData?.founderEquity ?? '',
             experiences: Array.isArray(memberData?.experiences) ? memberData.experiences : (Array.isArray(edit?.founderExperiences) ? edit.founderExperiences : (Array.isArray(profileData?.founderExperiences) ? profileData.founderExperiences : [])),
             study: memberData?.study ?? edit?.founderStudy ?? profileData?.founderStudy ?? '',
             about: memberData?.about ?? edit?.founderAbout ?? profileData?.founderAbout ?? '',
           };
-          const currentTeam = Array.isArray(edit?.team) ? edit.team.map(m => ({ ...m })) : (Array.isArray(profileData?.team) ? profileData.team.map(m => ({ ...m })) : []);
           const combined = [founderMember, ...currentTeam];
           const seen = new Set();
           const deduped = combined.filter(m => { const k = (m?.name || '').trim().toLowerCase(); if (!k || seen.has(k)) return false; seen.add(k); return true; });
@@ -310,7 +322,8 @@ export default function StartupProfile() {
           setError(e?.response?.data?.message || e?.message || 'Failed to save founder in team');
         }
       } else {
-        const newFounderName = memberData?.name ?? profileData.founder ?? '';
+        const oldFounderName = (profileData.founder ?? '').trim();
+        const newFounderName = (memberData?.name ?? oldFounderName).trim();
         const updates = {
           founder: newFounderName,
           ...(memberData?.role !== undefined ? { founderRole: memberData.role } : {}),
@@ -340,16 +353,22 @@ export default function StartupProfile() {
         }
         try {
           // 2) Save founder details into team
+          const currentTeam = Array.isArray(profileData?.team) ? profileData.team.map(m => ({ ...m })) : [];
+          const findTeamPhotoByName = (nm) => {
+            if (!nm) return '';
+            const mm = currentTeam.find(m => (m?.name || '').trim().toLowerCase() === nm.toLowerCase());
+            return mm?.photo || '';
+          };
+          const teamPhoto = findTeamPhotoByName(newFounderName) || findTeamPhotoByName(oldFounderName);
           const founderMember = {
             name: newFounderName,
             role: memberData?.role ?? profileData?.founderRole ?? 'Founder',
-            photo: memberData?.photo ?? profileData?.founderPhoto ?? '',
+            photo: memberData?.photo ?? profileData?.founderPhoto ?? teamPhoto ?? '',
             equity: memberData?.equity ?? profileData?.founderEquity ?? '',
             experiences: Array.isArray(memberData?.experiences) ? memberData.experiences : (Array.isArray(profileData?.founderExperiences) ? profileData.founderExperiences : []),
             study: memberData?.study ?? profileData?.founderStudy ?? '',
             about: memberData?.about ?? profileData?.founderAbout ?? '',
           };
-          const currentTeam = Array.isArray(profileData?.team) ? profileData.team.map(m => ({ ...m })) : [];
           const combined = [founderMember, ...currentTeam];
           const seen = new Set();
           const deduped = combined.filter(m => { const k = (m?.name || '').trim().toLowerCase(); if (!k || seen.has(k)) return false; seen.add(k); return true; });
@@ -476,7 +495,8 @@ export default function StartupProfile() {
         name: profileData.name || '',
         founder: profileData.founder || '',
         founderRole: profileData.founderRole || '',
-        founderPhoto: profileData.founderPhoto || '',
+        // Use undefined instead of empty string so UI can fall back to team photo
+        founderPhoto: profileData.founderPhoto || undefined,
         founderEquity: profileData.founderEquity || '',
         founderExperiences: (profileData.founderExperiences && profileData.founderExperiences.length) ? [...profileData.founderExperiences] : [],
         founderStudy: profileData.founderStudy || '',

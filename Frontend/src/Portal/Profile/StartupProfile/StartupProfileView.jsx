@@ -32,7 +32,7 @@ const StartupProfileView = ({ profileData, isEditing, editStateProps }) => {
     if (!founderName) return sourceTeam;
     const hasFounder = sourceTeam.some(m => (m && m.name && String(m.name).trim().toLowerCase()) === founderName.toLowerCase());
     if (hasFounder) return sourceTeam;
-    const founderPhoto = isEditing ? (p.edit?.founderPhoto ?? profileData.founderPhoto) : profileData.founderPhoto;
+    const founderPhoto = isEditing ? (p.edit?.founderPhoto || profileData.founderPhoto) : profileData.founderPhoto;
     const founderRole = isEditing ? (p.edit?.founderRole ?? profileData.founderRole ?? 'Founder') : (profileData.founderRole ?? 'Founder');
     return [{ name: founderName, photo: founderPhoto, role: founderRole, _founder: true }, ...sourceTeam];
   })();
@@ -121,8 +121,8 @@ const StartupProfileView = ({ profileData, isEditing, editStateProps }) => {
                       onDragEnd={handleDragEnd}
                     >
                       <div className="avatar-wrap" onClick={() => p.openMember(dataIdx, isFounder)}>
-                        {(m && (isFounder ? (isEditing ? (p.edit?.founderPhoto ?? m.photo) : (m.photo || profileData.founderPhoto)) : m.photo)) ? (
-                          <img src={(isFounder ? (isEditing ? (p.edit?.founderPhoto ?? m.photo) : (m.photo || profileData.founderPhoto)) : m.photo)} alt={memberName} className="avatar-img" />
+                        {(m && (isFounder ? (isEditing ? (p.edit?.founderPhoto || m.photo || profileData.founderPhoto) : (m.photo || profileData.founderPhoto)) : m.photo)) ? (
+                          <img src={(isFounder ? (isEditing ? (p.edit?.founderPhoto || m.photo || profileData.founderPhoto) : (m.photo || profileData.founderPhoto)) : m.photo)} alt={memberName} className="avatar-img" />
                         ) : (
                           <div className="avatar-circle">{memberName.charAt(0).toUpperCase()}</div>
                         )}

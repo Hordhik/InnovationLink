@@ -4,17 +4,35 @@ import './TeamMemberModal.css';
 const TeamMemberModal = ({ focusedMemberIndex, isEditing, profileData, edit, memberEditing, memberDraft, setMemberEditing, setMemberDraft, closeMember, saveMemberEdits, changeTeamMember, openMember }) => {
   if (!focusedMemberIndex) return null;
   const { idx, isFounder } = focusedMemberIndex;
+  // Source team to help fallback to existing photos (important for founder)
+  const sourceTeam = isEditing
+    ? (Array.isArray(edit?.team) ? edit.team : [])
+    : (Array.isArray(profileData?.team) ? profileData.team : []);
+  const findTeamPhotoByName = (nm) => {
+    if (!nm) return '';
+    const m = sourceTeam.find(x => (x?.name || '').trim().toLowerCase() === nm.trim().toLowerCase());
+    return m?.photo || '';
+  };
+
   const member = isFounder
-    ? {
-      name: isEditing ? (edit?.founder ?? '') : (profileData?.founder ?? ''),
-      role: isEditing ? (edit?.founderRole ?? 'Founder') : (profileData?.founderRole ?? 'Founder'),
-      photo: isEditing ? (edit?.founderPhoto ?? '') : (profileData?.founderPhoto ?? ''),
-      equity: isEditing ? (edit?.founderEquity ?? '') : (profileData?.founderEquity ?? ''),
-      experiences: isEditing ? (edit?.founderExperiences ?? []) : (profileData?.founderExperiences ?? []),
-      study: isEditing ? (edit?.founderStudy ?? '') : (profileData?.founderStudy ?? ''),
-      about: isEditing ? (edit?.founderAbout ?? '') : (profileData?.founderAbout ?? ''),
-    }
-    : ((isEditing ? edit.team && edit.team[idx] : profileData.team && profileData.team[idx]) || {});
+    ? (() => {
+      const name = isEditing ? (edit?.founder ?? '') : (profileData?.founder ?? '');
+      const role = isEditing ? (edit?.founderRole ?? 'Founder') : (profileData?.founderRole ?? 'Founder');
+      const fallbackTeamPhoto = findTeamPhotoByName(name);
+      const photo = isEditing
+        ? (edit?.founderPhoto || fallbackTeamPhoto || profileData?.founderPhoto || '')
+        : (profileData?.founderPhoto || fallbackTeamPhoto || '');
+      return {
+        name,
+        role,
+        photo,
+        equity: isEditing ? (edit?.founderEquity ?? '') : (profileData?.founderEquity ?? ''),
+        experiences: isEditing ? (edit?.founderExperiences ?? []) : (profileData?.founderExperiences ?? []),
+        study: isEditing ? (edit?.founderStudy ?? '') : (profileData?.founderStudy ?? ''),
+        about: isEditing ? (edit?.founderAbout ?? '') : (profileData?.founderAbout ?? ''),
+      };
+    })()
+    : ((Array.isArray(sourceTeam) && sourceTeam[idx]) || {});
 
   // helper to compress image and return dataURL with robust format fallback
   const fileToCompressedDataUrl = (file, { maxW = 800, maxH = 800, quality = 0.85, targetBytes = 1200 * 1024 } = {}) => new Promise((resolve) => {
