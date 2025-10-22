@@ -16,7 +16,6 @@
     font-size: 16px;
     font-weight: 500;
     color: #999;
-    transition: all 0.3s ease;
     position: relative;
     margin-bottom: -2px;
 }
@@ -236,6 +235,7 @@
     background: #fff;
     transition: box-shadow .2s ease, border-color .2s ease;
 }
+.login-page .login .credentials label{font-weight:700;font-size:16px}
 .login-page .login .credentials input:focus {
     outline: none;
     border-color: #b7d9fc;
@@ -248,7 +248,10 @@
     margin-bottom: 15px;
     text-align: left;
     display: block;
+    cursor: pointer;
 }
+/* underline on hover for forgot password */
+.login-page .login .credentials .password .forgot-password:hover { text-decoration: underline; }
 /* Keep forgot password black always */
 
 .password-input{position:relative;display:flex;align-items:center}
@@ -283,9 +286,28 @@
 
 /* Alerts & separators */
 .alert.success{width:min(355px,78vw);background:#e9f7ef;color:#1e7e34;border:1px solid #c3e6cb;border-radius:10px;padding:10px 12px}
-.or-sep{position:relative;width:min(355px,78vw);text-align:center;color:#666;font-size:12px;margin:6px 0}
+.or-sep{position:relative;width:min(355px,78vw);text-align:center;color:#666;font-size:12px;margin:6px auto}
 .or-sep:before,.or-sep:after{content:"";position:absolute;top:50%;width:42%;height:1px;background:rgba(0,0,0,.15)}
 .or-sep:before{left:0}.or-sep:after{right:0}
+
+/* Inline tip with icon (shared for login/signup) */
+.form-tip{
+    display:flex;align-items:center;gap:8px;
+    width:min(355px,78vw);
+    margin:0 auto 8px;
+    color:#333;font-size:13px;
+    background: rgba(0,0,0,0.035);
+    border:1px solid rgba(0,0,0,0.08);
+    border-radius:8px;
+    padding:8px 10px;
+}
+.form-tip svg{width:16px;height:16px;color:#f59e0b;flex:0 0 16px;filter:drop-shadow(0 0 4px rgba(245,158,11,.55));animation:glowPulse 2.2s ease-in-out infinite}
+
+@keyframes glowPulse{
+    0%{filter:drop-shadow(0 0 2px rgba(245,158,11,.35))}
+    50%{filter:drop-shadow(0 0 9px rgba(245,158,11,.85))}
+    100%{filter:drop-shadow(0 0 2px rgba(245,158,11,.35))}
+}
 
 /* Focus style for Forgot password */
 .forgot-password:focus-visible{
@@ -304,3 +326,6 @@
     .login-page .image{order:2;display:block;opacity:0.35;width:100%}
     .login-page .image img{height:auto;max-height:40vh;object-fit:contain;padding:0;margin:0 auto}
 }
+
+/* Login-only tweak: reduce top spacing before the tip */
+.login-page .form-tip{margin-bottom:10px ; margin-top:-10px ;}

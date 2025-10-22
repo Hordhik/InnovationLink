@@ -4,7 +4,7 @@ import './LogIn.css'
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import logo from '../assets/NavBar/logo.png';
-import googleIcon from '../assets/Authentication/google.svg';
+// import googleIcon from '../assets/Authentication/google.svg';
 import login from '../assets/Authentication/login.png';
 import { login as loginApi } from '../services/authApi';
 
@@ -25,7 +25,7 @@ const LogIn = () => {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [userType, setUserType] = useState(signupData?.userType || 'startup'); // 'startup' or 'investor'
+  const [userType, setUserType] = useState(signupData?.userType || null); // null until user selects 'startup' or 'investor'
   const [successMessage, setSuccessMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
@@ -67,6 +67,10 @@ const LogIn = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    if (!userType) {
+      setError('Please select Startup or Investor.');
+      return;
+    }
     setLoading(true);
 
     try {
@@ -96,9 +100,6 @@ const LogIn = () => {
     }
   };
 
-
-
-
   return (
     <div className="login-page">
       <div className="image">
@@ -108,7 +109,7 @@ const LogIn = () => {
         <img className="brand" src={logo} alt="InnovationLink" />
 
         <h1 className="login-title">Welcome back</h1>
-        <p className="login-subtitle">Login as {userType === 'investor' ? 'Investor' : 'Startup'} to continue</p>
+  <p className="login-subtitle">{userType ? `Login as ${userType === 'investor' ? 'Investor' : 'Startup'} to continue` : 'Select Startup or Investor to continue'}</p>
 
         {/* User type toggle */}
         <div className="user-type-toggle" role="tablist" aria-label="Select user type">
@@ -119,7 +120,7 @@ const LogIn = () => {
             className={`toggle-button ${userType === 'startup' ? 'active' : ''}`}
             onClick={() => handleUserTypeChange('startup')}
           >
-            Start Up
+            Startup
           </button>
           <button
             type="button"
@@ -133,6 +134,19 @@ const LogIn = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="login-form" noValidate>
+          {!userType && (
+            <div className="form-tip" role="note" aria-live="polite">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="10" r="6" fill="currentColor" opacity=".18" />
+                <path d="M9 18h6"/>
+                <path d="M10 22h4"/>
+                <path d="M2 10a10 10 0 1 1 20 0c0 3.53-1.93 6.6-4.8 8.2-.14.09-.2.2-.2.35V19H7v-.45c0-.15-.06-.26-.2-.35C3.93 16.6 2 13.53 2 10z"/>
+              </svg>
+              <span>
+                Select <strong>Startup</strong> Or <strong>Investor</strong> Before Filling Data.
+              </span>
+            </div>
+          )}
           <div className="credentials">
             <div className="username">
               <label className='label' htmlFor="login-username">Email or Username</label>
@@ -201,6 +215,8 @@ const LogIn = () => {
           </div>
         </form>
 
+        {/** Temporarily disabled: Login with Google **/}
+        {/**
         <div className="or-sep" aria-hidden="true">
           <span>or</span>
         </div>
@@ -209,6 +225,7 @@ const LogIn = () => {
             <img src={googleIcon} alt="Google" />
           </button>
         </div>
+        **/}
         <p className='create-account'>Don't have an account? <span onClick={handleCreateAccountClick}>Create one</span></p>
         <p className='policies'>Please go through <span>Privacy Policy</span> & <span>Cookie Policy</span></p>
       </div>
