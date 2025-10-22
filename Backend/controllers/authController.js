@@ -126,7 +126,14 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Do not block login on userType mismatch; the actual userType will be used downstream
+    // Enforce userType match when provided (and require it to avoid wrong-portal logins)
+    const requestedType = (userType || '').toString().trim();
+    if (!requestedType) {
+      return res.status(400).json({ message: 'userType is required' });
+    }
+    if (requestedType !== user.userType) {
+      return res.status(403).json({ message: 'Invalid user type for this account' });
+    }
 
     // sign token
     if (!process.env.JWT_SECRET) {
