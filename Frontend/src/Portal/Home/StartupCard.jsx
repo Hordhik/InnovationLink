@@ -1,48 +1,45 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import './StartupCard.css';
 import eyes from "../../assets/Portal/StartupCard/eyes.svg"
 import statues from "../../assets/Portal/StartupCard/status-up.svg"
-import { getSession } from '../../services/authApi.js';
-import { getToken } from '../../auth.js';
 
-const StartupCard = () => {
-  const tags = ['HealthTech', 'RuralTech', 'SaaS', 'Clean Energy'];
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        if (!getToken()) return;
-        const data = await getSession();
-        if (!cancelled && data?.user) setUser(data.user);
-      } catch {}
-    })();
-    return () => { cancelled = true; };
-  }, []);
+const StartupCard = ({
+  logo,
+  companyName,
+  founderName,
+  description,
+  domain,
+  teamCount,
+  profileUrl,
+}) => {
+  // Show only the sector from database (domain); no default tag
+  const tags = domain ? [domain] : [];
+  const displayName = companyName || 'Startup';
+  const founder = founderName || 'Founder';
+  const avatarSrc = logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=0D8ABC&color=fff`;
 
   return (
     <div className="startup-card">
       <div className="card-header">
         <div className="startup-info">
           <div className="avatar">
-            <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || user?.username || 'Innovation Link')}`} alt={user?.name || user?.username || 'Innovation Link'} />
+            <img src={avatarSrc} alt={displayName} />
           </div>
           <div className="text-info">
-            <p className="startup-name">{user?.name || user?.username || 'Innovation Link'}</p>
-            <p className="founder-name">Founder: <span>{user?.username || 'Founder'}</span></p>
+            <p className="startup-name">{displayName}</p>
+            <p className="founder-name">Founder: <span>{founder}</span></p>
             {/* <p className="location-team">Location: <span>Vijaywda</span></p> */}
-            <p className="team-size">Team size: <span>4-10</span></p>
+            <p className="team-size">Team members: <span>{typeof teamCount === 'number' ? teamCount : '-'}</span></p>
           </div>
         </div>
         <div className="connect">
           <div className="mentor-info">
             <div className="mentors-engaged">
-              <img src={eyes} alt="" className='icon'/>
+              <img src={eyes} alt="" className='icon' />
               <span>12 Engaged</span>
             </div>
             <div className="mentors-this-month">
-              <img src={statues} alt="" className='icon'/>
+              <img src={statues} alt="" className='icon' />
               <span>128 Lookouts</span>
             </div>
           </div>
@@ -53,17 +50,19 @@ const StartupCard = () => {
         </div>
       </div>
       <div className="card-body">
-        <p className="description">
-          Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has
-          been the industry's standard dummy text ever since the 1500s, when an unknown printer took
-          a galley of type and scrambled it to make a type specimen book.
-        </p>
+        {description && (
+          <>
+            <p className="description description--clamp">
+              {description}
+            </p>
+          </>
+        )}
         <div className="tags">
           {tags.map((tag, index) => (
             <p key={index} className="tag">{tag}</p>
           ))}
         </div>
-        <a href="#" className="view-profile-link">
+        <a href={profileUrl || '#'} className="view-profile-link">
           <span>View Full Profile</span>
           <span className="arrow-icon">→</span>
         </a>
