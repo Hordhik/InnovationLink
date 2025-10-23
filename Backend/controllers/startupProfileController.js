@@ -167,3 +167,53 @@ exports.saveProfile = async (req, res) => {
     }
 };
 
+// List all startup profiles with lightweight fields and team member counts
+exports.getAllProfilesWithTeamCounts = async (req, res) => {
+    try {
+        // Aggregate profiles and team counts. LEFT JOIN to include startups with zero team members
+        const [rows] = await db.query(`
+            SELECT
+                sp.username,
+                sp.company_name,
+                sp.founder,
+                sp.domain,
+                sp.description,
+                sp.logo,
+                sp.logo_mime,
+                COUNT(tm.id) AS teamCount
+            FROM startup_profile_details sp
+            LEFT JOIN team_members tm ON tm.username = sp.username
+            GROUP BY sp.username, sp.company_name, sp.founder, sp.domain, sp.description, sp.logo, sp.logo_mime
+            ORDER BY sp.updated_at DESC, sp.created_at DESC
+        `);
+
+        const profiles = (rows || []).map(r => {
+            const out = {
+                username: r.username,
+                company_name: r.company_name,
+                founder: r.founder,
+                domain: r.domain,
+                description: r.description,
+                teamCount: Number(r.teamCount || 0)
+            };
+            if (r.logo) {
+                try {
+                    const b64 = Buffer.from(r.logo).toString('base64');
+                    out.logo = `data:${r.logo_mime || 'application/octet-stream'};base64,${b64}`;
+                } catch {
+                    out.logo = null;
+                }
+            } else {
+                out.logo = null;
+            }
+            return out;
+        });
+
+        res.json({ startups: profiles });
+    } catch (err) {
+        console.error('GetAllProfilesWithTeamCounts Error:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+

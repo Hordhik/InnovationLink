@@ -23,3 +23,9 @@ export async function saveProfile(payload) {
     const { data } = await api.post('/api/startup-profile', payload, { headers: authHeader() });
     return data; // { message, profile }
 }
+
+// Fetch all startups for investor dashboard, including team counts
+export async function getAllStartups() {
+    const { data } = await api.get('/api/startup-profile/all', { headers: authHeader() });
+    return data; // { startups: [...] }
+}
