@@ -189,7 +189,7 @@
 .signup-page .signup-container .user-type-toggle {
     display: flex;
     width: min(355px, 78vw); /* align width with fields */
-    margin: 0 auto 20px; /* match login spacing */
+    margin: 0 auto 10px; /* tighter to bring tip closer */
     border-bottom: 2px solid #e0e0e0;
     justify-content: space-evenly;
     position: relative;
@@ -205,6 +205,9 @@
     color: #999;
     position: relative;
     margin-bottom: -2px;
+    flex: 1;               /* Equal widths, not based on text length */
+    text-align: center;    /* Center the label */
+    min-width: 0;          /* Allow flex to size evenly without overflow */
 }
 
 .signup-page .signup-container .user-type-toggle .toggle-button.active {
@@ -303,6 +306,20 @@
 .signup-page .form-tip svg{
     width:14px;height:14px;flex:0 0 14px;
     animation: glowPulseSoft 2.2s ease-in-out infinite;
+}
+/* Center the tip and tighten spacing similar to login */
+.signup-page .form-tip{ margin: 2px auto 10px; }
+/* Make the signup tip match login exactly in width/centering */
+.signup-page .signup-container .credentials .form-tip{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: fit-content;
+    max-width: min(90vw, 420px);
+    align-self: center;
+    text-align: center;
+    padding: 8px 10px;
 }
 .form-tip.tip-pop{
     animation: tipPop .25s ease-out 1;

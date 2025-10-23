@@ -144,9 +144,15 @@ const SignUp = () => {
                 <path d="M10 22h4" />
                 <path d="M2 10a10 10 0 1 1 20 0c0 3.53-1.93 6.6-4.8 8.2-.14.09-.2.2-.2.35V19H7v-.45c0-.15-.06-.26-.2-.35C3.93 16.6 2 13.53 2 10z" />
               </svg>
-              <span>
-                Select <strong>Startup</strong> or <strong>Investor</strong> before filling data.
-              </span>
+                <span>
+                  {submitted
+                    ? (<>
+                        Select <strong>Startup</strong> or <strong>Investor</strong>
+                      </>)
+                    : (<>
+                        Select <strong>Startup</strong> or <strong>Investor</strong> before filling data.
+                      </>)}
+                </span>
             </div>
           )}
           <div className="username">

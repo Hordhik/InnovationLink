@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import './LogIn.css'
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -27,6 +27,8 @@ const LogIn = () => {
   const [userType, setUserType] = useState(signupData?.userType || null); // null until user selects 'startup' or 'investor'
   const [successMessage, setSuccessMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const tipRef = useRef(null);
 
   // Handle pre-filled data from signup
   useEffect(() => {
@@ -71,8 +73,15 @@ const LogIn = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSubmitted(true);
     if (!userType) {
-      setError('Please select Startup or Investor.');
+      // Pop the inline tip instead of showing a bottom error
+      if (tipRef.current) {
+        const el = tipRef.current;
+        el.classList.remove('tip-pop');
+        void el.offsetWidth; // force reflow to restart CSS animation
+        el.classList.add('tip-pop');
+      }
       return;
     }
     try {
@@ -132,7 +141,7 @@ const LogIn = () => {
 
         <form onSubmit={handleSubmit} className="login-form" noValidate>
           {!userType && (
-            <div className="form-tip" role="note" aria-live="polite">
+            <div className="form-tip" role="note" aria-live="polite" ref={tipRef}>
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <circle cx="12" cy="10" r="6" fill="currentColor" opacity=".18" />
                 <path d="M9 18h6"/>
@@ -140,7 +149,9 @@ const LogIn = () => {
                 <path d="M2 10a10 10 0 1 1 20 0c0 3.53-1.93 6.6-4.8 8.2-.14.09-.2.2-.2.35V19H7v-.45c0-.15-.06-.26-.2-.35C3.93 16.6 2 13.53 2 10z"/>
               </svg>
               <span>
-                Select <strong>Startup</strong> Or <strong>Investor</strong> Before Filling Data.
+                {submitted
+                  ? (<>Select <strong>Startup</strong> or <strong>Investor</strong></>)
+                  : (<>Select <strong>Startup</strong> or <strong>Investor</strong> before filling data.</>)}
               </span>
             </div>
           )}
