@@ -3,7 +3,6 @@ import "./LogIn.css";
 import "./SignUp.css";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/NavBar/logo.png";
-import { toast } from 'react-toastify';
 // import googleIcon from "../assets/Authentication/google.svg";
 import login from "../assets/Authentication/login.png";
 import { signup as signupApi } from "../services/authApi";
@@ -87,7 +86,7 @@ const SignUp = () => {
         phone: formData.phone.trim(),
         password: formData.password,
       };
-      
+
       const data = await signupApi(payload);
       if (data?.user) {
         setAuth({ token: data?.token || null, user: data.user, role: data.user?.role || formData.userType });
@@ -141,13 +140,13 @@ const SignUp = () => {
             <div className="form-tip" role="note" aria-live="polite" ref={tipRef}>
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <circle cx="12" cy="10" r="6" fill="currentColor" opacity=".18" />
-                <path d="M9 18h6"/>
-                <path d="M10 22h4"/>
-                <path d="M2 10a10 10 0 1 1 20 0c0 3.53-1.93 6.6-4.8 8.2-.14.09-.2.2-.2.35V19H7v-.45c0-.15-.06-.26-.2-.35C3.93 16.6 2 13.53 2 10z"/>
+                <path d="M9 18h6" />
+                <path d="M10 22h4" />
+                <path d="M2 10a10 10 0 1 1 20 0c0 3.53-1.93 6.6-4.8 8.2-.14.09-.2.2-.2.35V19H7v-.45c0-.15-.06-.26-.2-.35C3.93 16.6 2 13.53 2 10z" />
               </svg>
-                <span>
-                  Select <strong>Startup</strong> or <strong>Investor</strong> before filling data.
-                </span>
+              <span>
+                Select <strong>Startup</strong> or <strong>Investor</strong> before filling data.
+              </span>
             </div>
           )}
           <div className="username">
@@ -197,15 +196,15 @@ const SignUp = () => {
               >
                 {showPassword ? (
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-5 0-9.27-3.11-11-8 1.02-2.77 2.86-5.05 5.06-6.58"/>
-                    <path d="M1 1l22 22"/>
-                    <path d="M9.88 9.88A3 3 0 0 0 12 15a3 3 0 0 0 2.12-.88"/>
-                    <path d="M14.12 14.12 9.88 9.88"/>
+                    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-5 0-9.27-3.11-11-8 1.02-2.77 2.86-5.05 5.06-6.58" />
+                    <path d="M1 1l22 22" />
+                    <path d="M9.88 9.88A3 3 0 0 0 12 15a3 3 0 0 0 2.12-.88" />
+                    <path d="M14.12 14.12 9.88 9.88" />
                   </svg>
                 ) : (
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
                   </svg>
                 )}
               </button>
