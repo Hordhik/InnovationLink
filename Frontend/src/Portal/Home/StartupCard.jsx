@@ -31,7 +31,6 @@ const StartupCard = () => {
           <div className="text-info">
             <p className="startup-name">{user?.name || user?.username || 'Innovation Link'}</p>
             <p className="founder-name">Founder: <span>{user?.username || 'Founder'}</span></p>
-            {/* <p className="location-team">Location: <span>Vijaywda</span></p> */}
             <p className="team-size">Team size: <span>4-10</span></p>
           </div>
         </div>
