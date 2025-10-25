@@ -32,7 +32,13 @@ const TeamMemberModal = ({ focusedMemberIndex, isEditing, profileData, edit, mem
         about: isEditing ? (edit?.founderAbout ?? '') : (profileData?.founderAbout ?? ''),
       };
     })()
-    : ((Array.isArray(sourceTeam) && sourceTeam[idx]) || {});
+    : (() => {
+      // If we have memberDraft (editing mode), use it; otherwise use sourceTeam[idx] or empty object
+      if (memberDraft && Object.keys(memberDraft).length > 0) {
+        return memberDraft;
+      }
+      return (Array.isArray(sourceTeam) && sourceTeam[idx]) || {};
+    })();
 
   // helper to compress image and return dataURL with robust format fallback
   const fileToCompressedDataUrl = (file, { maxW = 800, maxH = 800, quality = 0.85, targetBytes = 1200 * 1024 } = {}) => new Promise((resolve) => {
@@ -120,7 +126,7 @@ const TeamMemberModal = ({ focusedMemberIndex, isEditing, profileData, edit, mem
     <div className="member-modal-overlay" onClick={closeMember}>
       <div className="member-panel-card modal-card" onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h4>{member.name || 'Team Member'}</h4>
+          <h4>{member.name || (memberEditing ? 'Add Team Member' : 'Team Member')}</h4>
           <div style={{ display: 'flex', gap: 8 }}>
             {!memberEditing && <button className="btn btn-ghost" onClick={() => { setMemberEditing(true); setMemberDraft(member || {}); }}>Edit</button>}
             <button className="modal-close" aria-label="Close" title="Close" onClick={closeMember}>×</button>
@@ -255,7 +261,20 @@ const TeamMemberModal = ({ focusedMemberIndex, isEditing, profileData, edit, mem
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
               <button type="button" className="btn btn-secondary" onClick={() => { setMemberEditing(false); setMemberDraft(null); }}>Cancel</button>
-              <button type="button" className="btn btn-primary" onClick={() => saveMemberEdits(isFounder ? { idx: null, isFounder } : idx, memberDraft)}>Save</button>
+              <button 
+                type="button" 
+                className="btn btn-primary" 
+                onClick={() => {
+                  // Basic validation
+                  if (!memberDraft?.name?.trim()) {
+                    alert('Please enter a name for the team member');
+                    return;
+                  }
+                  saveMemberEdits(isFounder ? { idx: null, isFounder } : idx, memberDraft);
+                }}
+              >
+                Save
+              </button>
             </div>
           </div>
         )}

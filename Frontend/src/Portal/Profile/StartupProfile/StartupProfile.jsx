@@ -133,7 +133,13 @@ export default function StartupProfile() {
           about: m?.about || '',
           photo: m?.photo || ''
         })) : [];
-        const combined = (founderMember ? [founderMember] : []).concat(formTeam).filter(x => x && x.name);
+        // Keep a single founder entry only
+        const filteredFormTeam = formTeam.filter(m => {
+          const nm = (m?.name || '').trim().toLowerCase();
+          const role = (m?.role || m?.designation || '').trim().toLowerCase();
+          return (!founderMember || nm !== founderMember.name.trim().toLowerCase()) && role !== 'founder';
+        });
+        const combined = (founderMember ? [founderMember] : []).concat(filteredFormTeam).filter(x => x && x.name);
         if (combined.length) {
           try {
             // De-duplicate by name (founder first)
@@ -160,16 +166,16 @@ export default function StartupProfile() {
     setIsEditing(false);
   };
 
-  const handleProfileSave = async () => {
+  const handleProfileSave = async (patch = {}) => {
     // Persist edits made within StartupProfileView's edit mode
     const payload = {
-      startupName: edit.name || profileData.name || '',
-      founderName: edit.founder || profileData.founder || '',
-      description: edit.description ?? profileData.description ?? '',
-      address: edit.address ?? profileData.address ?? '',
-      phone: edit.phone ?? profileData.phone ?? '',
-      domain: edit.domain ?? profileData.domain ?? '',
-      logo: edit.logo ?? profileData.logo ?? '',
+      startupName: (patch.name ?? edit.name ?? profileData.name) || '',
+      founderName: (patch.founder ?? edit.founder ?? profileData.founder) || '',
+      description: (patch.description ?? edit.description ?? profileData.description) ?? '',
+      address: (patch.address ?? edit.address ?? profileData.address) ?? '',
+      phone: (patch.phone ?? edit.phone ?? profileData.phone) ?? '',
+      domain: (patch.domain ?? edit.domain ?? profileData.domain) ?? '',
+      logo: (patch.logo ?? edit.logo ?? profileData.logo) ?? '',
     };
     try {
       const resp = await apiSaveProfile(payload);
@@ -211,8 +217,14 @@ export default function StartupProfile() {
         about: m?.about || '',
         photo: m?.photo || '',
       })).filter(m => m.name);
+      // Keep a single founder entry only
+      const filteredTeamForSave = mappedTeam.filter(m => {
+        const nm = (m?.name || '').trim().toLowerCase();
+        const role = (m?.role || m?.designation || '').trim().toLowerCase();
+        return (!founderMember || nm !== founderMember.name.trim().toLowerCase()) && role !== 'founder';
+      });
       // Combine, de-duplicate by name (keep founder at front)
-      const combined = (founderMember ? [founderMember] : []).concat(mappedTeam);
+      const combined = (founderMember ? [founderMember] : []).concat(filteredTeamForSave);
       const seen = new Set();
       const deduped = combined.filter(m => {
         const key = m.name.trim().toLowerCase();
@@ -242,8 +254,10 @@ export default function StartupProfile() {
 
   const openMember = (idx, isFounder = false) => {
     setFocusedMemberIndex({ idx, isFounder });
-    setMemberEditing(false);
-    setMemberDraft(null);
+    // If adding a new member (idx is at the end of team array), open in editing mode
+    const isAddingNew = idx >= (Array.isArray(profileData?.team) ? profileData.team.length : 0);
+    setMemberEditing(isAddingNew);
+    setMemberDraft(isAddingNew ? { name: '', role: '', photo: '', equity: '', experiences: [], study: '', about: '' } : null);
   };
   const closeMember = () => setFocusedMemberIndex(null);
 
@@ -295,7 +309,13 @@ export default function StartupProfile() {
         try {
           const oldFounderName = (edit.founder ?? profileData.founder ?? '').trim();
           const newFounderName = (memberData?.name ?? oldFounderName).trim();
-          const currentTeam = Array.isArray(edit?.team) ? edit.team.map(m => ({ ...m })) : (Array.isArray(profileData?.team) ? profileData.team.map(m => ({ ...m })) : []);
+          const currentTeamRaw = Array.isArray(edit?.team) ? edit.team.map(m => ({ ...m })) : (Array.isArray(profileData?.team) ? profileData.team.map(m => ({ ...m })) : []);
+          // Remove any existing entries matching old/new founder names OR with role Founder to avoid duplicates
+          const currentTeam = currentTeamRaw.filter(m => {
+            const nm = (m?.name || '').trim().toLowerCase();
+            const role = (m?.role || m?.designation || '').trim().toLowerCase();
+            return nm && nm !== oldFounderName.toLowerCase() && nm !== newFounderName.toLowerCase() && role !== 'founder';
+          });
           const findTeamPhotoByName = (nm) => {
             if (!nm) return '';
             const mm = currentTeam.find(m => (m?.name || '').trim().toLowerCase() === nm.toLowerCase());
@@ -353,10 +373,16 @@ export default function StartupProfile() {
         }
         try {
           // 2) Save founder details into team
-          const currentTeam = Array.isArray(profileData?.team) ? profileData.team.map(m => ({ ...m })) : [];
+          const currentTeamRaw = Array.isArray(profileData?.team) ? profileData.team.map(m => ({ ...m })) : [];
+          // Filter out any entries with old/new founder names or role Founder to prevent duplicates
+          const currentTeam = currentTeamRaw.filter(m => {
+            const nm = (m?.name || '').trim().toLowerCase();
+            const role = (m?.role || m?.designation || '').trim().toLowerCase();
+            return nm && nm !== oldFounderName.toLowerCase() && nm !== newFounderName.toLowerCase() && role !== 'founder';
+          });
           const findTeamPhotoByName = (nm) => {
             if (!nm) return '';
-            const mm = currentTeam.find(m => (m?.name || '').trim().toLowerCase() === nm.toLowerCase());
+            const mm = currentTeamRaw.find(m => (m?.name || '').trim().toLowerCase() === nm.toLowerCase());
             return mm?.photo || '';
           };
           const teamPhoto = findTeamPhotoByName(newFounderName) || findTeamPhotoByName(oldFounderName);
@@ -384,7 +410,14 @@ export default function StartupProfile() {
       if (isEditing) {
         setEdit(prev => {
           const copy = (prev.team || []).map(m => ({ ...m }));
-          copy[idx] = { ...copy[idx], ...memberData };
+          if (idx >= 0 && idx < copy.length) {
+            // Editing existing member
+            const base = copy[idx] ? { ...copy[idx] } : {};
+            copy[idx] = { ...base, ...memberData };
+          } else if (idx === copy.length) {
+            // Adding new member
+            copy.push({ ...memberData });
+          }
           return { ...prev, team: copy };
         });
         // Also persist immediately so changes are not lost if user doesn't press the main Save
@@ -401,8 +434,21 @@ export default function StartupProfile() {
           } : null;
           const currentTeam = Array.isArray(edit?.team) ? edit.team.map(m => ({ ...m })) : [];
           // reflect the just-edited change at idx
-          if (idx >= 0 && idx < currentTeam.length) currentTeam[idx] = { ...currentTeam[idx], ...memberData };
-          const combined = (founderMember ? [founderMember] : []).concat(currentTeam).filter(m => m && m.name);
+          if (idx >= 0 && idx < currentTeam.length) {
+            // Editing existing member
+            const base = currentTeam[idx] ? { ...currentTeam[idx] } : {};
+            currentTeam[idx] = { ...base, ...memberData };
+          } else if (idx === currentTeam.length) {
+            // Adding new member
+            currentTeam.push({ ...memberData });
+          }
+          // Keep a single founder entry only: drop any items named the founder or with role 'Founder'
+          const filteredTeam = currentTeam.filter(m => {
+            const nm = (m?.name || '').trim().toLowerCase();
+            const role = (m?.role || m?.designation || '').trim().toLowerCase();
+            return (!founderName || nm !== founderName.toLowerCase()) && role !== 'founder';
+          });
+          const combined = (founderMember ? [founderMember] : []).concat(filteredTeam).filter(m => m && m.name);
           const seen = new Set();
           const deduped = combined.filter(m => { const k = (m?.name || '').trim().toLowerCase(); if (!k || seen.has(k)) return false; seen.add(k); return true; });
           const teamResp = await apiSetMyTeam(deduped);
@@ -426,7 +472,13 @@ export default function StartupProfile() {
             study: profileData?.founderStudy || '',
             about: profileData?.founderAbout || '',
           } : null;
-          const combined = (founderMember ? [founderMember] : []).concat(newTeam).filter(m => m && m.name);
+          // Keep a single founder entry only
+          const filteredTeam = newTeam.filter(m => {
+            const nm = (m?.name || '').trim().toLowerCase();
+            const role = (m?.role || m?.designation || '').trim().toLowerCase();
+            return (!founderName || nm !== founderName.toLowerCase()) && role !== 'founder';
+          });
+          const combined = (founderMember ? [founderMember] : []).concat(filteredTeam).filter(m => m && m.name);
           const seen = new Set();
           const deduped = combined.filter(m => { const k = (m?.name || '').trim().toLowerCase(); if (!k || seen.has(k)) return false; seen.add(k); return true; });
           const teamResp = await apiSetMyTeam(deduped);
@@ -443,7 +495,14 @@ export default function StartupProfile() {
     setMemberDraft(null);
   };
 
-  const addTeamMember = () => setEdit(prev => ({ ...prev, team: [...(prev.team || []), { name: '' }] }));
+  const addTeamMember = () => {
+    // Ensure we're in editing mode first
+    if (!isEditing) {
+      setIsEditing(true);
+    }
+    // Add new member to edit state
+    setEdit(prev => ({ ...prev, team: [...(prev.team || []), { name: '', role: '', photo: '', equity: '', experiences: [], study: '', about: '' }] }));
+  };
   const removeTeamMember = (idx) => setEdit(prev => ({ ...prev, team: (prev.team || []).filter((_, i) => i !== idx) }));
   const changeTeamMember = (idx, val) => setEdit(prev => {
     const copy = (prev.team || []).map(t => ({ ...t }));
@@ -516,7 +575,7 @@ export default function StartupProfile() {
     edit, setEdit, fileInputRef, openMember, closeMember,
     memberEditing, setMemberEditing, memberDraft, setMemberDraft,
     addTeamMember, removeTeamMember, changeTeamMember, moveTeamMember, saveMemberEdits,
-    handleLogoUpload, handleChange, handleSave: () => handleProfileSave(), handleCancel,
+    handleLogoUpload, handleChange, handleSave: (patch) => handleProfileSave(patch), handleCancel,
     onStartEdit: () => setIsEditing(true), tags, team, contact
   };
 

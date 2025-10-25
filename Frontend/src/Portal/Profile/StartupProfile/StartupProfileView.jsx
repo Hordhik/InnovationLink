@@ -1,5 +1,6 @@
 // File: StartupProfileView.jsx
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './StartupProfile.css';
 import { Document, Page, pdfjs } from 'react-pdf';
 import workerSrc from 'pdfjs-dist/legacy/build/pdf.worker.mjs?url';
@@ -85,7 +86,7 @@ export function EditModal({ open, title, children, onSave, onCancel, initialFocu
           ? document.querySelector(initialFocusSelector)
           : backdropRef.current?.querySelector('textarea, input');
         if (el) el.focus();
-      } catch (e) {}
+      } catch (e) { }
     }, 80);
     return () => document.removeEventListener('keydown', onKey);
   }, [open, onCancel, initialFocusSelector]);
@@ -108,61 +109,11 @@ export function EditModal({ open, title, children, onSave, onCancel, initialFocu
   );
 }
 
-/* ----------------------- TeamMemberModal ---------------------- */
-export function TeamMemberModal({
-  focusedMemberIndex, closeMember, profileData, memberDraft, setMemberDraft, saveMemberEdits
-}) {
-  const isOpen = Boolean(focusedMemberIndex);
-  const idx = focusedMemberIndex?.idx;
-  const isFounder = Boolean(focusedMemberIndex?.isFounder);
-  const source = isFounder
-    ? { name: profileData?.founder || '' }
-    : (Array.isArray(profileData?.team) && typeof idx === 'number' && profileData.team[idx]) || { name: '' };
-
-  const [draft, setDraft] = useState(memberDraft || source);
-  useEffect(() => { setDraft(memberDraft || source); }, [focusedMemberIndex, memberDraft, source]);
-
-  const handleChange = (field) => (e) => setDraft(prev => ({ ...prev, [field]: e.target.value }));
-
-  const doSave = async () => {
-    await saveMemberEdits(focusedMemberIndex, draft || {});
-    if (typeof setMemberDraft === 'function') setMemberDraft(null);
-    closeMember();
-  };
-
-  if (!isOpen) return null;
-  return (
-    <div className="epm-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) closeMember(); }}>
-      <div className="epm-modal epm-small">
-        <div className="epm-header">
-          <h3>{isFounder ? 'Edit Founder' : (draft?.name ? 'Edit Member' : 'Add member')}</h3>
-          <button className="epm-close" onClick={closeMember} aria-label="Close">✕</button>
-        </div>
-        <div className="epm-body">
-          <label className="field">Name
-            <input value={draft?.name || ''} onChange={handleChange('name')} />
-          </label>
-          <label className="field">Role
-            <input value={draft?.role || ''} onChange={handleChange('role')} />
-          </label>
-          <label className="field">Photo URL
-            <input value={draft?.photo || ''} onChange={handleChange('photo')} placeholder="https://..." />
-          </label>
-          <label className="field">About
-            <textarea value={draft?.about || ''} onChange={handleChange('about')} rows={4} />
-          </label>
-        </div>
-        <div className="epm-footer">
-          <button className="epm-btn epm-cancel" onClick={closeMember}>Cancel</button>
-          <button className="epm-btn epm-save" onClick={doSave}>Save</button>
-        </div>
-      </div>
-    </div>
-  );
-}
+// TeamMemberModal is now imported from separate file - see imports at top
 
 /* ------------------------- StartupProfileView (main UI) ------------------------- */
 export default function StartupProfileView({ profileData = {}, isEditing, editStateProps }) {
+  const navigate = useNavigate();
   // 🔧 FIX: Local states for files/videos
   const [isPitchOpen, setPitchOpen] = useState(false);
   const [isDemoOpen, setDemoOpen] = useState(false);
@@ -264,28 +215,39 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
 
   const saveDesc = () => {
     if (setEdit) setEdit(prev => ({ ...prev, description: descDraft }));
+    if (typeof editStateProps?.handleSave === 'function') {
+      editStateProps.handleSave({ description: descDraft });
+    }
     setDescOpen(false);
   };
   const saveHeader = () => {
     if (setEdit) setEdit(prev => ({ ...prev, name: headerDraft.name, founder: headerDraft.founder }));
+    if (typeof editStateProps?.handleSave === 'function') {
+      editStateProps.handleSave({ name: headerDraft.name, founder: headerDraft.founder });
+    }
     setHeaderOpen(false);
   };
   const saveTags = () => {
-    if (setEdit) setEdit(prev => ({ ...prev, domain: tagsDraft.join(', ') }));
+    const domainStr = tagsDraft.join(', ');
+    if (setEdit) setEdit(prev => ({ ...prev, domain: domainStr }));
+    if (typeof editStateProps?.handleSave === 'function') {
+      editStateProps.handleSave({ domain: domainStr });
+    }
     setTagsOpen(false);
   };
 
   const handleAddMemberClick = () => {
     if (typeof onStartEdit === 'function') onStartEdit();
+    if (typeof addTeamMember === 'function') addTeamMember();
     if (typeof openMember === 'function')
-      openMember({ idx: (Array.isArray(data.team) ? data.team.length : 0), isFounder: false });
+      openMember((Array.isArray(data.team) ? data.team.length : 0), false);
   };
 
   return (
     <div className="spv-root">
       {/* HEADER */}
       <div className="spv-topgrid">
-      
+
         <div className="card spv-header" onClick={() => setHeaderOpen(true)} role="button" tabIndex={0}>
           <div className='main-details'>
             <div className="spv-logo">
@@ -302,19 +264,22 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
               <div className="spv-sub">
                 Founder: <strong>{data.founder || '—'}</strong>
               </div>
-              
+
             </div>
           </div>
           <div className="spv-actions">
-              <button className="feedback"><img src={feedback} alt="" />FeedBack</button>
-              <button className="connect-btn"><img src={user} alt="" />Connect</button>
-            </div>
+            <button className="feedback"><img src={feedback} alt="" />FeedBack</button>
+            <button className="connect-btn" onClick={() => {
+              const prefix = `/${(window.location.pathname.split('/')[1] || 'I')}`;
+              navigate(`${prefix}/inbox`, { state: { initialChat: { username: data?.username, companyName: data?.name } } });
+            }}><img src={user} alt="" />Connect</button>
+          </div>
         </div>
         {/* DESCRIPTION */}
         <div className="card spv-desc" onClick={() => setDescOpen(true)} role="button" tabIndex={0}>
           <div className="card-title">Project Description</div>
           <div className="card-body">
-            <p className="desc-text">{data.description || 'Click to add a short project description.'}</p>
+            <p className="desc-text">{data.description || 'Click to add a description.'}</p>
           </div>
           <div className="spv-tags">
             {(String(data.domain || '')).split(',').filter(Boolean).slice(0, 3).map((t, i) => (
@@ -347,23 +312,27 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
         <div className="card spv-team">
           <div className="card-title">Team</div>
           <div className="team-grid">
-            {(Array.isArray(data.team) ? data.team : []).map((m, idx) => (
-              <div key={idx} className="team-item" onClick={() => openMember(idx, false)}>
-                <div className="team-avatar">
-                  {m.photo ? (
-                    <img src={m.photo} alt={m.name} />
-                  ) : (
-                    <div className="avatar-placeholder">
-                      {(m.name || '').split(' ').map(p => p[0]).slice(0, 2).join('')}
-                    </div>
-                  )}
+            {(Array.isArray(data.team) ? data.team : []).map((m, idx) => {
+              // Check if this member is the founder
+              const isFounder = m.role?.toLowerCase() === 'founder' || m.designation?.toLowerCase() === 'founder';
+              return (
+                <div key={idx} className="team-item" onClick={() => openMember(idx, isFounder)}>
+                  <div className="team-avatar">
+                    {m.photo ? (
+                      <img src={m.photo} alt={m.name} />
+                    ) : (
+                      <div className="avatar-placeholder">
+                        {(m.name || '').split(' ').map(p => p[0]).slice(0, 2).join('')}
+                      </div>
+                    )}
+                  </div>
+                  <div className="team-meta">
+                    <div className="team-name">{m.name}</div>
+                    <div className="team-role">{m.role || m.designation || 'Team Member'}</div>
+                  </div>
                 </div>
-                <div className="team-meta">
-                  <div className="team-name">{m.name}</div>
-                  <div className="team-role">{m.role}</div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
             <div className="team-item team-add" onClick={handleAddMemberClick}>
               <div className="team-add-circle">
                 <div className="team-name">Add <br /> member</div>
@@ -379,7 +348,7 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
             <li><strong>Phase 3:</strong> Expand via digital marketing and B2B referrals.</li>
           </ul>
         </div>
-        
+
       </div>
 
       {/* --- Market Analysis / GTM / Achievements --- */}
@@ -408,7 +377,7 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
             ))}
           </div>
         </div>
-        
+
         {/* 📊 Market Analysis */}
         <div className="card market-analysis">
           <div className="card-title">Market Analysis</div>
@@ -446,18 +415,18 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
           <div className="card-title">Recent Posts</div>
           <div className="card-body">
             <div className="blog-grid">
-              <div className='BlogCardShort' style={{cursor: 'pointer'}}>
+              <div className='BlogCardShort' style={{ cursor: 'pointer' }}>
                 <p className='blog-title'>Deploying tiny ML to the field</p>
                 <p className='blog-meta'>Jan 2025 • Tech</p>
               </div>
-              <div className='BlogCardShort' style={{cursor: 'pointer'}}>
+              <div className='BlogCardShort' style={{ cursor: 'pointer' }}>
                 <p className='blog-title'>Deploying tiny ML to the field</p>
                 <p className='blog-meta'>Jan 2025 • Tech</p>
               </div>
             </div>
           </div>
         </div>
-        
+
       </div>
 
       {/* 🚀 STARTUP DOCK MODAL */}
@@ -550,21 +519,18 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
       </EditModal>
 
       {/* Other Modals unchanged */}
-      <EditModal open={isDescOpen} title="Edit project description" onSave={saveDesc} onCancel={() => setDescOpen(false)}>
-        <label className="field">Short description
-          <input value={descDraft.split('\\n')[0] || ''} onChange={(e)=> setDescDraft(e.target.value + '\\n' + descDraft.split('\\n').slice(1).join('\\n'))} />
-        </label>
-        <label className="field">Long description
-          <textarea rows={8} value={descDraft} onChange={(e)=> setDescDraft(e.target.value)} />
+      <EditModal open={isDescOpen} title="Edit description" onSave={saveDesc} onCancel={() => setDescOpen(false)}>
+        <label className="field">Description
+          <textarea rows={8} value={descDraft} onChange={(e) => setDescDraft(e.target.value)} />
         </label>
       </EditModal>
 
       <EditModal open={isHeaderOpen} title="Edit header" onSave={saveHeader} onCancel={() => setHeaderOpen(false)}>
         <label className="field">Startup name
-          <input value={headerDraft.name} onChange={(e)=> setHeaderDraft(prev => ({ ...prev, name: e.target.value }))} />
+          <input value={headerDraft.name} onChange={(e) => setHeaderDraft(prev => ({ ...prev, name: e.target.value }))} />
         </label>
         <label className="field">Founder
-          <input value={headerDraft.founder} onChange={(e)=> setHeaderDraft(prev => ({ ...prev, founder: e.target.value }))} />
+          <input value={headerDraft.founder} onChange={(e) => setHeaderDraft(prev => ({ ...prev, founder: e.target.value }))} />
         </label>
       </EditModal>
 
@@ -606,6 +572,8 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
           </div>
         </div>
       </EditModal>
+
+      {/* Team Member Modal is handled in parent StartupProfile.jsx */}
     </div>
   );
 }

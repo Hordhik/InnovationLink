@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './StartupCard.css';
 import eyes from "../../assets/Portal/StartupCard/eyes.svg"
 import statues from "../../assets/Portal/StartupCard/status-up.svg"
@@ -11,7 +12,16 @@ const StartupCard = ({
   domain,
   teamCount,
   profileUrl,
+  username,
 }) => {
+  const navigate = useNavigate();
+  const portalPrefix = `/${(window.location.pathname.split('/')[1] || 'I')}`; // I or S
+
+  const startChat = () => {
+    navigate(`${portalPrefix}/inbox`, {
+      state: { initialChat: { username: username || displayName, companyName: displayName } },
+    });
+  };
   // Show only the sector from database (domain); no default tag
   const tags = domain ? [domain] : [];
   const displayName = companyName || 'Startup';
@@ -44,8 +54,8 @@ const StartupCard = ({
             </div>
           </div>
           <div className="card-actions">
-            <button className="connect-button">Connect</button>
-            <button className="request-button">Request a Meeting</button>
+            <button className="connect-button" onClick={startChat}>Connect</button>
+            <button className="request-button" onClick={startChat}>Request a Meeting</button>
           </div>
         </div>
       </div>
@@ -55,6 +65,7 @@ const StartupCard = ({
             <p className="description description--clamp">
               {description}
             </p>
+            <a href={profileUrl || '#'} className="read-more-link">Read more</a>
           </>
         )}
         <div className="tags">

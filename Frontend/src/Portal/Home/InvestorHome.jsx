@@ -47,6 +47,7 @@ const InvestorHome = () => {
           domain={s.domain}
           teamCount={s.teamCount}
           profileUrl={`/startup/${s.username}`}
+          username={s.username}
         />
       ))}
     </div>

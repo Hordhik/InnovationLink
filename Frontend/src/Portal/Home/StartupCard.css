@@ -1,9 +1,17 @@
 .startup-card,
 .investor-card {
   background-color: #fff;
-  border: 1px solid #ddd;
+  border: 1px solid #e5e7eb;
+  /* subtle border */
   border-radius: 15px;
-  padding: 20px 45px;
+  padding: 20px 28px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  transition: box-shadow .18s ease, transform .18s ease;
+}
+
+.startup-card:hover {
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.10);
+  transform: translateY(-1px);
 }
 
 .card-header {
@@ -14,19 +22,14 @@
   border-bottom: 1px solid #ddd;
 }
 
-.card-title {
-  font-size: 20px;
-}
-
-.startup-info {
-  display: flex;
-  align-items: center;
-}
+/* Removed a global .card-title avatar style that conflicted with profile cards */
 
 .avatar img {
-  width: 120px;
+  flex-wrap: wrap;
+  gap: 10px;
   height: 120px;
-  border-radius: 50%;
+  border-radius: 12px;
+  /* square avatar */
   margin-right: 15px;
 }
 
@@ -47,6 +50,31 @@
 .team-size {
   font-size: 16px;
   color: #666;
+}
+
+/* Responsive layout tweaks */
+@media (max-width: 900px) {
+  .avatar img {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+@media (max-width: 720px) {
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .connect {
+    width: 100%;
+  }
+
+  .card-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
 }
 
 .founder-name span,
@@ -118,9 +146,9 @@
 /* Clamp long descriptions to 3 lines */
 .description--clamp {
   display: -webkit-box;
-  line-clamp: 3;
+  line-clamp: 4;
   /* standard */
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
