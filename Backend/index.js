@@ -7,7 +7,8 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const startupProfileRoutes = require('./routes/startupProfileRoutes');
 const teamRoutes = require('./routes/teamRoutes');
-const postRoutes = require('./routes/postRoutes'); // ✅ added
+const postRoutes = require('./routes/postRoutes');
+const startupDockRoutes = require('./routes/startupDockRoutes'); // ✅ 1. Import
 
 // Error handler
 const errorHandler = require('./middleware/errorHandler');
@@ -18,25 +19,27 @@ const Investor = require('./models/investorModel');
 const Startup = require('./models/startupModel');
 const StartupProfile = require('./models/startupProfileModel');
 const Team = require('./models/teamModel');
-const Post = require('./models/postModel'); // ✅ added
+const Post = require('./models/postModel');
+const StartupDock = require('./models/startupDockModel'); // ✅ 2. Import
 
 const corsOptions = {
   origin: 'http://localhost:5173',
 };
 
 const app = express();
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: '50mb' })); // Keep 50mb limit for large file uploads
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(cors(corsOptions));
 
-// ✅ Initialize DB tables (auto-creates them if not existing)
+// ✅ Initialize DB tables
 (async () => {
   await User.init();
   await Investor.init();
   await Startup.init();
   await StartupProfile.init();
   await Team.init();
-  await Post.init(); // ✅ added
+  await Post.init();
+  await StartupDock.init(); // ✅ 3. Add init
 })();
 
 // ✅ Health check
@@ -47,7 +50,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/startup-profile', startupProfileRoutes);
 app.use('/api/team', teamRoutes);
-app.use('/api/posts', postRoutes); // ✅ new posts/blogs route
+app.use('/api/posts', postRoutes);
+app.use('/api/startup-dock', startupDockRoutes); // ✅ 4. Add route
 
 // ✅ Centralized error handler
 app.use(errorHandler);

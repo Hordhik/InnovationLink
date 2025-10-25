@@ -1,30 +1,37 @@
-// Backend/middleware/auth.js
-
 const jwt = require('jsonwebtoken');
-const User = require('../models/userModel'); // 1. Import your User model
+const User = require('../models/userModel'); // Make sure this path is correct
 
-// 2. Make the function async
 module.exports = async function (req, res, next) {
-  const authHeader = req.header('Authorization') || req.header('authorization');
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.split(" ")[1] : null;
+  let token = null;
 
+  // 1. Try to get token from Authorization header (for normal API calls)
+  const authHeader = req.header('Authorization') || req.header('authorization');
+  if (authHeader?.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
+  }
+
+  // 2. If not in header, check query parameter (for file download links)
+  if (!token && req.query.token) {
+    token = req.query.token;
+  }
+
+  // 3. If still no token, reject
   if (!token) {
     return res.status(401).json({ message: 'Unauthorized: No token provided.' });
   }
 
   try {
+    // 4. Verify the token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // 3. Fetch the full user from DB using the ID from the token
-    // Assuming you have a function like 'findById' in your userModel
+    // 5. Fetch the full user from DB (this is from our previous fix)
     const user = await User.findById(decoded.id);
 
     if (!user) {
       return res.status(401).json({ message: 'Unauthorized: User not found.' });
     }
 
-    // 4. Attach the complete user object to req.user
-    // This object will now contain id, username, userType, email, etc.
+    // 6. Attach the complete user object to req.user
     req.user = user;
 
     next();

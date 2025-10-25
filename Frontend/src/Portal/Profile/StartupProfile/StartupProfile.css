@@ -739,24 +739,38 @@
   align-items: center;
   gap: 8px;
   background: #f9fafb;
-  padding: 8px 12px;
+  padding: 10px 14px;
+  /* Increased padding */
   font-weight: 500;
   cursor: pointer;
   transition: background 0.2s ease;
 }
 
 .folder-header:hover {
-  background: #eef1f5;
+  background: #f3f4f6;
+  /* Lighter hover */
 }
 
 .folder-body {
-  padding: 8px 14px;
-  border-top: 1px solid #ddd;
+  padding: 12px 14px;
+  border-top: 1px solid #f0f0f0;
+  /* Lighter border */
   background: #fff;
+  display: flex;
+  /* Use flex for layout */
+  flex-direction: column;
+  gap: 12px;
+  /* Add gap between items */
 }
 
 .folder-icon {
   font-size: 1.1rem;
+}
+
+.folder-count {
+  font-size: 13px;
+  color: #6b7280;
+  margin-left: 4px;
 }
 
 .file-item {
@@ -770,10 +784,18 @@
   font-size: 1rem;
 }
 
+/* Updated file-name for truncation */
 .file-name {
   text-decoration: none;
-  color: #0073e6;
+  color: #0F62FE;
+  /* Use theme color */
   font-weight: 500;
+  font-size: 14px;
+  flex: 1;
+  /* Allow name to take available space */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .file-name:hover {
@@ -781,39 +803,64 @@
 }
 
 .empty-text {
-  color: #999;
+  color: #6b7280;
+  /* Darker gray */
   font-style: italic;
+  font-size: 14px;
+  padding: 8px 0;
 }
 
 .upload-btn {
-  display: inline-block;
+  display: inline-flex;
+  /* Use inline-flex */
+  align-items: center;
   margin-top: 10px;
-  padding: 6px 10px;
-  border: 1px dashed #0073e6;
+  padding: 8px 12px;
+  /* Better padding */
+  border: 1px dashed #0F62FE;
+  /* Theme color */
   border-radius: 6px;
-  color: #0073e6;
+  color: #0F62FE;
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
   transition: 0.2s ease;
+  width: max-content;
+  /* Fit to content */
 }
 
 .upload-btn:hover {
-  background: #0073e60d;
+  background: #f0f6ff;
+  /* Light blue hover */
+}
+
+/* Disabled state for upload button */
+.upload-btn.disabled {
+  border-color: #d1d5db;
+  color: #9ca3af;
+  background: #f9fafb;
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .file-delete {
-  margin-left: auto;
+  margin-left: 8px;
+  /* Remove auto margin */
   background: none;
   border: none;
   cursor: pointer;
-  color: #e74c3c;
-  font-size: 14px;
-  transition: transform 0.1s ease;
+  color: #9ca3af;
+  /* Make it subtle */
+  font-size: 16px;
+  /* Slightly larger */
+  transition: all 0.2s ease;
+  padding: 4px;
 }
 
 .file-delete:hover {
   transform: scale(1.1);
+  color: #ef4444;
+  /* Red on hover */
 }
 
 .market-analysis .card-body {
@@ -825,4 +872,66 @@
 
 .recharts-legend-wrapper {
   font-size: 13px;
+}
+
+/* ===================================
+NEW STYLES FOR STARTUP DOCK FILES
+===================================
+*/
+
+/* Container for each file row */
+.file-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f4f6;
+  /* Soft separator */
+}
+
+/* Last item has no border */
+.file-item-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* Container for the buttons */
+.file-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  /* Prevent buttons from shrinking */
+}
+
+/* "Primary" badge */
+.primary-badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background-color: #e0e9ff;
+  /* Light blue */
+  color: #0F62FE;
+  /* Theme blue */
+}
+
+/* "Make Primary" button */
+.file-action-btn {
+  background-color: #fff;
+  border: 1px solid #d1d5db;
+  /* Gray border */
+  color: #374151;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.file-action-btn:hover {
+  background-color: #f9fafb;
+  /* Light hover */
+  border-color: #9ca3af;
 }

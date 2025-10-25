@@ -10,52 +10,196 @@ import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recha
 import user from '../../../assets/Portal/user.svg';
 import feedback from '../../../assets/Portal/feedback.png';
 
-// 🧩 Folder Component
-// 🧩 Interactive Folder Component
-const Folder = ({ name, files, setFiles, accept }) => {
-  const [open, setOpen] = useState(false);
+// -----------------------------------------------------------------
+// 1. IMPORT THE NEW API SERVICE
+// -----------------------------------------------------------------
+import * as startupDockApi from '../../../services/startupDockApi.js';
+import { getToken } from '../../../auth.js'; // Need this for file URLs
 
-  const handleFileUpload = (e) => {
-    const newFiles = Array.from(e.target.files);
-    setFiles((prev) => [
-      ...prev,
-      ...newFiles.map((f) => ({
-        name: f.name,
-        url: URL.createObjectURL(f),
-        type: f.type,
-      })),
-    ]);
+// Helper function to read file as Data URI
+const fileToDataUrl = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+// -----------------------------------------------------------------
+// 2. UPDATED DOCKFOLDER COMPONENT (with Drag & Drop)
+// -----------------------------------------------------------------
+const DockFolder = ({ name, category, files = [], onUpdate, accept }) => {
+  const [open, setOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState('');
+  const [isDragging, setIsDragging] = useState(false); // <-- NEW: State for drag UI
+  const fileInputRef = useRef(null);
+  const fileLimit = 5;
+
+  // NEW: Reusable function to handle file processing
+  const processFiles = async (fileList) => {
+    const newFiles = Array.from(fileList);
+    if (newFiles.length === 0) return;
+
+    if (files.length + newFiles.length > fileLimit) {
+      setError(`You can only upload a maximum of ${fileLimit} files.`);
+      return;
+    }
+
+    setIsUploading(true);
+    setError('');
+
+    try {
+      for (const file of newFiles) {
+        // Simple client-side validation for 'accept' prop
+        const fileType = file.type;
+        const fileExt = `.${file.name.split('.').pop()}`;
+        const allowed = accept.split(',').map(a => a.trim());
+
+        if (!allowed.includes(fileType) && !allowed.includes(fileExt)) {
+          console.warn(`Skipping file ${file.name}: Type ${fileType} not accepted.`);
+          continue; // Skip this file
+        }
+
+        const fileDataURI = await fileToDataUrl(file);
+        await startupDockApi.uploadFile(category, file.name, fileDataURI);
+      }
+      onUpdate(); // Refresh the file list from backend
+    } catch (err) {
+      setError(err.response?.data?.message || 'File upload failed.');
+    } finally {
+      setIsUploading(false);
+      // Clear the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = null;
+      }
+    }
   };
 
-  const handleDelete = (fileName) => {
-    setFiles((prev) => prev.filter((f) => f.name !== fileName));
+  // UPDATED: Handles click-to-upload
+  const handleFileClickUpload = (e) => {
+    processFiles(e.target.files);
+  };
+
+  // --- NEW: Drag & Drop Handlers ---
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isUploading) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    if (files.length >= fileLimit || isUploading) {
+      return; // Don't process drop if limit reached or uploading
+    }
+
+    processFiles(e.dataTransfer.files);
+  };
+  // -----------------------------------
+
+  const handleDelete = async (file_id) => {
+    if (window.confirm('Are you sure you want to delete this file?')) {
+      try {
+        await startupDockApi.deleteFile(file_id);
+        onUpdate();
+      } catch (err) {
+        setError(err.response?.data?.message || 'Failed to delete file.');
+      }
+    }
+  };
+
+  const handleSetPrimary = async (file_id) => {
+    try {
+      await startupDockApi.setPrimaryFile(file_id, category);
+      onUpdate();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to set primary file.');
+    }
+  };
+
+  // Helper to get the full, token-authenticated URL for viewing
+  const getFileUrlWithToken = (file_id) => {
+    const token = getToken();
+    return `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/startup-dock/files/${file_id}/data?token=${token}`;
   };
 
   return (
-    <div className="folder">
+    // NEW: Added drag handlers and conditional 'dragging' class
+    <div
+      className={`folder ${isDragging ? 'dragging' : ''}`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       <div className="folder-header" onClick={() => setOpen(!open)}>
-        <span className="folder-icon">{open ? "📂" : "📁"}</span>
+        <span className="folder-icon">{open ? " 📂 " : " 📁 "}</span>
         <span className="folder-name">{name}</span>
+        <span className="folder-count">({files.length} / {fileLimit})</span>
       </div>
-
       {open && (
         <div className="folder-body">
+          {/* NEW: Drop-zone overlay, only visible when dragging */}
+          {isDragging && (
+            <div className="drop-zone-overlay">
+              <span>Drop files to upload</span>
+            </div>
+          )}
+
+          {error && <p className="empty-text" style={{ color: 'red' }}>{error}</p>}
+
           {files.length === 0 ? (
-            <p className="empty-text">No files added yet.</p>
+            <p className="empty-text">No files added yet. Drag & drop here.</p>
           ) : (
-            files.map((f, i) => (
-              <FileItem key={i} name={f.name} url={f.url} onDelete={() => handleDelete(f.name)} />
+            files.map((f) => (
+              <div key={f.file_id} className="file-item-row">
+                <a
+                  href={getFileUrlWithToken(f.file_id)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="file-name"
+                  title={`View ${f.name}`}
+                >
+                  📄 {f.name}
+                </a>
+                <div className="file-actions">
+                  {f.is_primary ? (
+                    <span className="primary-badge">Primary</span>
+                  ) : (
+                    <button className="file-action-btn" onClick={() => handleSetPrimary(f.file_id)}>
+                      Make Primary
+                    </button>
+                  )}
+                  <button className="file-delete" onClick={() => handleDelete(f.file_id)} title="Delete file">
+                    🗑️
+                  </button>
+                </div>
+              </div>
             ))
           )}
 
-          <label className="upload-btn">
-            ➕ Add Files
+          {/* UPDATED: 'onChange' handler changed */}
+          <label className={`upload-btn ${files.length >= fileLimit || isUploading ? 'disabled' : ''}`}>
+            {isUploading ? 'Uploading...' : '➕ Add Files (or drag & drop)'}
             <input
               type="file"
               multiple
               accept={accept}
-              onChange={handleFileUpload}
+              onChange={handleFileClickUpload} // <-- UPDATED
+              ref={fileInputRef}
               style={{ display: "none" }}
+              disabled={files.length >= fileLimit || isUploading}
             />
           </label>
         </div>
@@ -64,16 +208,9 @@ const Folder = ({ name, files, setFiles, accept }) => {
   );
 };
 
-// 🧩 File Item Component
-const FileItem = ({ name, url, onDelete }) => (
-  <div className="file-item">
-    <span className="file-icon">📄</span>
-    <a href={url} target="_blank" rel="noopener noreferrer" className="file-name">{name}</a>
-    <button className="file-delete" onClick={onDelete}>🗑️</button>
-  </div>
-);
 
 /* ------------------------- EditModal (reusable) ------------------------- */
+// ... (Your existing EditModal component is fine, no changes needed)
 export function EditModal({ open, title, children, onSave, onCancel, initialFocusSelector }) {
   const backdropRef = useRef(null);
   useEffect(() => {
@@ -90,7 +227,6 @@ export function EditModal({ open, title, children, onSave, onCancel, initialFocu
     }, 80);
     return () => document.removeEventListener('keydown', onKey);
   }, [open, onCancel, initialFocusSelector]);
-
   if (!open) return null;
   return (
     <div className="epm-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) onCancel(); }} ref={backdropRef}>
@@ -108,82 +244,38 @@ export function EditModal({ open, title, children, onSave, onCancel, initialFocu
     </div>
   );
 }
-
-// TeamMemberModal is now imported from separate file - see imports at top
-
 /* ------------------------- StartupProfileView (main UI) ------------------------- */
 export default function StartupProfileView({ profileData = {}, isEditing, editStateProps }) {
   const navigate = useNavigate();
-  // 🔧 FIX: Local states for files/videos
-  const [isPitchOpen, setPitchOpen] = useState(false);
-  const [isDemoOpen, setDemoOpen] = useState(false);
-  const [pitchFile, setPitchFile] = useState(null);
-  const [demoFile, setDemoFile] = useState(null);
-  const [demoLink, setDemoLink] = useState('');
-  const [pitchURL, setPitchURL] = useState(''); // local preview URL
-  const [demoURL, setDemoURL] = useState('');   // local preview URL
-  // patent / trademark states (like pitchURL)
-  const [isPatentOpen, setPatentOpen] = useState(false);
-  const [isTrademarkOpen, setTrademarkOpen] = useState(false);
-  const [patentFile, setPatentFile] = useState(null);
-  const [trademarkFile, setTrademarkFile] = useState(null);
-  const [patentURL, setPatentURL] = useState('');
-  const [trademarkURL, setTrademarkURL] = useState('');
+  //  🔧  REMOVED OLD LOCAL FILE STATES
 
   const { onStartEdit, edit, setEdit, addTeamMember, openMember } = editStateProps || {};
   const [isAchievementsOpen, setAchievementsOpen] = useState(false);
   const [isDockOpen, setDockOpen] = useState(false);
-  // 🗂️ Folder file states
-  const [pitchFiles, setPitchFiles] = useState([]);
-  const [demoFiles, setDemoFiles] = useState([]);
-  const [patentFiles, setPatentFiles] = useState([]);
 
+  // -----------------------------------------------------------------
+  // 3. ADD NEW STATE AND LOADER FOR DOCK FILES
+  // -----------------------------------------------------------------
+  const [dockFiles, setDockFiles] = useState({ pitch: [], demo: [], patent: [] });
+  const [dockError, setDockError] = useState('');
 
-
-
-  // 🔧 FIX: Handle saving locally (frontend only)
-  const savePitch = () => {
-    if (pitchFile) {
-      const fileURL = URL.createObjectURL(pitchFile);
-      setPitchURL(fileURL);
-      if (setEdit) setEdit(prev => ({ ...prev, pitchDeck: fileURL, pitchFile })); // save both
+  const loadDockFiles = async () => {
+    try {
+      setDockError('');
+      const data = await startupDockApi.getMyDock();
+      setDockFiles(data.files || { pitch: [], demo: [], patent: [] });
+    } catch (err) {
+      setDockError(err.response?.data?.message || 'Failed to load dock files.');
     }
-    setPitchOpen(false);
   };
 
-  const savePatent = () => {
-    if (patentFile) {
-      const fileURL = URL.createObjectURL(patentFile);
-      setPatentURL(fileURL);
-      if (setEdit) setEdit(prev => ({ ...prev, patentDoc: fileURL }));
-    }
-    setPatentOpen(false);
-    setPatentFile(null);
-  };
+  // Load dock files when the component mounts
+  useEffect(() => {
+    loadDockFiles();
+  }, []);
 
-  const saveTrademark = () => {
-    if (trademarkFile) {
-      const fileURL = URL.createObjectURL(trademarkFile);
-      setTrademarkURL(fileURL);
-      if (setEdit) setEdit(prev => ({ ...prev, trademarkDoc: fileURL }));
-    }
-    setTrademarkOpen(false);
-    setTrademarkFile(null);
-  };
 
-  const saveDemo = () => {
-    if (demoFile) {
-      const videoURL = URL.createObjectURL(demoFile);
-      setDemoURL(videoURL);
-      if (setEdit) setEdit(prev => ({ ...prev, demoVideo: videoURL }));
-    } else if (demoLink.trim()) {
-      setDemoURL(demoLink.trim());
-      if (setEdit) setEdit(prev => ({ ...prev, demoVideo: demoLink.trim() }));
-    }
-    setDemoOpen(false);
-    setDemoFile(null);
-    setDemoLink('');
-  };
+  //  🔧  REMOVED OLD LOCAL savePitch, savePatent, saveDemo functions
 
   // Sample fallback data
   const sample = {
@@ -198,11 +290,9 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
     ],
   };
   const data = (profileData && Object.keys(profileData).length) ? profileData : sample;
-
   const [isDescOpen, setDescOpen] = useState(false);
   const [isHeaderOpen, setHeaderOpen] = useState(false);
   const [isTagsOpen, setTagsOpen] = useState(false);
-
   const [descDraft, setDescDraft] = useState(data.description || '');
   const [tagsDraft, setTagsDraft] = useState((data.domain && String(data.domain).split(',').map(t => t.trim()).filter(Boolean)) || []);
   const [headerDraft, setHeaderDraft] = useState({ name: data.name || '', founder: data.founder || '' });
@@ -211,7 +301,7 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
     setDescDraft(data.description || '');
     setTagsDraft((data.domain && String(data.domain).split(',').map(t => t.trim()).filter(Boolean)) || []);
     setHeaderDraft({ name: data.name || '', founder: data.founder || '' });
-  }, [profileData]);
+  }, [profileData]); // Keep this useEffect
 
   const saveDesc = () => {
     if (setEdit) setEdit(prev => ({ ...prev, description: descDraft }));
@@ -235,7 +325,6 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
     }
     setTagsOpen(false);
   };
-
   const handleAddMemberClick = () => {
     if (typeof onStartEdit === 'function') onStartEdit();
     if (typeof addTeamMember === 'function') addTeamMember();
@@ -245,9 +334,8 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
 
   return (
     <div className="spv-root">
-      {/* HEADER */}
+      { /* HEADER */}
       <div className="spv-topgrid">
-
         <div className="card spv-header" onClick={() => setHeaderOpen(true)} role="button" tabIndex={0}>
           <div className='main-details'>
             <div className="spv-logo">
@@ -264,7 +352,6 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
               <div className="spv-sub">
                 Founder: <strong>{data.founder || '—'}</strong>
               </div>
-
             </div>
           </div>
           <div className="spv-actions">
@@ -275,7 +362,7 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
             }}><img src={user} alt="" />Connect</button>
           </div>
         </div>
-        {/* DESCRIPTION */}
+        { /* DESCRIPTION */}
         <div className="card spv-desc" onClick={() => setDescOpen(true)} role="button" tabIndex={0}>
           <div className="card-title">Project Description</div>
           <div className="card-body">
@@ -298,7 +385,7 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
             </button>
           </div>
         </div>
-        {/* STARTUP DOCK */}
+        { /* STARTUP DOCK */}
         <div className="card startup-dock" onClick={() => setDockOpen(true)} role="button">
           <div className="card-title">Startup Dock</div>
           <div className="card-body">
@@ -306,8 +393,7 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
           </div>
         </div>
       </div>
-
-      {/* TEAM + BLOGS */}
+      { /* TEAM + BLOGS */}
       <div className="spv-row">
         <div className="card spv-team">
           <div className="card-title">Team</div>
@@ -348,13 +434,11 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
             <li><strong>Phase 3:</strong> Expand via digital marketing and B2B referrals.</li>
           </ul>
         </div>
-
       </div>
-
-      {/* --- Market Analysis / GTM / Achievements --- */}
+      { /* --- Market Analysis / GTM / Achievements --- */}
       <div className="more">
-        {/* 🚀 STARTUP DOCK */}
-        {/* Achievements */}
+        { /* 🚀  STARTUP DOCK */}
+        { /* Achievements */}
         <div className="card achievements">
           <div className="ach-header">
             <div className="card-title">Achievements</div>
@@ -377,8 +461,7 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
             ))}
           </div>
         </div>
-
-        {/* 📊 Market Analysis */}
+        { /* 📊  Market Analysis */}
         <div className="card market-analysis">
           <div className="card-title">Market Analysis</div>
           <div className="card-body">
@@ -398,9 +481,9 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
                   label={({ name, value }) => `${name}: $${value}B`}
                   labelLine={false}
                 >
-                  <Cell fill="#0073e6" />  {/* TAM */}
-                  <Cell fill="#00c49f" />  {/* SAM */}
-                  <Cell fill="#ffbb28" />  {/* SOM */}
+                  <Cell fill="#0073e6" />  { /* TAM */}
+                  <Cell fill="#00c49f" />  { /* SAM */}
+                  <Cell fill="#ffbb28" />  { /* SOM */}
                 </Pie>
                 <Tooltip formatter={(value) => `$${value}B`} />
                 <Legend verticalAlign="bottom" align="center" iconType="circle" />
@@ -408,9 +491,7 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
             </ResponsiveContainer>
           </div>
         </div>
-
-
-        {/* Blogs */}
+        { /* Blogs */}
         <div className="card spv-blogs">
           <div className="card-title">Recent Posts</div>
           <div className="card-body">
@@ -426,10 +507,11 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
             </div>
           </div>
         </div>
-
       </div>
 
-      {/* 🚀 STARTUP DOCK MODAL */}
+      { /* ----------------------------------------------------------------- */}
+      { /* 4. UPDATE THE STARTUP DOCK MODAL */}
+      { /* ----------------------------------------------------------------- */}
       <EditModal
         open={isDockOpen}
         title="Startup Dock"
@@ -437,29 +519,33 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
         onSave={() => setDockOpen(false)}
       >
         <div className="folder-container">
-          <Folder
+          {dockError && <p style={{ color: 'red' }}>{dockError}</p>}
+          <DockFolder
             name="Pitch Deck"
-            files={pitchFiles}
-            setFiles={setPitchFiles}
+            category="pitch"
+            files={dockFiles.pitch}
+            onUpdate={loadDockFiles}
             accept=".pdf,.ppt,.pptx"
           />
-
-          <Folder
+          <DockFolder
             name="Project Demo"
-            files={demoFiles}
-            setFiles={setDemoFiles}
-            accept="video/mp4,video/mkv"
+            category="demo"
+            files={dockFiles.demo}
+            onUpdate={loadDockFiles}
+            accept="video/mp4,video/mkv,video/webm"
           />
-
-          <Folder
+          <DockFolder
             name="Patent / Copyright"
-            files={patentFiles}
-            setFiles={setPatentFiles}
+            category="patent"
+            files={dockFiles.patent}
+            onUpdate={loadDockFiles}
             accept=".pdf,.doc,.docx"
           />
         </div>
       </EditModal>
 
+      {/* --- ALL OTHER MODALS --- */}
+      {/* (No changes needed to the other modals) */}
 
       <EditModal
         open={isAchievementsOpen}
@@ -483,57 +569,21 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
         </div>
       </EditModal>
 
-      {/* 🔧 FIX: Pitch Deck Modal */}
-      <EditModal open={isPitchOpen} title="Upload Pitch Deck" onSave={savePitch} onCancel={() => setPitchOpen(false)}>
-        <label className="field">Upload Pitch Deck (PDF or PPT)
-          <input type="file" accept=".pdf,.ppt,.pptx" onChange={(e) => setPitchFile(e.target.files[0])} />
-        </label>
-        {pitchFile && <p>Selected: {pitchFile.name}</p>}
-      </EditModal>
+      { /* REMOVED OLD Pitch Deck, Patent, and Demo Modals */}
 
-      {/* Patent Modal */}
-      <EditModal open={isPatentOpen} title="Upload Patent / Copyright" onSave={savePatent} onCancel={() => setPatentOpen(false)}>
-        <label className="field">Upload patent / copyright document (PDF, DOCX)
-          <input type="file" accept=".pdf,.doc,.docx" onChange={(e) => setPatentFile(e.target.files[0])} />
-        </label>
-        {patentFile && <p>Selected: {patentFile.name}</p>}
-      </EditModal>
-
-      {/* Trademark Modal */}
-      <EditModal open={isTrademarkOpen} title="Upload Trade Mark Document" onSave={saveTrademark} onCancel={() => setTrademarkOpen(false)}>
-        <label className="field">Upload trademark document (PDF, DOCX)
-          <input type="file" accept=".pdf,.doc,.docx" onChange={(e) => setTrademarkFile(e.target.files[0])} />
-        </label>
-        {trademarkFile && <p>Selected: {trademarkFile.name}</p>}
-      </EditModal>
-
-      {/* 🔧 FIX: Demo Modal */}
-      <EditModal open={isDemoOpen} title="Add Project Demo" onSave={saveDemo} onCancel={() => setDemoOpen(false)}>
-        <label className="field">Add Demo Video (MP4 file or video link)
-          <input type="file" accept="video/mp4" onChange={(e) => setDemoFile(e.target.files[0])} />
-        </label>
-        <label className="field">Or paste video URL
-          <input type="text" placeholder="https://youtube.com/..." value={demoLink} onChange={(e) => setDemoLink(e.target.value)} />
-        </label>
-        {demoFile && <p>Selected: {demoFile.name}</p>}
-      </EditModal>
-
-      {/* Other Modals unchanged */}
       <EditModal open={isDescOpen} title="Edit description" onSave={saveDesc} onCancel={() => setDescOpen(false)}>
         <label className="field">Description
           <textarea rows={8} value={descDraft} onChange={(e) => setDescDraft(e.target.value)} />
         </label>
       </EditModal>
-
       <EditModal open={isHeaderOpen} title="Edit header" onSave={saveHeader} onCancel={() => setHeaderOpen(false)}>
         <label className="field">Startup name
           <input value={headerDraft.name} onChange={(e) => setHeaderDraft(prev => ({ ...prev, name: e.target.value }))} />
         </label>
         <label className="field">Founder
-          <input value={headerDraft.founder} onChange={(e) => setHeaderDraft(prev => ({ ...prev, founder: e.target.value }))} />
+          <input value={headerDraft.founder} onChange={(e) => setHeaderDraft(prev => ({ ...prev, name: e.target.value }))} />
         </label>
       </EditModal>
-
       <EditModal open={isTagsOpen} title="Edit tags" onSave={saveTags} onCancel={() => setTagsOpen(false)}>
         <div className="tags-editor">
           <div className="tag-list">
@@ -572,10 +622,7 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
           </div>
         </div>
       </EditModal>
-
-      {/* Team Member Modal is handled in parent StartupProfile.jsx */}
     </div>
   );
 }
 
-/* ------------------------- END OF FILE ------------------------- */
