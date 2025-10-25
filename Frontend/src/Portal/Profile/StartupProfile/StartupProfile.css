@@ -1,6 +1,3 @@
-/* File: StartupProfile.css */
-/* Light, clean, responsive — tuned for your StartupProfileView + Modals */
-
 /* Root layout */
 .spv-root {
   font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
@@ -36,11 +33,12 @@
 /* ----- HEADER CARD ----- */
 .spv-header {
   display: flex;
-  gap: 16px;
+  flex-direction: column;
   align-items: center;
   width: 372px;
   cursor: pointer;
   justify-content: center;
+  gap: 30px;
 }
 
 .spv-logo {
@@ -52,7 +50,6 @@
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #eef2ff, #fff);
-  flex-shrink: 0;
 }
 
 .spv-logo img {
@@ -67,15 +64,28 @@
   font-size: 20px;
 }
 
+.main-details{
+  display: flex;
+  align-items: center;
+  gap: 36px;
+}
+
 .spv-title {
   margin: 0 0 6px 0;
   font-size: 20px;
   font-weight: 600;
 }
 
+.spv-actions{
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  gap: 24px;
+}
+
 .spv-sub {
   color: #374151;
-  font-size: 13px;
+  font-size: 14px;
   margin-bottom: 4px;
 }
 
@@ -111,28 +121,36 @@
 }
 
 /* Buttons */
-.btn {
+.feedback img, .connect-btn img{
+  width: 18px;
+}
+
+.feedback{
+  display: flex;
+  border: 1px solid #0F62FE;
+  color: #0F62FE;
+  background-color: #fff;
   padding: 8px 12px;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  background: transparent;
   cursor: pointer;
-  font-size: 14px;
-  transition: background 0.15s ease, color 0.15s ease;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  height: 42px;
 }
 
-.btn:hover {
-  background: #f3f4f6;
-}
-
-.btn.primary {
-  background: #111827;
+.connect-btn{
+  display: flex;
+  background: #0F62FE;
   color: #fff;
   border: none;
-}
-
-.btn.primary:hover {
-  background: #1f2937;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  height: 42px;
 }
 
 /* ----- PROJECT DESCRIPTION CARD ----- */
@@ -189,9 +207,8 @@
   gap: 10px;
   align-items: center;
   cursor: pointer;
-  padding: 8px 12px;
+  padding: 12px 20px;
   border-radius: 8px;
-  transition: background 0.12s ease;
 }
 
 .team-item:hover {
@@ -447,12 +464,13 @@
 /* PLACEHOLDER TEXT */
 
 .startup-dock{
-  width: 100%;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 20px;
-  margin-top: 20px;
+  width: 330px;
+  height: 100%;
 }
 
 .pitch-deck, .project-demo{
@@ -468,6 +486,7 @@
   align-items: center;
   width: 100%;
   height: 100%;
+  overflow: visible;
 }
 
 .placeholder-text {
@@ -497,16 +516,23 @@
 .more{
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 18px;
   margin-top: 20px;
 }
 
-.market-analysis, .gtm , .achievements{
-  width: 100%;
-  height: 300px;
+.gtm{
+  height: 240px;
+  width: 600px;
 }
 
+.market-analysis, .achievements{
+  width: 100%;
+  height: 338px;
+}
 
+.market-analysis{
+  padding: 24px 18px;
+}
 /* PDF Preview styling */
 .pdf-preview {
   display: flex;
@@ -578,6 +604,12 @@
 }
 
 /* --- ACHIEVEMENTS --- */
+.ach-grid{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
 .ach-header {
   display: flex;
   justify-content: space-between;
@@ -597,24 +629,14 @@
   text-decoration: underline;
 }
 
-.ach-grid {
-  display: flex;
-  gap: 12px;
-  margin-top: 10px;
-}
-
 .ach-card {
-  flex: 1;
   background: #f8fafc;
   padding: 10px;
   border-radius: 8px;
-  min-width: 140px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-  transition: transform 0.2s ease;
-}
-
-.ach-card:hover {
-  transform: translateY(-2px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
 .ach-title {
@@ -665,4 +687,112 @@
   font-size: 13px;
   color: #334155;
   line-height: 1.4;
+}
+
+/* ---- Startup Dock Modal ---- */
+.folder-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* ---- Folder ---- */
+.folder {
+  border: 1px solid #e2e2e2;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.folder-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f9fafb;
+  padding: 8px 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.folder-header:hover {
+  background: #eef1f5;
+}
+
+.folder-body {
+  padding: 8px 14px;
+  border-top: 1px solid #ddd;
+  background: #fff;
+}
+
+.folder-icon {
+  font-size: 1.1rem;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+}
+
+.file-icon {
+  font-size: 1rem;
+}
+
+.file-name {
+  text-decoration: none;
+  color: #0073e6;
+  font-weight: 500;
+}
+
+.file-name:hover {
+  text-decoration: underline;
+}
+
+.empty-text {
+  color: #999;
+  font-style: italic;
+}
+
+.upload-btn {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 6px 10px;
+  border: 1px dashed #0073e6;
+  border-radius: 6px;
+  color: #0073e6;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: 0.2s ease;
+}
+
+.upload-btn:hover {
+  background: #0073e60d;
+}
+
+.file-delete {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #e74c3c;
+  font-size: 14px;
+  transition: transform 0.1s ease;
+}
+
+.file-delete:hover {
+  transform: scale(1.1);
+}
+
+.market-analysis .card-body {
+  height: 260px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.recharts-legend-wrapper {
+  font-size: 13px;
 }
