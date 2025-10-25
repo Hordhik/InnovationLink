@@ -1,0 +1,53 @@
+.folder {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #1e1e1e;
+  user-select: none;
+  margin: 4px 0;
+}
+
+.folder-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.folder-header:hover {
+  background: #f0f0f0;
+}
+
+.folder-icon {
+  color: #f9a825;
+}
+
+.folder-name {
+  font-weight: 500;
+}
+
+.folder-content {
+  margin-left: 20px;
+  margin-top: 4px;
+  border-left: 1px dashed #ccc;
+  padding-left: 8px;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.file-item:hover {
+  background: #f5f5f5;
+}
+
+.file-icon {
+  color: #555;
+}
