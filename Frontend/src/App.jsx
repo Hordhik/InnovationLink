@@ -12,6 +12,7 @@ import Blog from './Website/Blogs/Blog';
 import LogIn from './Authentication/LogIn';
 import SignUp from './Authentication/SignUp';
 import Portal from './Portal/Portal';
+import AddBlog from './Website/Blogs/AddBlog';
 
 
 function App() {
@@ -63,10 +64,14 @@ function App() {
           <Route path="/startup/:username/*" element={<LegacyStartupRedirect />} />
           <Route path="/investor/:username/*" element={<LegacyInvestorRedirect />} />
           {/* Website Routes (wrapped; redirect logged-in users to portal) */}
+
           <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<PublicRedirect><Home /></PublicRedirect>} />
+
           <Route path="/blogs" element={<PublicRedirect><Blogs /></PublicRedirect>} />
           <Route path="/blog/:id" element={<PublicRedirect><Blog /></PublicRedirect>} />
+          <Route path="/:portal/blogs/new" element={<AddBlog />} />
+
           <Route path="/events" element={<PublicRedirect><Events /></PublicRedirect>} />
           <Route path="/about" element={<PublicRedirect><About /></PublicRedirect>} />
 

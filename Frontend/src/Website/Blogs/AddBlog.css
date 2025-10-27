@@ -1,0 +1,325 @@
+/* AddBlog.css */
+
+.add-blog-container {
+  max-width: 800px; /* Adjust as needed */
+  margin: 40px auto;
+  padding: 0 20px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  color: #333;
+}
+
+/* --- Top Action Bar --- */
+.blog-actions-top {
+  display: flex;
+  justify-content: flex-end; /* Align to the right */
+  gap: 15px; /* Space between buttons */
+  margin-bottom: 30px; /* Space below the action bar */
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee; /* Subtle separator */
+}
+
+.publish-button,
+.cancel-button {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.publish-button {
+  background-color: #007bff; /* Medium green */
+  color: white;
+}
+
+.publish-button:hover {
+  background-color: #0271e8;
+}
+
+.cancel-button {
+    background-color: transparent;
+  border: 1px solid #007bff;
+  color: #007bff;
+}
+
+.cancel-button:hover {
+  background-color: #007bff;
+  color: white;
+}
+
+/* --- Title and Subtitle Inputs --- */
+.blog-title-input {
+  font-size: 3em; /* Larger title */
+  font-weight: bold;
+  border: none;
+  outline: none;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 5px 0;
+  color: #222;
+  background-color: transparent;
+}
+
+.blog-subtitle-input {
+  font-size: 1.5em; /* Larger subtitle */
+  border: none;
+  outline: none;
+  width: 100%;
+  margin-bottom: 30px; /* Space before editor */
+  padding: 5px 0;
+  background-color: transparent;
+  color: #555;
+}
+
+.blog-title-input::placeholder,
+.blog-subtitle-input::placeholder {
+  color: #ccc;
+}
+
+/* --- Custom Quill Editor Overrides --- */
+
+/* Hide the default border around the editor */
+.custom-quill-editor .ql-container.ql-snow {
+  border: none;
+  min-height: 400px; /* Give it some initial height */
+  font-size: 1.15em; /* Make text a bit larger for readability */
+  line-height: 1.6;
+}
+
+/* Remove default padding to make it feel more "open" */
+.custom-quill-editor .ql-editor {
+  padding: 0; /* Remove default padding */
+  min-height: inherit; /* Ensure it respects min-height from container */
+}
+
+/* Adjust toolbar position and styling */
+.custom-quill-editor .ql-toolbar.ql-snow {
+  border: none; /* Remove toolbar border */
+  border-bottom: 1px solid #eee; /* Optional: subtle bottom border */
+  padding: 10px 0; /* Adjust toolbar padding */
+  position: sticky; /* Make toolbar sticky */
+  top: 0;
+  background: white;
+  z-index: 10; /* Ensure it stays on top */
+  margin-bottom: 20px; /* Space between toolbar and content */
+  display: flex; /* Use flexbox for better control */
+  justify-content: center; /* Center the toolbar items */
+  gap: 5px; /* Space between toolbar groups */
+}
+
+/* Style for individual toolbar buttons/groups */
+.custom-quill-editor .ql-toolbar.ql-snow .ql-formats {
+  margin-right: 10px; /* Space between groups of buttons */
+}
+
+/* Specific button styling to remove background and add hover */
+.custom-quill-editor .ql-toolbar.ql-snow button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+.custom-quill-editor .ql-toolbar.ql-snow button:hover {
+  background-color: #f0f0f0; /* Light background on hover */
+}
+
+/* Style for active/selected buttons */
+.custom-quill-editor .ql-toolbar.ql-snow button.ql-active {
+  color: #1a8917; /* Green for active buttons */
+}
+
+/* Adjust dropdowns */
+.custom-quill-editor .ql-toolbar.ql-snow .ql-picker-label {
+  border: none;
+  padding: 5px;
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+.custom-quill-editor .ql-toolbar.ql-snow .ql-picker-label:hover {
+  background-color: #f0f0f0;
+}
+
+/* Remove active state background for toolbar items */
+.custom-quill-editor .ql-snow .ql-toolbar button:hover:not(.ql-active),
+.custom-quill-editor .ql-snow .ql-toolbar button:focus:not(.ql-active) {
+  background-color: #f0f0f0;
+}
+
+.custom-quill-editor .ql-snow .ql-toolbar button.ql-active,
+.custom-quill-editor .ql-snow .ql-toolbar .ql-picker-label.ql-active,
+.custom-quill-editor .ql-snow .ql-toolbar .ql-picker.ql-expanded .ql-picker-label {
+  background-color: transparent; /* Remove background for active toolbar items */
+  color: #1a8917; /* Apply green color to active toolbar items */
+}
+
+/* Style for the plus icon (if you want to add a custom one for inline inserts) */
+/* This is more advanced and often requires custom Quill Blot implementation */
+/* For now, we are using the default image/link buttons in the toolbar */
+
+/* Example for the "plus icon" concept (not directly handled by react-quill this way) */
+/* This would typically be a custom React component that adds content into Quill */
+.plus-icon-container {
+    /* You would render a plus icon here and when clicked, insert content into Quill */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    font-size: 24px;
+    color: #ccc;
+    cursor: pointer;
+    margin-right: 10px;
+    transition: all 0.2s ease;
+}
+
+.plus-icon-container:hover {
+    border-color: #888;
+    color: #888;
+    background-color: #f9f9f9;
+}
+
+
+/* Content area styling (ql-editor) */
+.custom-quill-editor .ql-editor h1 {
+  font-size: 2.5em; /* Adjust heading sizes */
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+.custom-quill-editor .ql-editor h2 {
+  font-size: 2em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+.custom-quill-editor .ql-editor p,
+.custom-quill-editor .ql-editor li {
+  font-size: 1.15em;
+  line-height: 1.7;
+  margin-bottom: 1em;
+}
+
+/* Optional: Add a subtle focus effect for the editor area */
+.custom-quill-editor:focus-within .ql-container.ql-snow {
+    /* outline: 1px solid #cceeff; */ /* Example focus style, might not want for Medium-like */
+}
+
+/* Hide the default image/video resize handlers if you want a cleaner look */
+/* These are typically provided by quill-image-resize-module, which you might add later */
+.ql-resize { display: none !important; }
+.ql-handle { display: none !important; }
+
+/* Placeholder text styling */
+.custom-quill-editor .ql-editor.ql-blank::before {
+    font-style: normal; /* Remove italic for placeholder */
+    color: #bbb;
+    left: 0; /* Align with actual text */
+}
+
+/* --- Publish Modal Styles --- */
+
+.publish-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.publish-modal {
+  background: #fff;
+  border-radius: 8px;
+  padding: 25px 30px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  outline: none;
+}
+
+.publish-modal h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.modal-form-group {
+  margin-bottom: 20px;
+}
+
+.modal-form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #555;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box; /* Important for 100% width */
+}
+
+.modal-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #555;
+}
+
+.modal-checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.modal-cancel-button,
+.modal-publish-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.modal-publish-button {
+  background-color: #1a8917; /* Medium green */
+  color: white;
+}
+
+.modal-publish-button:hover {
+  background-color: #166e13;
+}
+
+.modal-cancel-button {
+  background-color: #f0f0f0;
+  color: #555;
+}
+
+.modal-cancel-button:hover {
+  background-color: #e0e0e0;
+}

@@ -95,3 +95,12 @@
   color: white;
   border-color: #007bff;
 }
+
+
+/* Optional: Message for when "Your Blogs" is empty */
+.empty-blogs-message {
+  text-align: center;
+  padding: 2rem;
+  color: #555;
+  font-size: 1.1rem;
+}
