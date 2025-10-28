@@ -1,96 +1,143 @@
-import React from 'react'
+import React, { useState, useEffect, useMemo } from 'react';
 import './Blog.css';
 import { useParams, useLocation } from 'react-router-dom';
-import { getBlogById } from './blogData';
 import calendarIcon from '../../assets/Events/calendar.svg';
 import profileIcon from '../../assets/Blogs/profile.svg';
 import BlogCardShort from './BlogCardShort';
-import { blogData } from './blogData';
+
+// --- API Imports ---
+import { getPostById, getAllPosts } from '../../services/postApi';
 
 const Blog = () => {
   const { id } = useParams();
   const location = useLocation();
 
-  // --- Simplified and explicit portal detection ---
-  const pathParts = location.pathname.split('/').filter(Boolean); // remove empty strings
-  const firstSegment = pathParts[0]; // "S", "I", or "blog"
-  const isPortalView = firstSegment === 'S' || firstSegment === 'I';
+  // --- State for API data ---
+  const [blog, setBlog] = useState(null);
+  const [popularBlogs, setPopularBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const blog = getBlogById(id);
+  // --- FIX: useMemo for URL-derived values ---
+  const isPortalView = useMemo(() => {
+    const pathParts = location.pathname.split('/').filter(Boolean);
+    const firstSegment = pathParts[0];
+    return firstSegment === 'S' || firstSegment === 'I';
+  }, [location.pathname]);
 
-  if (!blog) {
+  // --- Data Fetching ---
+  useEffect(() => {
+    const fetchBlogData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Fetch the main blog post
+        const postData = await getPostById(id);
+        setBlog(postData.post);
+
+        // For the public view, also fetch popular blogs (using getAllPosts for now)
+        if (!isPortalView) {
+          const allPostsData = await getAllPosts();
+          // Just show 3 popular posts, and filter out the current one
+          setPopularBlogs(
+            allPostsData.posts.filter(p => p.id !== parseInt(id)).slice(0, 3)
+          );
+        }
+      } catch (err) {
+        console.error("Error fetching blog data:", err);
+        setError(err.message || "Failed to load post.");
+      }
+      setLoading(false);
+    };
+
+    fetchBlogData();
+  }, [id, isPortalView]); // Refetch if ID or view changes
+
+  // --- Loading and Error States ---
+  if (loading) {
+    return <div className="blog-page-portal"><p>Loading post...</p></div>;
+  }
+
+  if (error || !blog) {
     return (
-      <div className="blog">
+      <div className="blog-page-portal">
         <h1>Blog not found</h1>
-        <p>The blog post you're looking for doesn't exist.</p>
+        <p>{error || "The blog post you're looking for doesn't exist."}</p>
       </div>
     );
   }
 
+  // Helper to format date
+  const formattedDate = new Date(blog.created_at).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  // --- Portal View ---
   if (isPortalView) {
     return (
       <div className="blog-page-portal">
         <div className="blog">
           <div className="blog-header">
             <p className="blog-title">{blog.title}</p>
+            {blog.subtitle && <p className="blog-subtitle">{blog.subtitle}</p>}
             <div className="blog-meta">
               <div className="blog-date">
                 <img src={calendarIcon} alt="" />
-                <p>{blog.date}</p>
+                <p>{formattedDate}</p>
               </div>
               <div className="blog-author">
                 <img src={profileIcon} alt="" />
-                <p>By {blog.user}</p>
+                <p>By {blog.username}</p>
               </div>
             </div>
           </div>
-          {blog.img && <img src={blog.img} alt={blog.title} className="blog-hero-image" />}
+
+          {/* Render the HTML content from ReactQuill */}
           <div className="blog-content">
-            <div className="blog-full-content">
-              {blog.fullContent.split('\n').map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
-              ))}
-            </div>
+            <div
+              className="blog-full-content"
+              dangerouslySetInnerHTML={{ __html: blog.content }}
+            />
           </div>
         </div>
       </div>
     );
   }
 
-  // --- Public website view ---
+  // --- Public Website View ---
   return (
     <div className="blog-page">
       <div className="empty"></div>
       <div className="blog">
         <div className="blog-header">
           <p className="blog-title">{blog.title}</p>
+          {blog.subtitle && <p className="blog-subtitle">{blog.subtitle}</p>}
           <div className="blog-meta">
             <div className="blog-date">
               <img src={calendarIcon} alt="" />
-              <p>{blog.date}</p>
+              <p>{formattedDate}</p>
             </div>
             <div className="blog-author">
               <img src={profileIcon} alt="" />
-              <p>By {blog.user}</p>
+              <p>By {blog.username}</p>
             </div>
           </div>
         </div>
-        {blog.img && <img src={blog.img} alt={blog.title} className="blog-hero-image" />}
+
+        {/* Render the HTML content from ReactQuill */}
         <div className="blog-content">
-          <div className="blog-full-content">
-            {blog.fullContent.split('\n').map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
-          </div>
+          <div
+            className="blog-full-content"
+            dangerouslySetInnerHTML={{ __html: blog.content }}
+          />
         </div>
       </div>
       <div className="most-viewd">
         <p className='title'>Most Popular</p>
-        {blogData.slice(0, 3).map((blog) => (
-          <BlogCardShort key={blog.id} blog={blog} />
-        ))}
-        {blogData.slice(0, 3).map((blog) => (
-          <BlogCardShort key={`duplicate-${blog.id}`} blog={blog} />
+        {popularBlogs.map((popBlog) => (
+          <BlogCardShort key={`popular-${popBlog.id}`} blog={popBlog} />
         ))}
       </div>
     </div>
@@ -98,3 +145,4 @@ const Blog = () => {
 };
 
 export default Blog;
+

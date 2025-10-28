@@ -6,6 +6,9 @@ import "./AddBlog.css";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 
+// Import our new API function (name corrected)
+import { createPost } from "../../services/postApi";
+
 // Bind modal to your app element for accessibility
 Modal.setAppElement("#root");
 
@@ -23,6 +26,10 @@ export default function AddBlog() {
   const [tags, setTags] = useState("");
   const [isScheduled, setIsScheduled] = useState(false);
   const [scheduleTime, setScheduleTime] = useState("");
+
+  // Loading/Error state
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Custom toolbar options
   const modules = {
@@ -44,38 +51,64 @@ export default function AddBlog() {
   // --- Button Handlers ---
 
   const handleCancel = () => {
-    // Navigate back to the /blogs page (adjust route if needed)
-    navigate("/blogs");
+    navigate(-1); // Go back to the previous page
   };
 
   const handleOpenModal = () => {
-    // This function now just opens the modal
+    // Clear any previous non-modal errors
+    setErrorMessage("");
+    if (!title || !content) {
+      // Set an error message instead of using alert()
+      setErrorMessage("Please add a title and some content before publishing.");
+      return;
+    }
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    setErrorMessage(""); // Clear error on close
   };
 
-  const handleFinalPublish = () => {
-    // This is where you'll send all data to your backend
+  const handleFinalPublish = async () => {
+    setIsPublishing(true);
+    setErrorMessage("");
+
     const postData = {
       title,
       subtitle,
       content, // The HTML content from ReactQuill
-      tags: tags.split(",").map(tag => tag.trim()), // Convert string to array
-      isScheduled,
-      scheduleTime: isScheduled ? scheduleTime : null,
-      author: getStoredUser().username, // Example of adding auth'd user
+      tags: tags.split(",").map(tag => tag.trim()).filter(Boolean), // Convert string to array
+      // We are not sending schedule info yet, but backend could be updated for it
     };
 
-    console.log("PUBLISHING POST:", postData);
+    try {
+      // Use the API function (name corrected)
+      const response = await createPost(postData);
 
-    // After successful API call, close modal and navigate
-    handleCloseModal();
-    // Optionally, navigate to the new post or back to blogs list
-    // navigate(`/blog/${postData.id}`); // Example
-    navigate("/blogs");
+      console.log("Post created successfully:", response);
+
+      // After successful API call, close modal and navigate
+      handleCloseModal();
+
+      // Navigate to the new post, detecting if we are in a portal
+      const user = getStoredUser();
+      const pathParts = window.location.pathname.split('/').filter(Boolean);
+      const firstSegment = pathParts[0];
+      const isPortalView = firstSegment === 'S' || firstSegment === 'I';
+
+      if (isPortalView) {
+        navigate(`/${firstSegment}/blog/${response.postId}`);
+      } else {
+        navigate(`/blog/${response.postId}`);
+      }
+
+    } catch (error) {
+      console.error("Failed to create post:", error);
+      setErrorMessage(error.message || "Failed to publish post. Please try again.");
+    } finally {
+      setIsPublishing(false);
+    }
   };
 
   return (
@@ -89,6 +122,14 @@ export default function AddBlog() {
           Publish
         </button>
       </div>
+
+      {/* Non-modal error message for validation */}
+      {/* --- FIX: Removed invalid WARNING tag --- */}
+      {errorMessage && !isModalOpen && (
+        <p style={{ color: 'red', textAlign: 'center', marginBottom: '15px' }}>
+          {errorMessage}
+        </p>
+      )}
 
       <input
         type="text"
@@ -142,6 +183,7 @@ export default function AddBlog() {
             <input
               type="checkbox"
               checked={isScheduled}
+              // --- FIX: Corrected typo 'e.g.' to 'e' ---
               onChange={(e) => setIsScheduled(e.target.checked)}
             />
             Schedule for later?
@@ -156,20 +198,27 @@ export default function AddBlog() {
               id="scheduleTime"
               className="modal-input"
               value={scheduleTime}
+              // --- FIX: Corrected typo 'e.g.' to 'e' ---
               onChange={(e) => setScheduleTime(e.target.value)}
             />
           </div>
         )}
 
+        {/* Modal error message for publish failure */}
+        {errorMessage && (
+          <p style={{ color: 'red', textAlign: 'center' }}>{errorMessage}</p>
+        )}
+
         <div className="modal-actions">
-          <button className="modal-cancel-button" onClick={handleCloseModal}>
+          <button className="modal-cancel-button" onClick={handleCloseModal} disabled={isPublishing}>
             Cancel
           </button>
-          <button className="modal-publish-button" onClick={handleFinalPublish}>
-            {isScheduled ? "Schedule Post" : "Publish Now"}
+          <button className="modal-publish-button" onClick={handleFinalPublish} disabled={isPublishing}>
+            {isPublishing ? "Publishing..." : (isScheduled ? "Schedule Post" : "Publish Now")}
           </button>
         </div>
       </Modal>
     </div>
   );
 }
+

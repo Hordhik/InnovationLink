@@ -5,7 +5,7 @@
     justify-content: space-between;
 }
 
-.blog-page .empty{
+.blog-page .empty {
     width: 40%;
 }
 
@@ -14,6 +14,11 @@
     padding: 20px 0;
     display: flex;
     flex-direction: column;
+    /* --- Added --- */
+    /* Ensure the main blog container doesn't exceed viewport width */
+    max-width: 100%;
+    overflow-x: hidden;
+    /* Prevent horizontal scrollbars if something still overflows */
 }
 
 .blog-page .blog .blog-header {
@@ -22,13 +27,7 @@
     border-bottom: 1px solid #000;
 }
 
-.blog-page .blog .blog-hero-image {
-    width: 100%;
-    height: 400px;
-    object-fit: cover;
-    border-radius: 10px;
-    margin-bottom: 20px;
-}
+/* Removed .blog-hero-image as images are now inline */
 
 .blog-page .blog .blog-title {
     font-size: 24px;
@@ -38,6 +37,16 @@
     color: #333;
 }
 
+.blog-page .blog .blog-subtitle {
+    /* Added rule for subtitle */
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.4;
+    margin-bottom: 20px;
+    color: #555;
+}
+
+
 .blog-page .blog .blog-meta {
     display: flex;
     align-items: center;
@@ -45,7 +54,8 @@
     gap: 15px;
 }
 
-.blog-page .blog .blog-date, .blog-page .blog .blog-author {
+.blog-page .blog .blog-date,
+.blog-page .blog .blog-author {
     font-weight: 500;
     display: flex;
     align-items: center;
@@ -54,7 +64,8 @@
     color: #000;
 }
 
-.blog-page .blog .blog-date img, .blog-page .blog .blog-author img{
+.blog-page .blog .blog-date img,
+.blog-page .blog .blog-author img {
     width: 24px;
     height: 24px;
 }
@@ -63,11 +74,32 @@
     font-size: 16px;
     font-weight: 500;
     line-height: 24px;
+    /* --- Added --- */
+    /* Ensure word wrapping for long text */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .blog-page .blog .blog-full-content p {
     margin-bottom: 30px;
 }
+
+/* --- CRITICAL FIX for Image Size --- */
+.blog-page .blog .blog-full-content img {
+    max-width: 100%;
+    /* Make image responsive, prevents overflow */
+    height: auto;
+    /* Maintain aspect ratio */
+    display: block;
+    /* Optional: removes extra space below image */
+    margin: 20px auto;
+    /* Optional: centers image and adds vertical space */
+    border-radius: 8px;
+    /* Optional: adds rounded corners */
+}
+
+/* ------------------------------------ */
+
 
 /* Portal-specific blog page styles */
 .blog-page-portal {
@@ -75,6 +107,8 @@
     font-family: Inter, sans-serif;
     max-width: 800px;
     margin: 0 auto;
+    /* --- Added --- */
+    overflow-x: hidden;
 }
 
 .blog-page-portal .blog {
@@ -97,6 +131,17 @@
     color: #333;
     line-height: 1.2;
 }
+
+.blog-page-portal .blog .blog-subtitle {
+    /* Added rule for subtitle */
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.5;
+    margin-bottom: 15px;
+    /* Adjusted margin */
+    color: #666;
+}
+
 
 .blog-page-portal .blog .blog-meta {
     display: flex;
@@ -125,13 +170,7 @@
     color: #666;
 }
 
-.blog-page-portal .blog .blog-hero-image {
-    width: 100%;
-    max-height: 400px;
-    object-fit: cover;
-    border-radius: 10px;
-    margin-bottom: 30px;
-}
+/* Removed .blog-hero-image */
 
 .blog-page-portal .blog .blog-content {
     margin-bottom: 40px;
@@ -142,8 +181,27 @@
     font-weight: 400;
     line-height: 1.6;
     color: #333;
+    /* --- Added --- */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .blog-page-portal .blog .blog-full-content p {
     margin-bottom: 20px;
 }
+
+/* --- CRITICAL FIX for Image Size (Portal View) --- */
+.blog-page-portal .blog .blog-full-content img {
+    max-width: 100%;
+    /* Make image responsive */
+    height: auto;
+    /* Maintain aspect ratio */
+    display: block;
+    /* Optional: removes extra space below */
+    margin: 25px auto;
+    /* Optional: centers and adds vertical space */
+    border-radius: 8px;
+    /* Optional: adds rounded corners */
+}
+
+/* ------------------------------------------------- */

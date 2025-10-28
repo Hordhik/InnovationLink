@@ -7,29 +7,34 @@ const router = express.Router();
 const {
     createPost,
     getAllPosts,
-    getMyPosts
+    getMyPosts,
+    getPostById
 } = require('../controllers/postController.js');
 
-// Import your auth middleware.
-// Based on your screenshot, this is likely 'auth.js'
-// If 'auth.js' doesn't export 'protect', check its contents.
-// It might be exporting a single middleware function.
+// Import your auth middleware
 const requireAuth = require('../middleware/auth.js');
 
-// --- Protect all post routes ---
-router.use(requireAuth);
+// --- DEFINE ROUTES ---
+// Define specific routes BEFORE general parameterized routes.
+// Apply middleware individually.
 
-// POST /api/posts
-// Create a new post
-router.post('/', createPost);
-
-// GET /api/posts
-// Get a list of all posts (e.g., for the main blog/feed)
+// GET /api/posts (Public)
 router.get('/', getAllPosts);
 
-// GET /api/posts/me
-// Get only the posts for the logged-in user
-router.get('/me', getMyPosts);
+// GET /api/posts/me (Protected)
+// --- FIX: Defined *before* /:id and middleware applied directly ---
+router.get('/me', requireAuth, getMyPosts);
+
+// POST /api/posts (Protected)
+// --- FIX: Middleware applied directly ---
+router.post('/', requireAuth, createPost);
+
+// GET /api/posts/:id (Public)
+// --- FIX: Defined *after* /me ---
+// This will now only match if the path segment is not 'me'
+router.get('/:id', getPostById);
+
 
 // Export the router
 module.exports = router;
+

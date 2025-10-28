@@ -2,26 +2,9 @@
 
 const db = require('../config/db');
 
-// --- Helper function for safely parsing images ---
-function parseImages(imagesJson) {
-    try {
-        // Try to parse the stored value
-        const parsed = JSON.parse(imagesJson);
-        // If it's a valid array, map over it
-        if (Array.isArray(parsed)) {
-            return parsed.map(i => `data:${i.mime};base64,${i.data}`);
-        }
-    } catch (e) {
-        // If parsing fails (e.g., it's null, "", or "null"),
-        // fall through and return an empty array
-    }
-    // Default return for null, undefined, or invalid JSON
-    return [];
-}
-// -------------------------------------------------
-
 const Post = {
     async init() {
+        // Create base table if needed, WITHOUT the images column
         await db.query(`
       CREATE TABLE IF NOT EXISTS posts (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -29,54 +12,127 @@ const Post = {
         username VARCHAR(255) NOT NULL,
         userType ENUM('startup', 'investor') NOT NULL,
         title VARCHAR(255),
-        content TEXT,
-        images JSON,
+        content LONGTEXT, -- Use LONGTEXT for potentially large HTML content with images
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       )
     `);
-        console.log('✅ posts table ready');
+        console.log('Checked/Created base posts table (no separate images column).');
+
+        // --- Idempotently add subtitle and tags columns ---
+        try {
+            await db.query("ALTER TABLE posts ADD COLUMN subtitle VARCHAR(500)");
+            console.log("✅ Successfully added 'subtitle' column to posts table.");
+        } catch (e) {
+            if (e.code === 'ER_DUP_FIELDNAME') {
+                console.log("✅ Column 'subtitle' already exists.");
+            } else {
+                console.error("❌❌ DATABASE SCHEMA ERROR: Failed to add 'subtitle' column:", e.message);
+            }
+        }
+        try {
+            await db.query("ALTER TABLE posts ADD COLUMN tags JSON");
+            console.log("✅ Successfully added 'tags' column to posts table.");
+        } catch (e) {
+            if (e.code === 'ER_DUP_FIELDNAME') {
+                console.log("✅ Column 'tags' already exists.");
+            } else {
+                console.error("❌❌ DATABASE SCHEMA ERROR: Failed to add 'tags' column:", e.message);
+            }
+        }
+        // --- Ensure 'content' column is LONGTEXT ---
+        try {
+            // Modify column type if it exists but isn't LONGTEXT
+            await db.query("ALTER TABLE posts MODIFY COLUMN content LONGTEXT");
+            console.log("✅ Ensured 'content' column type is LONGTEXT.");
+        } catch (e) {
+            // Handle cases where MODIFY might fail (e.g., column doesn't exist yet - unlikely here)
+            console.error("❌❌ DATABASE SCHEMA WARNING: Could not ensure 'content' is LONGTEXT:", e.message);
+        }
+        // --- Optionally remove the old images column if it exists ---
+        try {
+            await db.query("ALTER TABLE posts DROP COLUMN images");
+            console.log("🗑️ Successfully removed obsolete 'images' column from posts table.");
+        } catch (e) {
+            // Error code 'ER_CANT_DROP_FIELD_OR_KEY' (1091) means the column doesn't exist.
+            if (e.code === 'ER_CANT_DROP_FIELD_OR_KEY') {
+                console.log("ℹ️ Column 'images' does not exist, no need to remove.");
+            } else {
+                console.error("❌❌ DATABASE SCHEMA WARNING: Failed to remove 'images' column:", e.message);
+            }
+        }
+        // -----------------------------------------
+
+        console.log('✅ posts table structure check complete.');
     },
 
-    async createPost(user, { title, content, images }) {
-        const imageArray = images?.slice(0, 5).map(img => {
-            if (!img.startsWith('data:')) return null;
-            const [meta, base64Data] = img.split(',');
-            const mime = meta.match(/data:(.*);base64/)[1];
-            const buffer = Buffer.from(base64Data, 'base64');
-            return { data: buffer.toString('base64'), mime };
-        }).filter(Boolean);
+    /**
+     * Creates a new post. Images are embedded in the 'content' HTML.
+     */
+    async createPost(user, { title, subtitle, content, tags }) {
+        // Convert tags array to a JSON string for storage
+        const tagsJson = tags && Array.isArray(tags) && tags.length > 0 ? JSON.stringify(tags) : null;
+
+        console.log('Attempting to insert post (no separate images):', { userId: user.id, username: user.username, userType: user.userType, title, subtitle: subtitle || null, tags: tagsJson });
 
         const [result] = await db.execute(
-            `INSERT INTO posts (user_id, username, userType, title, content, images)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-            // Use JSON.stringify here or null if the array is empty
-            [user.id, user.username, user.userType, title, content, imageArray.length ? JSON.stringify(imageArray) : null]
+            // --- REMOVED 'images' from INSERT ---
+            `INSERT INTO posts (user_id, username, userType, title, subtitle, content, tags)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [user.id, user.username, user.userType, title, subtitle || null, content, tagsJson]
         );
 
+        console.log('Post inserted successfully, ID:', result.insertId);
         return result.insertId;
     },
 
+    /**
+     * Fetches a single post by its ID.
+     */
+    async findById(postId) {
+        // --- REMOVED 'images' from SELECT (it's part of content) ---
+        const [rows] = await db.execute(
+            `SELECT id, user_id, username, userType, title, subtitle, content, tags, created_at
+             FROM posts WHERE id = ?`,
+            [postId]
+        );
+        if (rows.length === 0) return null;
+
+        // Parse tags from JSON string back to an array, handle potential null
+        return {
+            ...rows[0],
+            tags: rows[0].tags ? JSON.parse(rows[0].tags) : [],
+            // No separate images field to parse
+        };
+    },
+
     async getAllPosts() {
-        const [rows] = await db.execute(`SELECT * FROM posts ORDER BY created_at DESC`);
-        // Use the safe helper function
+        // --- REMOVED 'images' from SELECT ---
+        const [rows] = await db.execute(`
+            SELECT id, user_id, username, userType, title, subtitle, content, tags, created_at
+            FROM posts ORDER BY created_at DESC
+        `);
+        // Parse tags, no separate images
         return rows.map(post => ({
             ...post,
-            images: parseImages(post.images),
+            tags: post.tags ? JSON.parse(post.tags) : [],
         }));
     },
 
     async getMyPosts(userId) {
+        // --- REMOVED 'images' from SELECT ---
         const [rows] = await db.execute(
-            `SELECT * FROM posts WHERE user_id = ? ORDER BY created_at DESC`,
+            `SELECT id, user_id, username, userType, title, subtitle, content, tags, created_at
+              FROM posts WHERE user_id = ? ORDER BY created_at DESC`,
             [userId]
         );
-        // Use the safe helper function
+        // Parse tags, no separate images
         return rows.map(post => ({
             ...post,
-            images: parseImages(post.images),
+            tags: post.tags ? JSON.parse(post.tags) : [],
         }));
     }
 };
 
 module.exports = Post;
+
