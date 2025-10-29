@@ -65,7 +65,6 @@ const StartupCard = ({
             <p className="description description--clamp">
               {description}
             </p>
-            <a href={profileUrl || '#'} className="read-more-link">Read more</a>
           </>
         )}
         <div className="tags">

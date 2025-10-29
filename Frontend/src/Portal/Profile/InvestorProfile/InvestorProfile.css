@@ -180,7 +180,7 @@ p {
   margin-top: 1.5rem;
 }
 
-.startup-card {
+.startup-list  .startup-card {
   background: #f9fafb;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
@@ -193,25 +193,25 @@ p {
   transition: all 0.2s ease;
 }
 
-.startup-card:hover {
+.startup-list .startup-card:hover {
   background: #f1f5f9;
   border-color: #bfdbfe;
   transform: translateY(-3px);
 }
 
-.startup-logo {
+.startup-list .startup-logo {
   width: 80px;
   height: 80px;
   border-radius: 8px;
   object-fit: cover;
 }
 
-.startup-info {
+.startup-list .startup-info {
   display: flex;
   flex-direction: column;
 }
 
-.startup-info h4 {
+.startup-list .startup-info h4 {
   font-size: 1rem;
   font-weight: 600;
   color: #111827;
@@ -336,4 +336,3 @@ p {
   from { transform: translateY(20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
-

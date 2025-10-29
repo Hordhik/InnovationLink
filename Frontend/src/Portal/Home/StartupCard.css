@@ -21,7 +21,11 @@
   padding-bottom: 10px;
   border-bottom: 1px solid #ddd;
 }
-
+.card-header ,.startup-info{
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
 /* Removed a global .card-title avatar style that conflicted with profile cards */
 
 .avatar img {
