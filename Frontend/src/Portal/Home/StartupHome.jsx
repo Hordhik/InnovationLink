@@ -1,42 +1,83 @@
-import React from 'react';
-// import './StartupHome.css';
-import InvestorCard from './InvestorCard.jsx';
-import AdvancedSearch from './AdvancedSearch.jsx';
-import Filter from './Filter.jsx';
-const dummyInvestors = [
-  {
-    id: 1,
-    initials: 'JD',
-    name: 'John Doe',
-    title: 'Angel Investor & GTM Mentor (ex-HubSpot)',
-    mentoredCount: 24,
-    investmentsCount: 8,
-    thesis:
-      'I invest in pre-seed B2B SaaS companies building the future of work. My primary value-add is helping founders with GTM strategy and their first 10 enterprise sales.',
-    tags: ['B2B SaaS', 'Go-to-Market', 'Fundraising', 'Product'],
-  },
-  {
-    id: 2,
-    initials: 'JS',
-    name: 'Jane Smith',
-    title: 'Managing Partner, XYZ Ventures',
-    mentoredCount: 45,
-    investmentsCount: 22,
-    thesis:
-      'XYZ Ventures is a $100M fund focused on Seed and Series A HealthTech and AI. We look for strong technical teams tackling complex, regulated markets.',
-    tags: ['HealthTech', 'AI/ML', 'Series A', 'Scaling'],
-  },
-];
+import React, { useState, useEffect } from 'react'; // Added hooks
+// import './StartupHome.css'; // Assuming styles might be added later
+import InvestorCard from './InvestorCard.jsx'; // Using the one that fetches its own data
+import AdvancedSearch from './AdvancedSearch.jsx'; // Kept import
+import Filter from './Filter.jsx';             // Kept import
+
+// --- Added API import ---
+import { getAllInvestors } from '../../services/investorApi.js'; // Corrected path
+
+// --- Dummy Details are NOT needed here, InvestorCard fetches/uses its own ---
 
 const StartupHome = () => {
+  // --- State for fetched data (basic list), loading, error ---
+  const [investorList, setInvestorList] = useState([]); // Stores { id, username }
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // --- Added useEffect for data fetching (basic list) ---
+  useEffect(() => {
+    const fetchInvestors = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        // Fetch only the list of IDs and usernames
+        const data = await getAllInvestors();
+        console.log("Fetched investor list data:", data);
+
+        if (!Array.isArray(data.investors)) {
+          throw new Error("Invalid data format received from server. Expected 'investors' array.");
+        }
+
+        // Store the basic list { id, username }
+        setInvestorList(data.investors);
+
+      } catch (err) {
+        console.error("Failed to fetch investor list:", err);
+        setError(err.message || "Could not load investors.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchInvestors();
+  }, []); // Run once on mount
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {/* --- Render Filter and Search as before --- */}
       <Filter />
-      {dummyInvestors.map((investor) => (
-        <InvestorCard key={investor.id} investor={investor} />
-      ))}
+      {/* <AdvancedSearch /> */} {/* Still commented out */}
+
+      {/* --- Render Loading State --- */}
+      {isLoading && (
+        <div style={{ textAlign: 'center', padding: '2rem' }}>Loading investors...</div>
+      )}
+
+      {/* --- Render Error State --- */}
+      {error && !isLoading && (
+        <div style={{ textAlign: 'center', padding: '2rem', color: 'red' }}>Error loading investors: {error}</div>
+      )}
+
+      {/* --- Render Investor List (if not loading and no error) --- */}
+      {!isLoading && !error && investorList.length > 0 && (
+        investorList.map((investor) => (
+          // --- FIX: Pass investorId and initialUsername ---
+          <InvestorCard
+            key={investor.id} // Use the investor profile ID as key
+            investorId={investor.id} // Pass the investor profile ID for fetching
+            initialUsername={investor.username} // Pass the username for initial display
+          />
+        ))
+      )}
+
+      {/* --- Render No Investors Found State --- */}
+      {!isLoading && !error && investorList.length === 0 && (
+        <p style={{ textAlign: 'center', padding: '2rem' }}>No investors found.</p>
+      )}
     </div>
   );
 };
 
 export default StartupHome;
+
