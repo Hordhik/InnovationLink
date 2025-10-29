@@ -6,7 +6,7 @@ import './Portal.css';
 import Home from './Home/Home';
 import StartupHome from './Home/StartupHome';
 import InvestorHome from './Home/InvestorHome';
-import InvestorProfile from './Profile/InvestorProfile';
+import InvestorProfile from './Profile/InvestorProfile/InvestorProfile';
 import StartupProfile from './Profile/StartupProfile/StartupProfile';
 import Blogs from '../Website/Blogs/Blogs';
 import Blog from '../Website/Blogs/Blog';
