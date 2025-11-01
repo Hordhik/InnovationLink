@@ -3,6 +3,35 @@
 const db = require('../config/db');
 
 const Post = {
+    // Safely parse tags from DB (can be JSON array, plain string, comma-separated, or null)
+    _parseTags(raw) {
+        if (!raw) return [];
+        if (Array.isArray(raw)) return raw; // already parsed by driver
+        if (typeof raw === 'object') {
+            try {
+                // Some drivers may return a Buffer or object-like JSON
+                return JSON.parse(raw.toString());
+            } catch {
+                return [];
+            }
+        }
+        if (typeof raw === 'string') {
+            const str = raw.trim();
+            // Try strict JSON first
+            try {
+                const parsed = JSON.parse(str);
+                return Array.isArray(parsed) ? parsed : (parsed ? [String(parsed)] : []);
+            } catch {
+                // Fallbacks: comma-separated or single token
+                if (str.includes(',')) {
+                    return str.split(',').map(s => s.trim()).filter(Boolean);
+                }
+                // Single tag string e.g., "startups"
+                return str ? [str] : [];
+            }
+        }
+        return [];
+    },
     async init() {
         // Create base table if needed, WITHOUT the images column
         await db.query(`
@@ -101,7 +130,7 @@ const Post = {
         // Parse tags from JSON string back to an array, handle potential null
         return {
             ...rows[0],
-            tags: rows[0].tags ? JSON.parse(rows[0].tags) : [],
+            tags: Post._parseTags(rows[0].tags),
             // No separate images field to parse
         };
     },
@@ -115,7 +144,7 @@ const Post = {
         // Parse tags, no separate images
         return rows.map(post => ({
             ...post,
-            tags: post.tags ? JSON.parse(post.tags) : [],
+            tags: Post._parseTags(post.tags),
         }));
     },
 
@@ -129,7 +158,7 @@ const Post = {
         // Parse tags, no separate images
         return rows.map(post => ({
             ...post,
-            tags: post.tags ? JSON.parse(post.tags) : [],
+            tags: Post._parseTags(post.tags),
         }));
     }
 };
