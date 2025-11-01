@@ -1,7 +1,8 @@
 /* AddBlog.css */
 
 .add-blog-container {
-  max-width: 800px; /* Adjust as needed */
+  max-width: 800px;
+  /* Adjust as needed */
   margin: 40px auto;
   padding: 0 20px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
@@ -12,11 +13,15 @@
 /* --- Top Action Bar --- */
 .blog-actions-top {
   display: flex;
-  justify-content: flex-end; /* Align to the right */
-  gap: 15px; /* Space between buttons */
-  margin-bottom: 30px; /* Space below the action bar */
+  justify-content: flex-end;
+  /* Align to the right */
+  gap: 15px;
+  /* Space between buttons */
+  margin-bottom: 30px;
+  /* Space below the action bar */
   padding-bottom: 15px;
-  border-bottom: 1px solid #eee; /* Subtle separator */
+  border-bottom: 1px solid #eee;
+  /* Subtle separator */
 }
 
 .publish-button,
@@ -30,7 +35,8 @@
 }
 
 .publish-button {
-  background-color: #007bff; /* Medium green */
+  background-color: #007bff;
+  /* Medium green */
   color: white;
 }
 
@@ -39,7 +45,7 @@
 }
 
 .cancel-button {
-    background-color: transparent;
+  background-color: transparent;
   border: 1px solid #007bff;
   color: #007bff;
 }
@@ -51,7 +57,8 @@
 
 /* --- Title and Subtitle Inputs --- */
 .blog-title-input {
-  font-size: 3em; /* Larger title */
+  font-size: 3em;
+  /* Larger title */
   font-weight: bold;
   border: none;
   outline: none;
@@ -63,11 +70,13 @@
 }
 
 .blog-subtitle-input {
-  font-size: 1.5em; /* Larger subtitle */
+  font-size: 1.5em;
+  /* Larger subtitle */
   border: none;
   outline: none;
   width: 100%;
-  margin-bottom: 30px; /* Space before editor */
+  margin-bottom: 30px;
+  /* Space before editor */
   padding: 5px 0;
   background-color: transparent;
   color: #555;
@@ -83,35 +92,49 @@
 /* Hide the default border around the editor */
 .custom-quill-editor .ql-container.ql-snow {
   border: none;
-  min-height: 400px; /* Give it some initial height */
-  font-size: 1.15em; /* Make text a bit larger for readability */
+  min-height: 400px;
+  /* Give it some initial height */
+  font-size: 1.15em;
+  /* Make text a bit larger for readability */
   line-height: 1.6;
 }
 
 /* Remove default padding to make it feel more "open" */
 .custom-quill-editor .ql-editor {
-  padding: 0; /* Remove default padding */
-  min-height: inherit; /* Ensure it respects min-height from container */
+  padding: 0;
+  /* Remove default padding */
+  min-height: inherit;
+  /* Ensure it respects min-height from container */
 }
 
 /* Adjust toolbar position and styling */
 .custom-quill-editor .ql-toolbar.ql-snow {
-  border: none; /* Remove toolbar border */
-  border-bottom: 1px solid #eee; /* Optional: subtle bottom border */
-  padding: 10px 0; /* Adjust toolbar padding */
-  position: sticky; /* Make toolbar sticky */
+  border: none;
+  /* Remove toolbar border */
+  border-bottom: 1px solid #eee;
+  /* Optional: subtle bottom border */
+  padding: 10px 0;
+  /* Adjust toolbar padding */
+  position: sticky;
+  /* Make toolbar sticky */
   top: 0;
   background: white;
-  z-index: 10; /* Ensure it stays on top */
-  margin-bottom: 20px; /* Space between toolbar and content */
-  display: flex; /* Use flexbox for better control */
-  justify-content: center; /* Center the toolbar items */
-  gap: 5px; /* Space between toolbar groups */
+  z-index: 10;
+  /* Ensure it stays on top */
+  margin-bottom: 20px;
+  /* Space between toolbar and content */
+  display: flex;
+  /* Use flexbox for better control */
+  justify-content: center;
+  /* Center the toolbar items */
+  gap: 5px;
+  /* Space between toolbar groups */
 }
 
 /* Style for individual toolbar buttons/groups */
 .custom-quill-editor .ql-toolbar.ql-snow .ql-formats {
-  margin-right: 10px; /* Space between groups of buttons */
+  margin-right: 10px;
+  /* Space between groups of buttons */
 }
 
 /* Specific button styling to remove background and add hover */
@@ -125,12 +148,14 @@
 }
 
 .custom-quill-editor .ql-toolbar.ql-snow button:hover {
-  background-color: #f0f0f0; /* Light background on hover */
+  background-color: #f0f0f0;
+  /* Light background on hover */
 }
 
 /* Style for active/selected buttons */
 .custom-quill-editor .ql-toolbar.ql-snow button.ql-active {
-  color: #1a8917; /* Green for active buttons */
+  color: #1a8917;
+  /* Green for active buttons */
 }
 
 /* Adjust dropdowns */
@@ -154,8 +179,10 @@
 .custom-quill-editor .ql-snow .ql-toolbar button.ql-active,
 .custom-quill-editor .ql-snow .ql-toolbar .ql-picker-label.ql-active,
 .custom-quill-editor .ql-snow .ql-toolbar .ql-picker.ql-expanded .ql-picker-label {
-  background-color: transparent; /* Remove background for active toolbar items */
-  color: #1a8917; /* Apply green color to active toolbar items */
+  background-color: transparent;
+  /* Remove background for active toolbar items */
+  color: #1a8917;
+  /* Apply green color to active toolbar items */
 }
 
 /* Style for the plus icon (if you want to add a custom one for inline inserts) */
@@ -165,31 +192,32 @@
 /* Example for the "plus icon" concept (not directly handled by react-quill this way) */
 /* This would typically be a custom React component that adds content into Quill */
 .plus-icon-container {
-    /* You would render a plus icon here and when clicked, insert content into Quill */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    border: 1px solid #ccc;
-    border-radius: 50%;
-    font-size: 24px;
-    color: #ccc;
-    cursor: pointer;
-    margin-right: 10px;
-    transition: all 0.2s ease;
+  /* You would render a plus icon here and when clicked, insert content into Quill */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  font-size: 24px;
+  color: #ccc;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: all 0.2s ease;
 }
 
 .plus-icon-container:hover {
-    border-color: #888;
-    color: #888;
-    background-color: #f9f9f9;
+  border-color: #888;
+  color: #888;
+  background-color: #f9f9f9;
 }
 
 
 /* Content area styling (ql-editor) */
 .custom-quill-editor .ql-editor h1 {
-  font-size: 2.5em; /* Adjust heading sizes */
+  font-size: 2.5em;
+  /* Adjust heading sizes */
   font-weight: bold;
   margin-bottom: 0.5em;
 }
@@ -209,19 +237,26 @@
 
 /* Optional: Add a subtle focus effect for the editor area */
 .custom-quill-editor:focus-within .ql-container.ql-snow {
-    /* outline: 1px solid #cceeff; */ /* Example focus style, might not want for Medium-like */
+  /* outline: 1px solid #cceeff; */
+  /* Example focus style, might not want for Medium-like */
 }
 
-/* Hide the default image/video resize handlers if you want a cleaner look */
-/* These are typically provided by quill-image-resize-module, which you might add later */
-.ql-resize { display: none !important; }
-.ql-handle { display: none !important; }
+/* Show resize handles when the image resize module is active */
+.ql-resize {
+  display: block;
+}
+
+.ql-handle {
+  display: block;
+}
 
 /* Placeholder text styling */
 .custom-quill-editor .ql-editor.ql-blank::before {
-    font-style: normal; /* Remove italic for placeholder */
-    color: #bbb;
-    left: 0; /* Align with actual text */
+  font-style: normal;
+  /* Remove italic for placeholder */
+  color: #bbb;
+  left: 0;
+  /* Align with actual text */
 }
 
 /* --- Publish Modal Styles --- */
@@ -272,7 +307,8 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 1rem;
-  box-sizing: border-box; /* Important for 100% width */
+  box-sizing: border-box;
+  /* Important for 100% width */
 }
 
 .modal-checkbox-label {
@@ -307,7 +343,8 @@
 }
 
 .modal-publish-button {
-  background-color: #1a8917; /* Medium green */
+  background-color: #1a8917;
+  /* Medium green */
   color: white;
 }
 

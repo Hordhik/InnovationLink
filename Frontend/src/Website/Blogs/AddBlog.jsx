@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import Modal from "react-modal"; // Import Modal
 import { getStoredUser } from "../../auth.js";
@@ -30,9 +30,44 @@ export default function AddBlog() {
   // Loading/Error state
   const [isPublishing, setIsPublishing] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [imageResizeEnabled, setImageResizeEnabled] = useState(false);
+
+  // Try to register image resize module dynamically (works if dependency is installed)
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        // Get Quill constructor from react-quill-new or fallback to global
+        const rq = await import("react-quill-new");
+        const QuillRef = rq?.Quill || (await import("quill")).default || window.Quill;
+        if (!QuillRef) return;
+
+        let ImageResize = null;
+        try {
+          // Preferred for Quill v2
+          const mod = await import("quill-image-resize-module-react");
+          ImageResize = mod?.default || mod;
+        } catch (_) {
+          try {
+            // Fallback for Quill v1-style module
+            const mod = await import("quill-image-resize-module");
+            ImageResize = mod?.default || mod;
+          } catch (_) { /* no module available */ }
+        }
+
+        if (ImageResize) {
+          QuillRef.register("modules/imageResize", ImageResize);
+          if (mounted) setImageResizeEnabled(true);
+        }
+      } catch (e) {
+        // silent fallback – editor still works without resize
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
 
   // Custom toolbar options
-  const modules = {
+  const modules = useMemo(() => ({
     toolbar: [
       [{ header: [1, 2, 3, 4, false] }],
       ["bold", "italic", "underline", "strike", "blockquote"],
@@ -41,7 +76,8 @@ export default function AddBlog() {
       ["link", "image"],
       ["clean"],
     ],
-  };
+    ...(imageResizeEnabled ? { imageResize: { modules: ["Resize", "DisplaySize", "Toolbar"] } } : {}),
+  }), [imageResizeEnabled]);
 
   const formats = [
     "header", "bold", "italic", "underline", "strike", "blockquote",
