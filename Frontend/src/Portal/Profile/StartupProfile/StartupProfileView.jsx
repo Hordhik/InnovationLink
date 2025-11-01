@@ -545,7 +545,6 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
       </EditModal>
 
       {/* --- ALL OTHER MODALS --- */}
-      {/* (No changes needed to the other modals) */}
 
       <EditModal
         open={isAchievementsOpen}
