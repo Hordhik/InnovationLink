@@ -1,12 +1,17 @@
 import React from 'react';
 
-export default function InvestLike() {
+export default function InvestLike({ description, onClick }) {
   return (
-    <div className="card investlike-card">
+    <div
+      className="card investlike-card"
+      onClick={onClick}
+      style={{ cursor: 'pointer' }}
+    >
       <h3>What I Like To Invest In</h3>
-      <p>
-        I prefer investing in innovative and impact-driven startups that focus on solving real-world
-        challenges through scalable technology and sustainable business models.
+      <p className="investlike-text">
+        {description && description.trim() !== ''
+          ? description
+          : 'Click to add your investment preferences or philosophy.'}
       </p>
     </div>
   );

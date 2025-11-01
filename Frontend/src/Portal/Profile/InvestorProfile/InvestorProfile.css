@@ -97,9 +97,9 @@
   cursor: pointer;
 }
 
-.btn-connect {
-  border: 1px solid #d1d5db;
-  color: #374151;
+.investor-actions .btn-connect {
+  border: 1px solid #2563eb;
+  color: #2563eb;
   background: none;
   padding: 0.6rem 1.2rem;
   border-radius: 8px;
@@ -108,14 +108,6 @@
 
 .btn-meet:hover {
   background: #2563eb;
-}
-.btn-connect:hover {
-  border-color: #3b82f6;
-  color: #3b82f6;
-}
-
-.about-section{
-
 }
 
 /* Typography */
@@ -335,4 +327,30 @@ p {
 @keyframes slideUp {
   from { transform: translateY(20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
+}
+
+
+/* InvestorProfile.css */
+
+/* General textarea style inside modal */
+.epm-modal textarea {
+  width: 100%;
+  min-height: 140px;
+  font-size: 16px;
+  font-family: 'Inter', sans-serif;
+  color: #1e293b;
+  background: #f8fafc;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 10px 12px;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.epm-modal textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  background: #ffffff;
 }
