@@ -414,18 +414,19 @@ class ScraperManager:
         
         # Import the new scrapers
         try:
-            from new_scrapers import StartupNewsAggregator, Inc42Scraper, EventbriteScraper
-            
+            from new_scrapers import StartupNewsAggregator, Inc42Scraper, EventbriteScraper, GlobalStartupAwardsScraper
+
             self.scrapers = [
                 StartupEventsScraper(),    # Existing excellent source
-                StartupIndiaScraper(),     # Government schemes  
+                StartupIndiaScraper(),     # Government schemes
                 THubScraper(),             # Hyderabad incubator
                 NasscomScraper(),          # Industry events
                 StartupNewsAggregator(),   # NEW: Curated startup events (replaces 10times)
-                Inc42Scraper(),            # NEW: Inc42 startup news & events  
-                EventbriteScraper()        # NEW: Eventbrite startup events
+                Inc42Scraper(),            # NEW: Inc42 startup news & events
+                EventbriteScraper(),       # NEW: Eventbrite startup events
+                GlobalStartupAwardsScraper()
             ]
-            print(f"✅ Loaded {len(self.scrapers)} scrapers including 3 new sources!")
+            print(f"✅ Loaded {len(self.scrapers)} scrapers including new sources")
             
         except ImportError as e:
             print(f"⚠️  Could not import new scrapers: {e}")

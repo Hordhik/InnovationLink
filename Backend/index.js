@@ -24,8 +24,20 @@ const Team = require('./models/teamModel');
 const Post = require('./models/postModel');
 const StartupDock = require('./models/startupDockModel');
 
+// Allow multiple local frontend origins during development. Prefer FRONTEND_URL env var when set.
+const frontendDefault = process.env.FRONTEND_URL || 'http://localhost:5173';
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173', // Use env var or default
+  origin: function (origin, callback) {
+    // Allow non-browser tools like curl or server-to-server requests (no origin)
+    if (!origin) return callback(null, true);
+
+    const allowed = [frontendDefault, 'http://localhost:5174'];
+    if (allowed.indexOf(origin) !== -1) {
+      return callback(null, true);
+    }
+    // For other origins, reject (CORS middleware will send appropriate response)
+    return callback(new Error('Not allowed by CORS'));
+  },
   optionsSuccessStatus: 200
 };
 

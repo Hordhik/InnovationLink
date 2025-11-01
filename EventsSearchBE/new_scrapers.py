@@ -408,31 +408,119 @@ class EventbriteScraper:
             'image_url': image_url or 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=400&h=300&fit=crop',
             'tags': ['startup', 'eventbrite', 'networking', 'india']
         }
-    
-    def _clean_text(self, text: str) -> str:
-        """Clean and normalize text"""
+
+
+class GlobalStartupAwardsScraper:
+    """Scrape the Global Startup Awards 'Startup Events Worldwide' page.
+
+    The page is mostly static HTML. This scraper uses heuristics:
+    - iterate over h2 headings as event titles
+    - collect following sibling text as description/metadata
+    - try to pull date and location with regex heuristics
+    """
+
+    def __init__(self):
+        self.source_name = "GlobalStartupAwards"
+        self.base_url = "https://www.globalstartupawards.com/startup-events-worldwide?utm_source=chatgpt.com"
+        self.session = requests.Session()
+        self.session.headers.update({
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        })
+
+    def _clean(self, text: str) -> str:
+        return ' '.join(text.split()) if text else ''
+
+    def _extract_date(self, text: str) -> str:
         if not text:
-            return ""
-        return ' '.join(text.strip().split())
-    
-    def _extract_date(self, date_text: str) -> str:
-        """Extract and format date"""
-        if not date_text:
             return None
-        
-        try:
-            # Try various date parsing approaches
-            patterns = [
-                r'(\d{4}-\d{2}-\d{2})',
-                r'(\d{1,2}/\d{1,2}/\d{4})',
-                r'(\w+\s+\d{1,2},?\s+\d{4})'
-            ]
-            
-            for pattern in patterns:
-                match = re.search(pattern, date_text)
-                if match:
-                    return match.group(1)
-        except:
-            pass
-        
+        # Look for common month names + year patterns
+        months = r'(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec|January|February|March|April|June|July|August|September|October|November|December)'
+        m = re.search(fr"({months}\s+\d{{1,2}}(?:[-–]\d{{1,2}})?,?\s+\d{{4}})|({months}\s+\d{{4}})|(\b\d{{1,2}}\s+{months}\s+\d{{4}})", text, re.I)
+        if m:
+            return self._clean(m.group(0))
         return None
+
+    def _extract_location(self, text: str) -> str:
+        if not text:
+            return None
+        # Often location appears as "CITY, COUNTRY" or uppercase city lines
+        # Try to find a pattern like 'CITY, COUNTRY' or 'CITY, COUNTRY.'
+        m = re.search(r'([A-Z][A-Za-z &\-]+,\s*[A-Z][A-Za-z .&\-]+)', text)
+        if m:
+            return self._clean(m.group(0))
+        # fallback: look for lines with all-caps tokens (short names)
+        lines = [l.strip() for l in text.splitlines() if l.strip()]
+        for l in lines:
+            if len(l.split()) <= 5 and l.upper() == l and any(c.isalpha() for c in l):
+                return l
+        return None
+
+    def scrape(self) -> List[Dict[str, Any]]:
+        events: List[Dict[str, Any]] = []
+        try:
+            resp = self.session.get(self.base_url, timeout=20)
+            resp.raise_for_status()
+            soup = BeautifulSoup(resp.content, 'html.parser')
+
+            # Heuristic: use h2 headings as event titles (page uses many h2s for event names)
+            all_h2 = soup.find_all('h2')
+            for h in all_h2:
+                title = self._clean(h.get_text())
+                if not title or len(title) < 3:
+                    continue
+                # skip generic headings
+                skip_words = ['explore', 'events', 'startup events worldwide', 'is your event missing?']
+                low = title.lower()
+                if any(sw in low for sw in skip_words):
+                    continue
+
+                # Collect sibling/nearby text for description/date/location
+                # Gather next siblings until next heading of same level
+                desc_parts = []
+                for sib in h.find_next_siblings():
+                    if sib.name and sib.name.startswith('h'):
+                        break
+                    desc_parts.append(self._clean(sib.get_text()))
+                    # limit to a few elements
+                    if len(desc_parts) >= 4:
+                        break
+
+                desc = ' '.join([p for p in desc_parts if p])[:800]
+
+                # Try to find link inside the heading
+                link = None
+                a = h.find('a', href=True)
+                if a:
+                    href = a['href']
+                    link = urllib.parse.urljoin(self.base_url, href)
+
+                date = self._extract_date(desc)
+                location = self._extract_location(desc) or 'Various'
+
+                events.append({
+                    'title': title,
+                    'description': desc or None,
+                    'date': date,
+                    'location': location,
+                    'organizer': self.source_name,
+                    'source_url': link or self.base_url,
+                    'event_type': 'startup_event',
+                    'image_url': None,
+                    'tags': ['startup', 'globalstartupawards']
+                })
+
+            # Deduplicate by title
+            seen = set()
+            deduped = []
+            for ev in events:
+                t = (ev.get('title') or '').strip().lower()
+                if t and t not in seen:
+                    seen.add(t)
+                    deduped.append(ev)
+
+            return deduped[:80]
+
+        except Exception as e:
+            print(f"Error scraping GlobalStartupAwards: {e}")
+            return []
+
