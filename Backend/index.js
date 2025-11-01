@@ -33,8 +33,8 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(cors(corsOptions));
 
-// Initialize DB tables
-(async () => {
+// Initialize DB tables when starting the server directly.
+async function initDb() {
   try {
     await User.init();
     await Investor.init(); // ✅ Ensure Investor model init is called
@@ -48,7 +48,7 @@ app.use(cors(corsOptions));
     console.error("Error initializing database tables:", error);
     process.exit(1); // Exit if DB init fails
   }
-})();
+}
 
 // Health check endpoint
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
@@ -66,5 +66,20 @@ app.use('/api/investors', investorRoutes); // ✅ Ensure investor routes are mou
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// Only start the server if this file is run directly. This allows importing the `app` in tests
+// without creating a second listener.
+if (require.main === module) {
+  // When running the server directly, initialize DB first, then start listening.
+  initDb()
+    .then(() => {
+      app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    })
+    .catch((err) => {
+      console.error('Failed to initialize DB:', err);
+      process.exit(1);
+    });
+}
+
+module.exports = app;
 
