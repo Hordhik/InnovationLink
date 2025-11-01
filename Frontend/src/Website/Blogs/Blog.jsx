@@ -12,48 +12,39 @@ const Blog = () => {
   const { id } = useParams();
   const location = useLocation();
 
-  // --- State for API data ---
   const [blog, setBlog] = useState(null);
   const [popularBlogs, setPopularBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // --- FIX: useMemo for URL-derived values ---
   const isPortalView = useMemo(() => {
     const pathParts = location.pathname.split('/').filter(Boolean);
     const firstSegment = pathParts[0];
     return firstSegment === 'S' || firstSegment === 'I';
   }, [location.pathname]);
 
-  // --- Data Fetching ---
   useEffect(() => {
     const fetchBlogData = async () => {
       setLoading(true);
       setError(null);
       try {
-        // Fetch the main blog post
         const postData = await getPostById(id);
         setBlog(postData.post);
 
-        // For the public view, also fetch popular blogs (using getAllPosts for now)
         if (!isPortalView) {
           const allPostsData = await getAllPosts();
-          // Just show 3 popular posts, and filter out the current one
-          setPopularBlogs(
-            allPostsData.posts.filter(p => p.id !== parseInt(id)).slice(0, 3)
-          );
+          setPopularBlogs(allPostsData.posts.filter(p => p.id !== parseInt(id)).slice(0, 3));
         }
       } catch (err) {
-        console.error("Error fetching blog data:", err);
-        setError(err.message || "Failed to load post.");
+        console.error('Error fetching blog data:', err);
+        setError(err.message || 'Failed to load post.');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
-
     fetchBlogData();
-  }, [id, isPortalView]); // Refetch if ID or view changes
+  }, [id, isPortalView]);
 
-  // --- Loading and Error States ---
   if (loading) {
     return <div className="blog-page-portal"><p>Loading post...</p></div>;
   }
@@ -67,14 +58,12 @@ const Blog = () => {
     );
   }
 
-  // Helper to format date
   const formattedDate = new Date(blog.created_at).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   });
 
-  // --- Portal View ---
   if (isPortalView) {
     return (
       <div className="blog-page-portal">
@@ -94,7 +83,6 @@ const Blog = () => {
             </div>
           </div>
 
-          {/* Render the HTML content from ReactQuill */}
           <div className="blog-content">
             <div
               className="blog-full-content"
@@ -108,39 +96,65 @@ const Blog = () => {
 
   // --- Public Website View ---
   return (
-    <div className="blog-page">
-      <div className="empty"></div>
-      <div className="blog">
-        <div className="blog-header">
-          <p className="blog-title">{blog.title}</p>
-          {blog.subtitle && <p className="blog-subtitle">{blog.subtitle}</p>}
-          <div className="blog-meta">
-            <div className="blog-date">
-              <img src={calendarIcon} alt="" />
-              <p>{formattedDate}</p>
+    <>
+      {/* Floating back button (public blog detail) */}
+      <button
+        className="blog-back-btn"
+        onClick={() => { if (window.history.length > 1) window.history.back(); else window.location.href = '/blogs'; }}
+        aria-label="Go back"
+      >
+        ← Back
+      </button>
+
+      <div className="blog-page">
+        <div className="empty"></div>
+        <div className="blog">
+          {/* Author bar */}
+          <div className="blog-author-bar">
+            <div className="blog-author-avatar" aria-hidden>
+              {String(blog.username || '')
+                .split(' ')
+                .map(s => s[0])
+                .filter(Boolean)
+                .slice(0, 2)
+                .join('')
+                .toUpperCase()}
             </div>
-            <div className="blog-author">
-              <img src={profileIcon} alt="" />
-              <p>By {blog.username}</p>
+            <div className="blog-author-info">
+              <div className="name-row">
+                <span className="author-name">{blog.username}</span>
+                <span className={`role-chip ${blog.userType === 'investor' ? 'investor' : 'startup'}`}>
+                  {blog.userType === 'investor' ? 'Investor' : 'Startup'}
+                </span>
+              </div>
+              <div className="date-row">
+                <img src={calendarIcon} alt="" />
+                <span>{formattedDate}</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Render the HTML content from ReactQuill */}
-        <div className="blog-content">
-          <div
-            className="blog-full-content"
-            dangerouslySetInnerHTML={{ __html: blog.content }}
-          />
+          <div className="blog-header">
+            <p className="blog-title">{blog.title}</p>
+            {blog.subtitle && <p className="blog-subtitle">{blog.subtitle}</p>}
+          </div>
+
+          {/* Render the HTML content from ReactQuill */}
+          <div className="blog-content">
+            <div
+              className="blog-full-content"
+              dangerouslySetInnerHTML={{ __html: blog.content }}
+            />
+          </div>
+        </div>
+        <div className="most-viewd">
+          <p className='title'>Most Popular</p>
+          {popularBlogs.map((popBlog) => (
+            <BlogCardShort key={`popular-${popBlog.id}`} blog={popBlog} />
+          ))}
         </div>
       </div>
-      <div className="most-viewd">
-        <p className='title'>Most Popular</p>
-        {popularBlogs.map((popBlog) => (
-          <BlogCardShort key={`popular-${popBlog.id}`} blog={popBlog} />
-        ))}
-      </div>
-    </div>
+    </>
   );
 };
 

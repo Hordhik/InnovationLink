@@ -43,8 +43,9 @@ function App() {
   };
 
   // Define routes where navbar should be shown (website routes)
-  const showNavbarRoutes = ["/home", "/blogs", "/events", "/about"];
-  const shouldShowNavbar = showNavbarRoutes.some(route => location.pathname === route) || location.pathname.startsWith('/blog/'); // Show navbar on blog detail pages
+  // Show navbar on website routes including blogs list, but hide on blog detail pages
+  const showNavbarRoutes = ["/home", "/events", "/about", "/blogs"];
+  const shouldShowNavbar = showNavbarRoutes.some(route => location.pathname === route);
   // Footer only on Home and About pages
   const shouldShowFooter = location.pathname === '/home' || location.pathname === '/about';
 

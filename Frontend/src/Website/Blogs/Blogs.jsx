@@ -183,7 +183,7 @@ const Blogs = () => {
 
   // --- Public (non-portal) blog page ---
   return (
-    <div className="Blogs">
+      <div className="Blogs">
       {loginRequired && !user && ( // This 'user' is the memoized one, okay for this banner
         <div className="login-banner">
           <strong>Want to post?</strong> Please log in to create and manage your blogs. You can still explore public posts.
@@ -223,7 +223,7 @@ const Blogs = () => {
           <BlogCardShort key={`popular-${blog.id}`} blog={blog} />
         ))}
       </div>
-    </div>
+      </div>
   );
 };
 

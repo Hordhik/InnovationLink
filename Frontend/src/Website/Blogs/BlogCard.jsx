@@ -21,7 +21,7 @@ const extractPreview = (htmlString) => {
     const firstElement = doc.body.firstElementChild;
 
     let imageHtml = null;
-    let lineClamp = 6; // Default to 6 lines
+  let lineClamp = 4; // Default to 4 lines (shorter)
     let imageNode = null;
 
     // --- NEW LOGIC ---
@@ -47,7 +47,7 @@ const extractPreview = (htmlString) => {
       // Remove the parent paragraph (if it exists) or the image itself
       const elementToRemove = imageNode.closest('p') || imageNode;
       elementToRemove.remove();
-      lineClamp = 4; // Show 4 lines of text if there's an image
+  lineClamp = 3; // Show 3 lines of text if there's an image
     }
 
     // Get all remaining text content from the parsed HTML

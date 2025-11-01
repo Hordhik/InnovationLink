@@ -295,21 +295,20 @@
 .spv-blogs .blog-grid {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0; /* use separators instead of gaps */
   width: 100%;
 }
 
-.blog-card {
-  padding: 10px;
-  border-radius: 8px;
-  background: #f8fafc;
+.spv-blogs .blog-card {
+  padding: 10px 0;
+  background: transparent;
+  border-radius: 0;
+  border-bottom: 1px solid #000; /* darker separator for clarity */
   cursor: pointer;
   width: 100%;
 }
 
-.blog-card:hover {
-  background: #f1f5f9;
-}
+.spv-blogs .blog-card:last-child { border-bottom: none; }
 
 .blog-title {
   font-weight: 600;

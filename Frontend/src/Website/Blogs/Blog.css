@@ -3,6 +3,7 @@
     display: flex;
     gap: 50px;
     justify-content: space-between;
+    padding: 56px 25px 20px; /* add top breathing space */
 }
 
 .blog-page .empty {
@@ -22,7 +23,7 @@
 }
 
 .blog-page .blog .blog-header {
-    margin-bottom: 30px;
+    margin-bottom: 24px;
     padding-bottom: 30px;
     border-bottom: 1px solid #000;
 }
@@ -132,13 +133,18 @@
     line-height: 1.2;
 }
 
-.blog-page-portal .blog .blog-subtitle {
-    /* Added rule for subtitle */
+/* Right column on public blog page */
+.most-viewd {
+    width: 260px;
+    border-left: 1px solid #e9ecef;
+    padding-left: 16px;
+}
+
+.most-viewd .title {
     font-size: 20px;
     font-weight: 400;
     line-height: 1.5;
     margin-bottom: 15px;
-    /* Adjusted margin */
     color: #666;
 }
 
@@ -205,3 +211,59 @@
 }
 
 /* ------------------------------------------------- */
+
+/* Floating back button for public blog detail */
+.blog-back-btn {
+    position: fixed;
+    top: 14px;
+    left: 16px;
+    z-index: 1000;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: #ffffff;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    color: #111827;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.blog-back-btn:hover { background: #f6f8fa; }
+
+/* Author bar on public blog */
+.blog-author-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.blog-author-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0f172a;
+    font-weight: 700;
+    background: linear-gradient(135deg, #e9f2ff, #ffffff);
+    border: 1px solid #dbeafe;
+}
+
+.blog-author-info .name-row { display: flex; align-items: center; gap: 8px; }
+.blog-author-info .author-name { font-weight: 600; color: #111827; }
+.blog-author-info .date-row { display: inline-flex; align-items: center; gap: 6px; color: #6b7280; font-size: 13px; }
+.blog-author-info .date-row img { width: 14px; height: 14px; }
+
+.role-chip {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 999px;
+}
+.role-chip.startup { background: #e9f2ff; color: #0F62FE; }
+.role-chip.investor { background: #e6f6f1; color: #059669; }
