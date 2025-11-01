@@ -1,28 +1,68 @@
 .NavBar {
+    position: sticky;
+    top: 12px;
+    z-index: 50;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 20px;
+    justify-content: center;
+    padding: 0 12px;
     font-family: Inter, sans-serif;
+    background: transparent;
 }
 
-.logo img{
-    width: 200px;
+/* Floating pill container */
+.NavBar-pill {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: #ffffff; /* Opaque white to avoid background tinting */
+    color: #111827;
+    border: 1px solid #E5E7EB; /* subtle ring like in the reference */
+    box-shadow: 0 10px 30px -15px rgba(17,24,39,0.18), 0 2px 6px rgba(17,24,39,0.06);
+    max-width: min(100%, 1040px);
+    width: fit-content;
 }
+
+/* Brand inside the pill */
+.brand { display: flex; align-items: center; padding: 4px 12px 4px 6px; border-right: 1px solid rgba(17,24,39,0.08); margin-right: 4px; text-decoration: none; }
+.brand img { height: 36px; width: auto; object-fit: contain; }
+
+@media (max-width: 640px) {
+    .brand { padding: 2px 8px 2px 4px; }
+    .brand img { height: 30px; }
+}
+
+/* (Logo inside pill removed) */
 
 .Nav-options {
     display: flex;
     align-items: center;
-    gap: 30px;
+    gap: 18px;
     font-size: 14px;
-    font-weight: 400;
+    font-weight: 500;
 }
 
 .Nav-option {
+    position: relative;
     cursor: pointer;
-    color: #A9A9A9;
+    color: #4B5563; /* gray-600 */
     text-align: center;
     text-decoration: none;
+    transition: color .2s ease, opacity .2s ease;
+}
+.Nav-option:hover { color: #111827; }
+.Nav-option.active { color: #111827; }
+.Nav-option.active::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: -10px;
+    width: 6px;
+    height: 6px;
+    background: #111827;
+    border-radius: 999px;
 }
 
 .Nav-option.active {
@@ -33,7 +73,7 @@
 .Signin-options {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     font-size: 14px;
 }
 
@@ -48,14 +88,22 @@
 }
 
 .Signin-option.login{
-    border-radius: 50px;
+    border-radius: 999px;
     border: 1px solid #E5E7EB;
-    background: #FFF;
+    background: #F8FAFC;
+    color: #111827;
 }
 
 .Signup-option.register {
-    border-radius: 50px;
+    border-radius: 999px;
+    background: #111827;
+    color: #ffffff;
+    gap: 8px;
+    border: 1px solid #111827;
+    box-shadow: 0 12px 24px -14px rgba(0,0,0,0.35);
+    transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+.Signup-option.register:hover {
+    transform: translateY(-2px);
     background: #0C0C0C;
-    color: #FFF;
-    gap: 10px;
 }

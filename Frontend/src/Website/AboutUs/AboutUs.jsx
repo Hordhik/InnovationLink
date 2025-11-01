@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import './AboutUs.css';
 
 // --- Reusable Icon Component ---
@@ -12,10 +13,14 @@ const Icon = ({ name, size = 32 }) => (
 
 // --- Team Section Data ---
 const teamMembers = [
-    { name: 'Chandar Sekhar', role: 'Founder & CEO', bio: 'Visionary builder creating trust-based startup ecosystems.', imageUrl: './ChandraSekhar.jpeg' },
-    { name: 'Sravan Kumar', role: 'CFO', bio: 'Numbers expert passionate about funding strategies and early-stage growth.', imageUrl: 'https://images.unsplash.com/photo-1556157382-97eda2d62296?q=80&w=400&auto=format&fit=crop' },
-    { name: 'Manikant Reddy', role: 'CTO', bio: 'Tech mind behind our secure and scalable platform architecture.', imageUrl: 'https://images.unsplash.com/photo-1624561172888-ac93c696e10c?q=80&w=400&auto=format&fit=crop' },
+  { name: 'Chandar Sekhar', role: 'Founder & CEO', bio: 'Visionary builder creating trust-based startup ecosystems.' },
+  { name: 'Sravan Kumar', role: 'CFO', bio: 'Numbers expert passionate about funding strategies and early-stage growth.' },
+  { name: 'Manikant Reddy', role: 'CTO', bio: 'Tech mind behind our secure and scalable platform architecture.' },
+  { name: 'Hemanth', role: 'SSM', bio: 'Driving strategic partnerships and market growth with a founder-first mindset.' },
+  { name: 'Yaswanth', role: 'Co-Founder', bio: 'Co-leading product and community to connect aligned capital with promising founders.' },
 ];
+
+const getInitials = (name = '') => name.split(' ').filter(Boolean).map(n => n[0]).slice(0,2).join('').toUpperCase();
 
 // --- Milestones Data ---
 const milestones = [
@@ -26,168 +31,193 @@ const milestones = [
     { title: 'Currently Validating with Early Investors & Founders', complete: false },
 ];
 
+// --- Features Data (What makes us different) ---
+const features = [
+  { icon: 'integrity', title: 'Smart matching', desc: 'Go beyond keywords. Our matching considers industry, stage, traction, and shared principles to surface the best-fit partners.' },
+  { icon: 'community', title: 'Built-in conversations', desc: 'Secure messaging and meetings keep everything streamlined from first hello to final handshake.' },
+  { icon: 'transparency', title: 'We don’t touch funds', desc: 'We facilitate connections. You manage the deal. No commissions, no hidden cuts.' },
+];
+
+// --- Values Data ---
+const values = [
+  { icon: 'integrity', title: 'Integrity first', desc: 'Every profile is verified. No fake promises, no fraud.' },
+  { icon: 'outcome', title: 'Outcome-driven', desc: 'We focus on results — meaningful conversations that lead to investments.' },
+  { icon: 'community', title: 'Community over competition', desc: 'We grow better together. Share, mentor, support.' },
+  { icon: 'transparency', title: 'Transparency always', desc: 'We don’t touch your money. We don’t sell your data.' },
+];
+
 // --- FAQ Data ---
 const faqData = [
-    { q: 'What stage startups do you support?', a: 'We focus on early-stage startups — from idea validation to pre-Series A — helping them connect with aligned, verified investors.' },
-    { q: 'How are investors verified?', a: 'Investors undergo a multi-step verification process that includes identity checks, portfolio review, and community endorsement before they can access opportunities.' },
-    { q: 'Do you charge fees or take equity?', a: 'No. Innovation Link is a neutral platform. We do not take equity or charge commissions on deals. Our revenue comes from premium features and services.' },
+  { q: 'What stage startups do you support?', a: 'We focus on early-stage startups — from idea validation to pre-Series A — helping them connect with aligned, verified investors.' },
+  { q: 'How are investors verified?', a: 'Investors undergo a multi-step verification process that includes identity checks, portfolio review, and community endorsement before they can access opportunities.' },
+  { q: 'Do you charge fees or take equity?', a: 'No. Innovation Link is a neutral platform. We do not take equity or charge commissions on deals. Our revenue comes from premium features and services.' },
+  { q: 'How do I join as an investor?', a: 'Sign up with your professional email, complete a short profile, and request verification. Once approved, you can explore and connect with founders that match your thesis.' },
+  { q: 'Is my data secure?', a: 'Yes. We use industry-standard encryption and never sell your data. You can control visibility from your profile settings at any time.' },
 ];
 
 
 const AboutUs = () => {
+  const [openFaqIndex, setOpenFaqIndex] = useState(-1);
+  const faqRefs = useRef([]);
+
+  useEffect(() => {
+    if (openFaqIndex >= 0 && faqRefs.current[openFaqIndex]) {
+      // Scroll the opened FAQ card into view so it’s always visible (especially the last one)
+      faqRefs.current[openFaqIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [openFaqIndex]);
   return (
-    <div className="about-us-page">
-      {/* Section 1: Hero / Vision */}
-      <header className="our-vision">
-        <h2>Shining a <span>light</span> forward & empowering ideas</h2>
-        <h3>
-          INNOVATION LINK IS AIMING TO PROVIDE THE PLATFORM FOR INVESTORS AND INVESTMENT SEEKERS
-        </h3>
+    <div className="about-page">
+      {/* Hero */}
+      <header className="about-hero">
+        <div className="about-hero__bg" aria-hidden />
+        <div className="about-hero__content container">
+          <h1>
+            Where founders meet investors —
+            <span className="accent"> with clarity and trust.</span>
+          </h1>
+          <p className="subtitle">
+            Innovation Link helps early-stage founders connect with aligned, verified investors.
+            No noise. No middlemen. Just the right conversations.
+          </p>
+          <div className="hero-cta">
+            <Link to="/auth/signup" className="btn btn--primary">Get Started</Link>
+            <Link to="/events" className="btn btn--ghost">Explore Events</Link>
+          </div>
+        </div>
       </header>
 
-      {/* Main content wrapper */}
-      <main className="about-us-content">
-        {/* Sections 2 & 3: Who We Are, Our Mission, What Makes Us Different */}
-        <section className="info-section">
-          <div className="info-item info-card-large">
-            <div className="info-text">
-              <h4>Who We Are</h4>
-              <p>
-                Innovation Link is a platform bridging the gap between bold innovators and forward-thinking investors. We exist to make venture capital accessible, strength-based, and outcome-driven. We're not just matchmaking — we're building the future of funding.
-              </p>
-            </div>
-            <div className="info-icon">
-              <img src="/WhoVR.png" alt="An abstract icon representing vision and technology" />
-            </div>
-          </div>
-          <div className="info-item reverse info-card-large">
-            <div className="info-text">
-              <h4>Our Mission</h4>
-              <p>
-                To empower innovators with access to aligned investors, and equip investors with high-potential, verified ideas that match their thesis.
-              </p>
-            </div>
-            <div className="info-icon">
-              <img src="/HandShake.jpeg" alt="An icon representing partnership and trust" />
-            </div>
-          </div>
-           <div className="info-item info-card-large">
-                <div className="info-text">
-                    <h4>What Makes Us Different</h4>
-                    <ul>
-                        <li><strong>Smart Matching:</strong> Our AI-powered recommendation engine goes beyond keywords, connecting you with the best-fit partners based on deep criteria like industry focus, funding stage, and shared values.</li>
-                        <li><strong>Built-in Conversations:</strong> From initial contact to final handshake, our secure messaging and video meeting tools keep your communication streamlined and confidential.</li>
-                        <li><strong>No Holding Money:</strong> We are not a financial intermediary. We don’t touch your funds or take a cut of your deal. We facilitate the connection, empowering you to manage your investments directly.</li>
-                    </ul>
-                </div>
-                <div className="info-icon">
-                     <img src="/Group.jpg" alt="An icon showing a diverse group collaborating" />
-                </div>
-            </div>
-        </section>
+      {/* Stats */}
+      <section className="about-stats container" aria-label="platform stats">
+        <div className="stat">
+          <div className="stat__num">1.2k+</div>
+          <div className="stat__label">Founder-introductions</div>
+        </div>
+        <div className="stat">
+          <div className="stat__num">180+</div>
+          <div className="stat__label">Active investors</div>
+        </div>
+        <div className="stat">
+          <div className="stat__num">72 hrs</div>
+          <div className="stat__label">Avg. first response</div>
+        </div>
+        <div className="stat">
+          <div className="stat__num">Beta</div>
+          <div className="stat__label">Yukthi Fellowship</div>
+        </div>
+      </section>
 
-        {/* Section 4: What We Do */}
-        <section className="what-we-do-section">
-          <h2>WHAT WE DO</h2>
-          <div className="cards-container">
-            <div className="info-card">
-              <h5>SHOWCASE IDEAS</h5>
-              <p>For creators, we provide the tools to build a compelling project profile—detailing your unique vision, market traction, and long-term goals to attract the right attention.</p>
-            </div>
-            <div className="info-card">
-              <h5>DISCOVER OPPORTUNITIES</h5>
-              <p>For investors, we offer a curated, high-quality deal flow. Browse verified project profiles to find the next great idea that aligns perfectly with your investment thesis.</p>
-            </div>
-            <div className="info-card">
-              <h5>CONNECT & COLLABORATE</h5>
-              <p>Our platform is built for action. Integrated tools for messaging and meeting make starting conversations and building partnerships seamless and efficient.</p>
-            </div>
+      <main>
+
+        {/* Differentiators */}
+        <section className="about-features container">
+          <h2 className="center">What makes us different</h2>
+          <div className="feature-grid scroll-row">
+            {features.map((f, idx) => (
+              <div className="feature" key={`feature-${idx}`}>
+                <Icon name={f.icon} />
+                <h3>{f.title}</h3>
+                <p>{f.desc}</p>
+              </div>
+            ))}
           </div>
         </section>
-        
-        {/* NEW: Our Story Section */}
-        <section className="story-section-new">
-            <h2>Our Story</h2>
-            <h3>It Started With a Problem</h3>
-            <p>
-                Early-stage founders waste time chasing cold leads. Investors get lost in a sea of pitch decks and scams. We built Innovation Link to bring <strong>structure</strong>, <strong>security</strong>, and <strong>strategy</strong> to startup-investor interactions — with a shared goal of building trust in the early-stage funding journey.
-            </p>
+
+  {/* Story */}
+        <section className="about-story container">
+          <h2>Our story</h2>
+          <p>
+            Founders waste time chasing cold leads. Investors get flooded with decks. Innovation Link brings
+            structure, security, and strategy to early-stage fundraising — restoring trust to the journey.
+          </p>
         </section>
 
-        {/* NEW: Our Values Section */}
-        <section className="values-section-new">
-            <h2>Our Values</h2>
-            <div className="values-grid-new">
-                <div className="value-card-new">
-                    <Icon name="integrity" />
-                    <h4>Integrity First</h4>
-                    <p>Every profile is verified. No fake promises, no fraud.</p>
-                </div>
-                <div className="value-card-new">
-                    <Icon name="outcome" />
-                    <h4>Outcome-Driven</h4>
-                    <p>We focus on results — not just meetings, but investments that create impact.</p>
-                </div>
-                <div className="value-card-new">
-                    <Icon name="community" />
-                    <h4>Community Over Competition</h4>
-                    <p>We grow together. We share, mentor, and support.</p>
-                </div>
-                <div className="value-card-new">
-                    <Icon name="transparency" />
-                    <h4>Transparency Always</h4>
-                    <p>We don’t touch your money. We don’t sell your data.</p>
-                </div>
+        {/* Values */}
+        <section className="about-values container">
+          <h2 className="center">Our values</h2>
+          <div className="values-grid-new scroll-row">
+            {values.map((v, idx) => (
+              <div className="value-card-new" key={`value-${idx}`}>
+                <Icon name={v.icon} />
+                <h4>{v.title}</h4>
+                <p>{v.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Timeline */}
+        <section className="about-timeline container">
+          <h2 className="center">Milestones</h2>
+          <div className="milestones-timeline-new">
+            {milestones.map((milestone, index) => (
+              <div key={index} className={`milestone-item-new ${milestone.complete ? 'complete' : ''}`}>
+                <div className="milestone-dot-new" />
+                <p>{milestone.title}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Team */}
+        <section className="about-team container">
+          <h2 className="center">Meet the team</h2>
+          <div className="team-grid-new">
+            {teamMembers.map(member => (
+              <div key={member.name} className="team-member-card-new">
+                <div className="avatar-initials" aria-hidden>{getInitials(member.name)}</div>
+                <h3>{member.name}</h3>
+                <p className="team-role-new">{member.role}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="about-cta container">
+          <div className="cta-card">
+            <div>
+              <h2>Ready to pitch or invest?</h2>
+              <p>Join the Innovation Link beta and be part of the future of funding.</p>
             </div>
-        </section>
-
-        {/* NEW: Team Section */}
-        <section className="team-section-new">
-            <h2>Meet Our Team</h2>
-            <div className="team-grid-new">
-                {teamMembers.map(member => (
-                    <div key={member.name} className="team-member-card-new">
-                        <img src={member.imageUrl} alt={`Photo of ${member.name}`} className="team-photo-new" />
-                        <h3>{member.name}</h3>
-                        <p className="team-role-new">{member.role}</p>
-                    </div>
-                ))}
+            <div className="cta-actions">
+              <Link to="/auth/signup" className="btn btn--primary">Request Early Access</Link>
             </div>
+          </div>
         </section>
 
-        {/* NEW: Milestones Section */}
-        <section className="milestones-section-new">
-            <h2>Milestones / Achievements</h2>
-            <div className="milestones-timeline-new">
-                {milestones.map((milestone, index) => (
-                    <div key={index} className={`milestone-item-new ${milestone.complete ? 'complete' : ''}`}>
-                        <div className="milestone-dot-new"></div>
-                        <p>{milestone.title}</p>
-                    </div>
-                ))}
-            </div>
-        </section>
-
-        {/* NEW: Call to Action Section */}
-        <section className="cta-section-new">
-            <h2>🚀 Ready to pitch or invest?</h2>
-            <p>Join the Innovation Link beta and be part of the future of funding.</p>
-            <button className="cta-button-new">
-                Request Early Access &rarr;
-            </button>
-        </section>
-
-
-        {/* Section 5 -> Now Section 10: FAQs */}
-        <section className="faq-section">
+        {/* FAQs */}
+        <section className="faq-section container">
           <h2>Frequently Asked Questions</h2>
           <div className="faq-container">
-            {faqData.map((faq, index) => (
-                 <details key={index} className="faq-item">
-                    <summary>{faq.q}</summary>
+            {faqData.map((faq, index) => {
+              const isOpen = openFaqIndex === index;
+              const panelId = `faq-panel-${index}`;
+              return (
+                <div
+                  key={index}
+                  className={`faq-card ${isOpen ? 'open' : ''}`}
+                  ref={(el) => (faqRefs.current[index] = el)}
+                >
+                  <button
+                    className="faq-trigger"
+                    aria-expanded={isOpen}
+                    aria-controls={panelId}
+                    onClick={() => setOpenFaqIndex(isOpen ? -1 : index)}
+                  >
+                    <span className="faq-q">{faq.q}</span>
+                    <span className="faq-icon" aria-hidden />
+                  </button>
+                  <div
+                    id={panelId}
+                    className="faq-content"
+                    aria-hidden={!isOpen}
+                  >
                     <p>{faq.a}</p>
-                </details>
-            ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
       </main>

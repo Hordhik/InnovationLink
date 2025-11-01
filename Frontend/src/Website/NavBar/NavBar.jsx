@@ -63,10 +63,12 @@ function NavBar() {
 
     return (
         <>
-            <div className="NavBar">
-                <div className="logo">
-                    <img src={logo} alt="Logo" />
-                </div>
+                                    <div className="NavBar">
+                                        <div className="NavBar-pill">
+                                            {/* Brand inside the pill for a unified control */}
+                                            <Link to="/home" className="brand" aria-label="Innovation Link home">
+                                                <img src={logo} alt="Innovation Link" />
+                                            </Link>
                 <div className="Nav-options">
                     {isLoggedIn ? (
                         <Link key="portal" to={getPortalPath(backendUser)} className={`Nav-option ${location.pathname.startsWith('/S') || location.pathname.startsWith('/I') ? 'active' : ''}`}>
@@ -106,6 +108,7 @@ function NavBar() {
                         </>
                     )}
                 </div>
+              </div>
             </div>
         </>
     )
