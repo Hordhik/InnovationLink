@@ -38,7 +38,7 @@
 .blog-card .blog-card-preview-image img {
     /* Always stretch to full card width while keeping aspect ratio */
     width: 100% !important;
-    height: auto !important;
+    height: 50% !important;
     object-fit: unset !important;
     display: block;
     /* Allow tall images to grow; container will expand naturally */
