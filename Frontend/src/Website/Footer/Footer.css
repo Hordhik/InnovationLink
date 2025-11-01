@@ -1,0 +1,27 @@
+:root {
+  /* Reuse existing palette vars from pages where available */
+  --footer-bg: #0b1220;
+  --footer-fg: #e2e8f0;
+  --footer-muted: #a0aec0;
+  --footer-border: rgba(255,255,255,0.08);
+}
+
+/* Removed page-level gradient background to eliminate gray band near footer */
+
+.site-footer { background: var(--footer-bg); color: var(--footer-fg); padding: 56px 0 24px; margin-top: 48px; border-top: 1px solid var(--footer-border); position: relative; }
+.footer-grid { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; align-items: start; }
+.footer-brand h3 { margin: 0 0 12px; font-size: 2rem; color: #fff; font-family: 'Poppins', sans-serif; }
+.footer-disclaimer { margin: 0; color: var(--footer-muted); line-height: 1.8; font-size: 0.98rem; }
+
+.footer-col h4 { margin: 0 0 12px; color: #fff; font-size: 1.1rem; font-family: 'Poppins', sans-serif; }
+.footer-col ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.footer-col a { color: var(--footer-fg); text-decoration: none; font-weight: 600; }
+.footer-col a:hover { color: var(--accent, #3B82F6); }
+
+.footer-bottom { margin-top: 28px; }
+.footer-divider { height: 1px; background: var(--footer-border); margin-bottom: 14px; }
+.footer-bottom p { margin: 0; color: var(--footer-muted); text-align: center; }
+
+@media (max-width: 900px) {
+  .footer-grid { grid-template-columns: 1fr; }
+}

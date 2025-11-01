@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { AuthProvider } from './contexts/AuthContext';
 import { getStoredUser, getStoredRole, getToken } from './auth';
 import NavBar from './Website/NavBar/NavBar';
+import Footer from './Website/Footer/Footer';
 import Home from './Website/Home/Home';
 import Events from './Website/Events/Events';
 import About from './Website/AboutUs/AboutUs';
@@ -44,6 +45,10 @@ function App() {
   // Define routes where navbar should be shown (website routes)
   const showNavbarRoutes = ["/home", "/blogs", "/events", "/about"];
   const shouldShowNavbar = showNavbarRoutes.some(route => location.pathname === route) || location.pathname.startsWith('/blog/'); // Show navbar on blog detail pages
+  // Footer only on Home and About pages
+  const shouldShowFooter = location.pathname === '/home' || location.pathname === '/about';
+
+  // Removed global overscroll background override to avoid header visual issues
 
   const RequireAuth = ({ children }) => {
     const token = getToken();
@@ -60,7 +65,7 @@ function App() {
       <>
         {/* Global toast removed to avoid duplicates. */}
         {shouldShowNavbar && <NavBar />}
-        <Routes>
+  <Routes>
           <Route path="/startup/:username/*" element={<LegacyStartupRedirect />} />
           <Route path="/investor/:username/*" element={<LegacyInvestorRedirect />} />
           {/* Website Routes (wrapped; redirect logged-in users to portal) */}
@@ -85,7 +90,8 @@ function App() {
           <Route path="/S/*" element={<RequireAuth><Portal /></RequireAuth>} />
           <Route path="/I/*" element={<RequireAuth><Portal /></RequireAuth>} />
 
-        </Routes>
+  </Routes>
+  {shouldShowFooter && <Footer />}
       </>
     </AuthProvider>
   )
