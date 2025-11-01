@@ -7,6 +7,7 @@ import BlogCardShort from './BlogCardShort';
 
 // --- API Imports ---
 import { getPostById, getAllPosts } from '../../services/postApi';
+import { getPublicProfileNoAuth } from '../../services/startupProfileApi';
 
 const Blog = () => {
   const { id } = useParams();
@@ -14,6 +15,7 @@ const Blog = () => {
 
   const [blog, setBlog] = useState(null);
   const [popularBlogs, setPopularBlogs] = useState([]);
+  const [authorLogo, setAuthorLogo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -45,6 +47,24 @@ const Blog = () => {
     fetchBlogData();
   }, [id, isPortalView]);
 
+  // Fetch author logo (startup) when blog loads
+  useEffect(() => {
+    const loadLogo = async () => {
+      try {
+        if (blog?.userType === 'startup' && blog?.username) {
+          const data = await getPublicProfileNoAuth(blog.username);
+          const logo = data?.profile?.logo || null;
+          setAuthorLogo(logo);
+        } else {
+          setAuthorLogo(null);
+        }
+      } catch (_) {
+        setAuthorLogo(null);
+      }
+    };
+    if (blog) loadLogo();
+  }, [blog?.username, blog?.userType]);
+
   if (loading) {
     return <div className="blog-page-portal"><p>Loading post...</p></div>;
   }
@@ -67,20 +87,46 @@ const Blog = () => {
   if (isPortalView) {
     return (
       <div className="blog-page-portal">
+        {/* Inline back button (portal keeps TopBar visible) */}
+        <button
+          className="blog-back-btn blog-back-btn--inline"
+          onClick={() => { if (window.history.length > 1) window.history.back(); else window.location.href = `/${(location.pathname.split('/')[1]||'S')}/blogs`; }}
+          aria-label="Go back"
+        >
+          ← Back
+        </button>
+
         <div className="blog">
+          {/* Author bar (portal) */}
+          <div className="blog-author-bar">
+            <div className="blog-author-avatar" aria-hidden>
+              {authorLogo ? (
+                <img src={authorLogo} alt={`${blog.username} logo`} />
+              ) : String(blog.username || '')
+                .split(' ')
+                .map(s => s[0])
+                .filter(Boolean)
+                .slice(0, 2)
+                .join('')
+                .toUpperCase()}
+            </div>
+            <div className="blog-author-info">
+              <div className="name-row">
+                <span className="author-name">{blog.username}</span>
+                <span className={`role-chip ${blog.userType === 'investor' ? 'investor' : 'startup'}`}>
+                  {blog.userType === 'investor' ? 'Investor' : 'Startup'}
+                </span>
+              </div>
+              <div className="date-row">
+                <img src={calendarIcon} alt="" />
+                <span>{formattedDate}</span>
+              </div>
+            </div>
+          </div>
+
           <div className="blog-header">
             <p className="blog-title">{blog.title}</p>
             {blog.subtitle && <p className="blog-subtitle">{blog.subtitle}</p>}
-            <div className="blog-meta">
-              <div className="blog-date">
-                <img src={calendarIcon} alt="" />
-                <p>{formattedDate}</p>
-              </div>
-              <div className="blog-author">
-                <img src={profileIcon} alt="" />
-                <p>By {blog.username}</p>
-              </div>
-            </div>
           </div>
 
           <div className="blog-content">
@@ -112,7 +158,9 @@ const Blog = () => {
           {/* Author bar */}
           <div className="blog-author-bar">
             <div className="blog-author-avatar" aria-hidden>
-              {String(blog.username || '')
+              {authorLogo ? (
+                <img src={authorLogo} alt={`${blog.username} logo`} />
+              ) : String(blog.username || '')
                 .split(' ')
                 .map(s => s[0])
                 .filter(Boolean)

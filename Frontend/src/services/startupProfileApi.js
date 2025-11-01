@@ -52,3 +52,14 @@ export async function getPublicProfile(username) {
     const { data } = await api.get(`/api/startup-profile/${username}`, { headers: authHeader() });
     return data; // Returns { profile, team, dockFiles }
 }
+
+// Public, no-auth variant (used by public pages to fetch logo by username)
+export async function getPublicProfileNoAuth(username) {
+    const base = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+    const res = await fetch(`${base}/api/public/startup-profile/${encodeURIComponent(username)}`);
+    if (!res.ok) {
+        const msg = await res.text().catch(() => 'Failed to fetch public profile');
+        throw new Error(msg || `Failed to fetch public profile (${res.status})`);
+    }
+    return res.json();
+}
