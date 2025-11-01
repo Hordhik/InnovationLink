@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './StartupProfileHeader.css';
 import './StartupProfile.css';
+import userIcon from '../../../assets/Portal/user.svg';
+import feedbackIcon from '../../../assets/Portal/feedback.png';
 
-const StartupProfileHeader = ({ profileData, isEditing, editStateProps }) => {
+const StartupProfileHeader = ({ profileData, isEditing, editStateProps, publicView = false, onConnect }) => {
   const p = editStateProps || {};
   p.fileInputRef = p.fileInputRef || { current: null };
   const [showReadMore, setShowReadMore] = useState(false);
@@ -105,22 +107,37 @@ const StartupProfileHeader = ({ profileData, isEditing, editStateProps }) => {
             </div>
           </div>
           <div className="left-actions big" style={{ marginTop: 6 }}>
-            <button className="btn btn-feedback big">Feedback</button>
-            <button className="btn btn-connect big">Connect</button>
+            <button className="feedback"><img src={feedbackIcon} alt="" />FeedBack</button>
+            <button
+              className="connect-btn"
+              onClick={typeof onConnect === 'function' ? () => onConnect(profileData) : undefined}
+            >
+              <img src={userIcon} alt="" />Connect
+            </button>
           </div>
         </div>
       </div>
 
       <div className="profile-center">
-        <div className="description-card highlight">
+        <div className="card description-card highlight">
           <h2 className="project-title">Project Description</h2>
           <div className="description-inner">
             {isEditing ? (
               <textarea className="inline-textarea" name="description" aria-label="Project description" value={p.edit?.description || ''} onChange={p.handleChange('description')} />
             ) : (
               <>
-                <div ref={descRef} className="startup-desc large clamp-5" style={{ lineHeight: 1.7 }}>{profileData.description || 'No description provided yet.'}</div>
-                {showReadMore && (
+                <div
+                  ref={descRef}
+                  className="startup-desc large clamp-5"
+                  style={{ lineHeight: 1.7, cursor: publicView ? 'pointer' : 'default' }}
+                  onClick={publicView ? () => setOpenDescModal(true) : undefined}
+                  role={publicView ? 'button' : undefined}
+                  tabIndex={publicView ? 0 : undefined}
+                  onKeyDown={publicView ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpenDescModal(true); } } : undefined}
+                >
+                  {profileData.description || 'No description provided yet.'}
+                </div>
+                {!publicView && showReadMore && (
                   <div style={{ marginTop: 10 }}>
                     <button className="btn btn-ghost" onClick={() => setOpenDescModal(true)}>Read more</button>
                   </div>
@@ -141,6 +158,8 @@ const StartupProfileHeader = ({ profileData, isEditing, editStateProps }) => {
             )}
           </div>
 
+          {/* Public view keeps the same description card as normal profile; actions remain only on the left profile card */}
+
           <div className="desc-contact">
             {isEditing ? (
               <>
@@ -157,7 +176,7 @@ const StartupProfileHeader = ({ profileData, isEditing, editStateProps }) => {
         <div className="desc-modal-backdrop" onClick={() => setOpenDescModal(false)}>
           <div className="desc-modal-card" onClick={(e) => e.stopPropagation()}>
             <h3 style={{ marginTop: 0 }}>Project Description</h3>
-            <div style={{ marginTop: 8, color: '#334155', lineHeight: 1.7 }}>{profileData.description || 'No description provided yet.'}</div>
+            <div className="desc-modal-text">{profileData.description || 'No description provided yet.'}</div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
               <button className="btn btn-secondary" onClick={() => setOpenDescModal(false)}>Close</button>
             </div>

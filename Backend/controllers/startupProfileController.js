@@ -1,7 +1,34 @@
 const StartupProfile = require('../models/startupProfileModel');
 const User = require('../models/userModel');
 const Team = require('../models/teamModel');
+const StartupDock = require('../models/startupDockModel'); // <-- ADDED THIS IMPORT
 const db = require('../config/db');
+
+// --- Helper function from teamController.js to normalize team data ---
+// (This is copied from your teamController.js to be self-contained)
+function normalizeMembers(members) {
+    if (!Array.isArray(members)) return [];
+    return members.map(m => {
+        const out = { ...m };
+        if (out.photo) {
+            try {
+                out.photo = `data:${out.photo_mime || 'application/octet-stream'};base64,${Buffer.from(out.photo).toString('base64')}`;
+            } catch (e) { /* ignore */ }
+        }
+        if (out.designation && !out.role) out.role = out.designation;
+        if (out.past_experiences) {
+            try {
+                const parsed = JSON.parse(out.past_experiences);
+                if (Array.isArray(parsed)) out.experiences = parsed;
+            } catch (e) {
+                out.experiences = String(out.past_experiences).split(',').map(s => s.trim()).filter(Boolean);
+            }
+        } else if (!Array.isArray(out.experiences)) {
+            out.experiences = [];
+        }
+        return out;
+    });
+}
 
 async function ensureFounderMember({ userId, username, company_name, founder }) {
     try {
@@ -216,4 +243,72 @@ exports.getAllProfilesWithTeamCounts = async (req, res) => {
     }
 };
 
+
+// --- NEW FUNCTION ADDED BELOW ---
+
+/**
+ * Get a complete public profile for a startup by their username.
+ * Intended for investors to view a startup's page.
+ * This is secure because the route itself is protected by requireAuth.
+ */
+exports.getPublicProfileByUsername = async (req, res) => {
+    try {
+        const { username } = req.params;
+        if (!username) {
+            return res.status(400).json({ message: 'Startup username is required.' });
+        }
+
+        // --- 1. Fetch Profile ---
+        const profile = await StartupProfile.findByUsername(username);
+        if (!profile) {
+            return res.status(404).json({ message: 'Startup profile not found.' });
+        }
+
+        // Convert logo to Base64
+        if (profile.logo) {
+            try {
+                const b64 = Buffer.from(profile.logo).toString('base64');
+                profile.logo = `data:${profile.logo_mime || 'application/octet-stream'};base64,${b64}`;
+            } catch {
+                profile.logo = null;
+            }
+        }
+
+        // --- 2. Fetch Team ---
+        const teamData = await Team.findByUsername(username);
+        const team = normalizeMembers(teamData); // Reuse your existing normalize function
+
+        // --- 3. Fetch Dock Files ---
+        const files = await StartupDock.findByUsername(username);
+
+        // Group files by category for the frontend
+        const dockFiles = {
+            pitch: [],
+            demo: [],
+            patent: [],
+        };
+        for (const file of files) {
+            if (dockFiles[file.file_category]) {
+                dockFiles[file.file_category].push({
+                    file_id: file.file_id,
+                    name: file.file_name,
+                    mime: file.file_mime,
+                    is_primary: !!file.is_primary, // Convert to boolean
+                    created_at: file.created_at,
+                });
+            }
+        }
+
+        // --- 4. Bundle and Send ---
+        res.status(200).json({
+            profile,
+            team,
+            dockFiles
+        });
+
+    } catch (err) {
+        console.error('GetPublicProfileByUsername Error:', err);
+        res.status(500).json({ message: 'Server error while fetching startup profile.' });
+    }
+};
 

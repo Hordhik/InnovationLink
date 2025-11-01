@@ -4,8 +4,9 @@ import TopBar from './TopBar';
 import SideBar from './SideBar';
 import './Portal.css';
 import Home from './Home/Home';
-import StartupHome from './Home/StartupHome';
-import InvestorHome from './Home/InvestorHome';
+// StartupHome and InvestorHome are rendered by Home.jsx, not directly here
+// import StartupHome from './Home/StartupHome'; 
+// import InvestorHome from './Home/InvestorHome';
 import InvestorProfile from './Profile/InvestorProfile/InvestorProfile';
 import StartupProfile from './Profile/StartupProfile/StartupProfile';
 import Blogs from '../Website/Blogs/Blogs';
@@ -13,7 +14,11 @@ import Blog from '../Website/Blogs/Blog';
 import Events from '../Website/Events/Events';
 import Inbox from './Inbox/Inbox';
 import Schedule from './Schedule/Schedule';
+import PublicStartupProfile from './Profile/StartupProfile/PublicStartupProfile';
+// PublicStartupDock is imported by PublicStartupProfile, not routed directly
+// import PublicStartupDock from './Profile/StartupProfile/PublicStartupDock';
 import Notifications from './Notifications/Notifications'; // Corrected import path
+import AddBlog from '../Website/Blogs/AddBlog'; // <-- IMPORTED AddBlog
 
 function Portal() {
   const userType = window.location.pathname.split('/')[1] || 'S';
@@ -41,11 +46,23 @@ function Portal() {
             <Route path="inbox" element={<Inbox />} />
             <Route path="blogs" element={<Blogs />} />
             <Route path="blog/:id" element={<Blog />} />
+
+            {/* --- ADDED ROUTE --- */}
+            <Route path="blogs/new" element={<AddBlog />} />
+
             <Route path="events" element={<Events />} />
+
+            {/* This route shows the user's OWN profile */}
             <Route path="profile" element={userType === 'I' ? <InvestorProfile /> : <StartupProfile />} />
-            {/* This route is no longer needed here.
-              <Route path="notifications" element={<Notifications onClose={() => setNotificationsOpen(false)} />} /> 
-            */}
+
+            {/* --- ADDED ROUTE --- */}
+            {/* This route is for an INVESTOR to view a STARTUP's profile */}
+            {/* It will match URLs like /I/startup/startup-username */}
+            <Route path="/home/startup/:username" element={<PublicStartupProfile />} />
+
+            {/* This empty route seems intentional from your file */}
+            <Route path="" />
+
             <Route path="support-tickets" element={<div>Support Tickets Content</div>} />
             <Route path="settings" element={<div>Settings Content</div>} />
           </Routes>
@@ -67,3 +84,4 @@ function Portal() {
 }
 
 export default Portal;
+

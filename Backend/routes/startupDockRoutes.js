@@ -4,6 +4,7 @@ const {
     getMyDock,
     uploadFile,
     getFileData,
+    getPublicFileData,
     deleteFile,
     setPrimaryFile,
 } = require('../controllers/startupDockController.js');
@@ -22,6 +23,9 @@ router.post('/upload', uploadFile);
 
 // Get raw file data for a specific file (for viewing/download)
 router.get('/files/:file_id/data', getFileData);
+
+// Get raw file data for a specific PRIMARY file of a given startup (public/investor access)
+router.get('/public/:username/files/:file_id/data', getPublicFileData);
 
 // Delete a file
 router.delete('/files/:file_id', deleteFile);

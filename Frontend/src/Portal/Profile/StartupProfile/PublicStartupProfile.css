@@ -1,0 +1,166 @@
+/*
+ * FILE: Frontend/src/components/Portal/Profile/PublicStartupProfile.css (New File)
+ *
+ * This file imports all your existing styles to make the new page look correct.
+ * The *actual layout fix* is in 'StartupProfile.css' which this file imports.
+ */
+
+/* Main profile layout, cards, buttons, etc. */
+@import './StartupProfile.css';
+
+/* Header styles (logo, name, description) */
+@import './StartupProfileHeader.css';
+
+/* Folder styles for the dock */
+@import './Folder.css';
+
+/* File preview styles (if any) */
+@import './FilePreview.css';
+
+/* TeamMemberModal is not used on this page, so we don't import it */
+/* StartupCard.css is not used on this page, so we don't import it */
+
+/*
+  Since we are re-using the class names from StartupProfile.css
+  (like .spv-root, .card, .spv-team),
+  no additional CSS is needed for the layout.
+*/
+
+/* Additional styles for the Public Profile layout can be added here when needed */
+
+/* Ensure the public team grid is scrollable like the private one */
+.public-profile-layout .spv-team .team-grid {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    /* Space for scrollbar */
+    margin-top: 10px;
+}
+
+/* Public page tweaks */
+.public-profile-layout .file-item .file-name {
+    color: #0F62FE;
+}
+
+/* Mark primary file visually when rendered inside the public dock */
+.public-profile-layout .primary-badge {
+    background-color: #e9f2ff;
+    color: #0F62FE;
+    border-radius: 999px;
+    padding: 4px 8px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+/* Reduce description clamp to 4 lines on public view for tighter layout */
+.public-profile-layout .clamp-5 {
+    -webkit-line-clamp: 4 !important;
+    line-clamp: 4 !important;
+}
+
+/* Make the Project Description card visually tighter on public */
+.public-profile-layout .profile-center .description-card {
+    padding: 16px 18px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(12, 18, 28, 0.06);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.public-profile-layout .profile-center .project-title {
+    font-size: 16px;
+    margin: 0 0 8px 0;
+}
+
+.public-profile-layout .profile-center .startup-desc.large {
+    font-size: 0.95rem;
+    /* Ensure multi-line clamp actually works on public */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    -webkit-line-clamp: 4;
+    /* 4 visible lines */
+    line-clamp: 4;
+}
+
+.public-profile-layout .profile-center .description-card .left-actions {
+    justify-content: flex-start;
+}
+
+
+/* Hide the inline Read more button in public; the whole text is clickable */
+.public-profile-layout .profile-center .description-card .btn.btn-ghost {
+    display: none;
+}
+
+/* Explicit column sizing for public top grid to match design */
+.public-profile-layout .spv-topgrid {
+    /* Match private profile top grid height for perfect alignment */
+    height: 280px;
+}
+
+.public-profile-layout .profile-left {
+    flex: 0 0 372px;
+    max-width: 372px;
+}
+
+.public-profile-layout .profile-center {
+    flex: 0 0 480px;
+    max-width: 480px;
+}
+
+.public-profile-layout .startup-dock {
+    flex: 0 0 338px;
+    max-width: 338px;
+    /* Ensure it visually aligns with center card height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Public Dock: simple list with headings (no dropdowns) */
+.public-profile-layout .public-dock-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.public-profile-layout .dock-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.public-profile-layout .dock-section-title {
+    font-weight: 600;
+    font-size: 13px;
+    color: #111827;
+}
+
+/* Hide any edit chips on public */
+.public-profile-layout .edit-chip {
+    display: none !important;
+}
+
+/* Minimal visual for domain tags on public */
+.public-profile-layout .domain-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    background: #f3f4f6;
+    color: #111827;
+    margin-right: 6px;
+}
+
+/* Ensure tags row shows on the card and wraps nicely */
+.public-profile-layout .profile-center .tags-box {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}

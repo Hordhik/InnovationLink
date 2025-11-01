@@ -76,3 +76,11 @@ export function getFileViewerUrl(file_id) {
     // you might fetch the blob and use URL.createObjectURL().
     return `${API_URL}/api/startup-dock/files/${file_id}/data?token=${token}`;
 }
+
+/**
+ * Public viewer URL (investor view) for a specific startup's PRIMARY file.
+ */
+export function getPublicFileViewerUrl(username, file_id) {
+    const token = getToken();
+    return `${API_URL}/api/startup-dock/public/${encodeURIComponent(username)}/files/${file_id}/data?token=${token}`;
+}

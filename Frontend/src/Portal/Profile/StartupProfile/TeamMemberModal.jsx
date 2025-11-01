@@ -1,7 +1,7 @@
 import React from 'react';
 import './TeamMemberModal.css';
 
-const TeamMemberModal = ({ focusedMemberIndex, isEditing, profileData, edit, memberEditing, memberDraft, setMemberEditing, setMemberDraft, closeMember, saveMemberEdits, changeTeamMember, openMember }) => {
+const TeamMemberModal = ({ focusedMemberIndex, isEditing, profileData, edit, memberEditing, memberDraft, setMemberEditing, setMemberDraft, closeMember, saveMemberEdits, changeTeamMember, openMember, readOnly = false }) => {
   if (!focusedMemberIndex) return null;
   const { idx, isFounder } = focusedMemberIndex;
   // Source team to help fallback to existing photos (important for founder)
@@ -128,12 +128,14 @@ const TeamMemberModal = ({ focusedMemberIndex, isEditing, profileData, edit, mem
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h4>{member.name || (memberEditing ? 'Add Team Member' : 'Team Member')}</h4>
           <div style={{ display: 'flex', gap: 8 }}>
-            {!memberEditing && <button className="btn btn-ghost" onClick={() => { setMemberEditing(true); setMemberDraft(member || {}); }}>Edit</button>}
+            {!readOnly && !memberEditing && (
+              <button className="btn btn-ghost" onClick={() => { setMemberEditing(true); setMemberDraft(member || {}); }}>Edit</button>
+            )}
             <button className="modal-close" aria-label="Close" title="Close" onClick={closeMember}>×</button>
           </div>
         </div>
 
-        {!memberEditing ? (
+        {readOnly || !memberEditing ? (
           <div style={{ marginTop: 12 }} className="member-preview-card">
             <div className="member-photo-wrap member-photo-ring">
               {member.photo ? <img src={member.photo} alt={member.name} className="member-photo" /> : <div className="member-photo-placeholder">{(member.name || '?').charAt(0).toUpperCase()}</div>}
@@ -261,9 +263,9 @@ const TeamMemberModal = ({ focusedMemberIndex, isEditing, profileData, edit, mem
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
               <button type="button" className="btn btn-secondary" onClick={() => { setMemberEditing(false); setMemberDraft(null); }}>Cancel</button>
-              <button 
-                type="button" 
-                className="btn btn-primary" 
+              <button
+                type="button"
+                className="btn btn-primary"
                 onClick={() => {
                   // Basic validation
                   if (!memberDraft?.name?.trim()) {

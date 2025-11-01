@@ -1,5 +1,6 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+// --- MODIFICATION: Import Link for correct navigation ---
+import { useNavigate, Link } from 'react-router-dom';
 import './StartupCard.css';
 import eyes from "../../assets/Portal/StartupCard/eyes.svg"
 import statues from "../../assets/Portal/StartupCard/status-up.svg"
@@ -11,22 +12,26 @@ const StartupCard = ({
   description,
   domain,
   teamCount,
-  profileUrl,
+  profileUrl, // This prop will no longer be used for navigation
   username,
 }) => {
   const navigate = useNavigate();
-  const portalPrefix = `/${(window.location.pathname.split('/')[1] || 'I')}`; // I or S
+  const portalPrefix = `/${(window.location.pathname.split('/')[1] || 'I')}`; // '/I' or '/S'
 
   const startChat = () => {
     navigate(`${portalPrefix}/inbox`, {
       state: { initialChat: { username: username || displayName, companyName: displayName } },
     });
   };
-  // Show only the sector from database (domain); no default tag
+
   const tags = domain ? [domain] : [];
   const displayName = companyName || 'Startup';
   const founder = founderName || 'Founder';
   const avatarSrc = logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=0D8ABC&color=fff`;
+
+  // Build absolute path to the public profile route inside the current portal
+  // Route is defined as '/home/startup/:username' under the portal prefix
+  const correctProfileUrl = `${portalPrefix}/home/startup/${username}`;
 
   return (
     <div className="startup-card">
@@ -72,10 +77,12 @@ const StartupCard = ({
             <p key={index} className="tag">{tag}</p>
           ))}
         </div>
-        <a href={profileUrl || '#'} className="view-profile-link">
+
+        {/* Link to investor-facing public profile */}
+        <Link to={correctProfileUrl} className="view-profile-link">
           <span>View Full Profile</span>
           <span className="arrow-icon">→</span>
-        </a>
+        </Link>
       </div>
     </div>
   );

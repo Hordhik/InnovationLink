@@ -7,11 +7,13 @@
   height: 100%;
   grid-area: left;
 }
-.profile-left > .profile-left-card {
+
+.profile-left>.profile-left-card {
   /* left card will receive a max-height from JS; keep it flexible */
   display: flex;
   flex-direction: column;
 }
+
 .logo-box {
   background: var(--surface);
   border-radius: 12px;
@@ -22,39 +24,51 @@
   justify-content: center;
   box-shadow: 0 12px 32px rgba(15, 23, 36, 0.08);
 }
+
 .logo-box img {
   width: 120px;
   height: 120px;
   object-fit: contain;
   border-radius: 10px;
 }
+
 /* header card variant */
 .profile-left-card {
   background: #fff;
   border-radius: 12px;
-  padding: 18px; /* slightly tighter to keep actions inside */
+  padding: 18px;
+  /* slightly tighter to keep actions inside */
   box-shadow: 0 12px 30px rgba(12, 18, 28, 0.06);
   display: flex;
   flex-direction: column;
-  gap: 12px; /* tighter gap */
+  gap: 12px;
+  /* tighter gap */
   min-height: 200px;
   height: 100%;
 }
+
 .header-card-inner {
   display: flex;
-  gap: 12px; /* tighter gap */
+  gap: 12px;
+  /* tighter gap */
   align-items: center;
-  flex: 1 1 auto; /* allow this to shrink so actions fit */
+  flex: 1 1 auto;
+  /* allow this to shrink so actions fit */
 }
+
 .header-card-inner.center {
-  flex-direction: column; /* stack logo and text */
+  flex-direction: column;
+  /* stack logo and text */
   align-items: center;
   text-align: center;
-  gap: 10px; /* compact spacing in centered layout */
+  gap: 10px;
+  /* compact spacing in centered layout */
 }
+
 .logo-card {
   width: 220px;
-  height: 140px; /* reduce logo box height */
+  height: 140px;
+  /* reduce logo box height */
   background: #fff;
   border-radius: 12px;
   display: flex;
@@ -62,13 +76,18 @@
   justify-content: center;
   padding: 10px;
 }
+
 .logo-image {
-  width: 120px; /* slightly smaller logo */
+  width: 120px;
+  /* slightly smaller logo */
   height: 120px;
-  object-fit: contain; /* preserve original logo proportions */
-  border-radius: 0; /* do not make the logo circular */
+  object-fit: contain;
+  /* preserve original logo proportions */
+  border-radius: 0;
+  /* do not make the logo circular */
   background: transparent;
 }
+
 .header-meta {
   flex: 1;
   min-width: 0;
@@ -76,7 +95,11 @@
   flex-direction: column;
   justify-content: center;
 }
-.header-card-inner.center .header-meta { align-items: center; }
+
+.header-card-inner.center .header-meta {
+  align-items: center;
+}
+
 .header-meta .meta-name.large {
   font-size: clamp(0.9rem, 1.2vw + 0.6rem, 1.2rem);
   font-weight: 700;
@@ -85,10 +108,18 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.header-meta .meta-name { font-size: 1.05rem; font-weight: 700; color: #0b1220; margin-top: 8px; }
+
+.header-meta .meta-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0b1220;
+  margin-top: 8px;
+}
+
 .header-meta .meta-name.large span {
   display: inline;
 }
+
 .left-actions.big {
   display: flex;
   gap: 12px;
@@ -96,56 +127,80 @@
   margin-top: auto;
   padding-bottom: 8px;
 }
+
 .btn-feedback.big {
-  padding: 8px 14px; /* compact buttons */
+  padding: 8px 14px;
+  /* compact buttons */
   border-radius: 12px;
   border: 1px solid #cfe0ff;
   min-width: 88px;
 }
+
 .btn-connect.big {
-  padding: 8px 14px; /* compact buttons */
+  padding: 8px 14px;
+  /* compact buttons */
   border-radius: 12px;
   min-width: 88px;
 }
+
 .startup-desc.large {
   font-size: 1.05rem;
   line-height: 1.5;
 }
+
 .meta-compact {
   padding: 6px 2px;
 }
+
 .meta-name {
   font-weight: 700;
   font-size: 1rem;
 }
+
 .meta-founder {
   color: var(--muted);
   font-size: 0.95rem;
   margin-top: 6px;
 }
-.meta-location { display:flex; align-items:center; gap:6px; color:#475569; font-size:0.92rem; margin-top:6px; }
-.meta-location svg { display:block; }
+
+.meta-location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #475569;
+  font-size: 0.92rem;
+  margin-top: 6px;
+}
+
+.meta-location svg {
+  display: block;
+}
+
 .left-actions {
   display: flex;
   gap: 12px;
   margin-top: 6px;
 }
+
 .left-actions {
   display: flex;
   gap: 12px;
   margin-top: 12px;
   align-items: center;
 }
+
 .left-actions .btn {
   padding: 10px 16px;
   border-radius: 10px;
   min-width: 96px;
 }
+
 .btn-feedback {
   background: #fff;
   border: 1px solid #e6eef8;
   color: var(--primary);
 }
+
 .btn-connect {
   background: var(--primary);
   color: #fff;
@@ -154,4 +209,50 @@
 /* hide phone in public profile view */
 .hide-phone {
   display: none;
+}
+
+/* Read-only description modal (used for public and private views) */
+.desc-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Use an extremely high z-index to sit above any stacked context on the page */
+  z-index: 2147483647;
+  /* max 32-bit int */
+  padding: 20px;
+}
+
+.desc-modal-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 18px 60px rgba(2, 6, 23, 0.4);
+  width: 720px;
+  max-width: 100%;
+  max-height: 75vh;
+  overflow: auto;
+  padding: 16px 18px;
+  position: relative;
+}
+
+/* Modal description text */
+.desc-modal-text {
+  margin-top: 8px;
+  color: #334155;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  font-size: 0.98rem;
+}
+
+/* Clamp to 4 lines when requested (public view) */
+.desc-modal-text.clamp-4 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
+  /* Ensure clamping works across browsers; avoid pre-wrap here */
+  white-space: normal;
 }

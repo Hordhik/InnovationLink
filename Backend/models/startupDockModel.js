@@ -91,6 +91,19 @@ const StartupDock = {
   },
 
   /**
+   * Gets the full data for a single file for a given startup username,
+   * without requiring the caller to be the owner. Intended for public/investor
+   * viewing. Restricts to files that are marked primary for safety.
+   */
+  async findPublicPrimaryFileById(username, file_id) {
+    const [rows] = await db.execute(
+      'SELECT * FROM startup_dock_files WHERE file_id = ? AND username = ? AND is_primary = TRUE',
+      [file_id, username]
+    );
+    return rows[0];
+  },
+
+  /**
    * Deletes a file, verifying user ownership.
    */
   async deleteById(file_id, user_id) {

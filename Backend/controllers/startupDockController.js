@@ -121,6 +121,34 @@ exports.getFileData = async (req, res) => {
 };
 
 /**
+ * Get the raw data for a single PRIMARY file of a specific startup username.
+ * This allows authenticated viewers (e.g., investors) to access files that the
+ * startup has marked as primary in their public profile.
+ */
+exports.getPublicFileData = async (req, res) => {
+    try {
+        const { username, file_id } = req.params;
+
+        if (!username || !file_id) {
+            return res.status(400).json({ message: 'Username and file id are required.' });
+        }
+
+        // Only return if this file belongs to the target username AND is marked primary
+        const file = await StartupDock.findPublicPrimaryFileById(username, file_id);
+        if (!file) {
+            return res.status(404).json({ message: 'File not found, not primary, or access denied.' });
+        }
+
+        res.setHeader('Content-Type', file.file_mime);
+        res.setHeader('Content-Disposition', `inline; filename="${file.file_name}"`);
+        res.send(file.file_data);
+    } catch (err) {
+        console.error('GetPublicFileData Error:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+/**
  * Delete a file from the dock.
  */
 exports.deleteFile = async (req, res) => {

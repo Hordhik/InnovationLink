@@ -1,3 +1,9 @@
+//
+// FILE: Frontend/src/services/startupProfileApi.js (Modified)
+//
+// I have added the new 'getPublicProfile' function at the end.
+//
+
 import axios from 'axios';
 import { getToken } from '../auth.js';
 
@@ -28,4 +34,21 @@ export async function saveProfile(payload) {
 export async function getAllStartups() {
     const { data } = await api.get('/api/startup-profile/all', { headers: authHeader() });
     return data; // { startups: [...] }
+}
+
+//
+// --- NEW FUNCTION ADDED BELOW ---
+//
+
+/**
+ * Fetches the complete public profile for a single startup by its username.
+ * (Used by investors to view a startup's page)
+ * @param {string} username - The username of the startup to fetch.
+ */
+export async function getPublicProfile(username) {
+    if (!username) {
+        throw new Error('Username is required to fetch public profile.');
+    }
+    const { data } = await api.get(`/api/startup-profile/${username}`, { headers: authHeader() });
+    return data; // Returns { profile, team, dockFiles }
 }
