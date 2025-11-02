@@ -5,6 +5,8 @@ import { getStoredUser } from "../../auth.js";
 import "./AddBlog.css";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
+import Quill from "quill";
+import ImageResize from "quill-image-resize-module-react";
 
 // Import our new API function (name corrected)
 import { createPost } from "../../services/postApi";
@@ -43,17 +45,9 @@ export default function AddBlog() {
         if (!QuillRef) return;
 
         let ImageResize = null;
-        try {
-          // Preferred for Quill v2
-          const mod = await import("quill-image-resize-module-react");
-          ImageResize = mod?.default || mod;
-        } catch (_) {
-          try {
-            // Fallback for Quill v1-style module
-            const mod = await import("quill-image-resize-module");
-            ImageResize = mod?.default || mod;
-          } catch (_) { /* no module available */ }
-        }
+       if (typeof Quill !== "undefined" && ImageResize) {
+        Quill.register("modules/imageResize", ImageResize);
+       }
 
         if (ImageResize) {
           QuillRef.register("modules/imageResize", ImageResize);
