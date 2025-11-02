@@ -14,6 +14,7 @@ import LogIn from './Authentication/LogIn';
 import SignUp from './Authentication/SignUp';
 import Portal from './Portal/Portal';
 import AddBlog from './Website/Blogs/AddBlog';
+import EditBlogPage from './Website/Blogs/EditBlogPage';
 
 
 function App() {
@@ -77,6 +78,8 @@ function App() {
           <Route path="/blogs" element={<PublicRedirect><Blogs /></PublicRedirect>} />
           <Route path="/blog/:id" element={<PublicRedirect><Blog /></PublicRedirect>} />
           <Route path="/:portal/blogs/new" element={<AddBlog />} />
+          <Route path="/S/edit-blog/:id" element={<EditBlogPage />} />
+          <Route path="/I/edit-blog/:id" element={<EditBlogPage />} />
 
           <Route path="/events" element={<PublicRedirect><Events /></PublicRedirect>} />
           <Route path="/about" element={<PublicRedirect><About /></PublicRedirect>} />

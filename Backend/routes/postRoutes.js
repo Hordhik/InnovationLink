@@ -8,7 +8,8 @@ const {
     createPost,
     getAllPosts,
     getMyPosts,
-    getPostById
+    getPostById,
+    updatePost // ✅ Added updatePost controller import
 } = require('../controllers/postController.js');
 
 // Import your auth middleware
@@ -34,7 +35,14 @@ router.post('/', requireAuth, createPost);
 // This will now only match if the path segment is not 'me'
 router.get('/:id', getPostById);
 
+// ✅ NEW: PUT /api/posts/:id (Protected)
+// --- FIX: Added update route for editing blogs ---
+router.put('/:id', requireAuth, updatePost);
+
+// DELETE /api/posts/:id (Protected)
+// --- FIX: Added route to delete a post ---
+router.delete('/:id', requireAuth, require('../controllers/postController.js').deletePost);
+
 
 // Export the router
 module.exports = router;
-

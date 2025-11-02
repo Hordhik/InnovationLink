@@ -93,7 +93,6 @@ const getPostById = async (req, res, next) => { // Added next
             return res.status(400).json({ message: "Invalid request path." });
         }
 
-
         // --- LOGGING ---
         console.log(`>>> getPostById: Calling Post.findById for ID: ${id}`);
         const post = await Post.findById(id);
@@ -114,11 +113,98 @@ const getPostById = async (req, res, next) => { // Added next
     }
 };
 
+/**
+ * Update an existing post by its ID.
+ */
+const updatePost = async (req, res, next) => {
+    // --- LOGGING ---
+    console.log(`>>> updatePost controller reached for ID: ${req.params.id}`);
+    try {
+        const { id } = req.params;
+        const user = req.user;
+        const { title, subtitle, content, tags } = req.body;
+
+        // --- VALIDATION ---
+        if (!title || !content) {
+            console.log(">>> updatePost: Missing title or content.");
+            return res.status(400).json({ message: "Title and content are required." });
+        }
+
+        // --- LOGGING ---
+        console.log(`>>> updatePost: Calling Post.findById for verification of ID ${id}`);
+        const existingPost = await Post.findById(id);
+
+        if (!existingPost) {
+            console.log(`>>> updatePost: Post with ID ${id} not found.`);
+            return res.status(404).json({ message: "Post not found." });
+        }
+
+        // --- SECURITY CHECK ---
+        if (existingPost.user_id !== user.id) {
+            console.warn(`>>> updatePost: Unauthorized edit attempt by user ${user.id}.`);
+            return res.status(403).json({ message: "You are not authorized to edit this post." });
+        }
+
+        // --- LOGGING ---
+        console.log(`>>> updatePost: Calling Post.updatePost for ID ${id}`);
+        await Post.updatePost(id, { title, subtitle, content, tags });
+
+        // --- SUCCESS ---
+        console.log(`>>> updatePost: Post ${id} updated successfully.`);
+        res.status(200).json({ message: "Post updated successfully." });
+    } catch (error) {
+        // --- LOGGING ---
+        console.error(`>>> updatePost: Error updating post ${req.params.id}:`, error);
+        next(error);
+    }
+};
+
+/**
+ * Delete an existing post by its ID.
+ */
+const deletePost = async (req, res, next) => {
+    // --- LOGGING ---
+    console.log(`>>> deletePost controller reached for ID: ${req.params.id}`);
+    try {
+        const { id } = req.params;
+        const user = req.user;
+
+        // --- LOGGING ---
+        console.log(`>>> deletePost: Calling Post.findById for verification of ID ${id}`);
+        const existingPost = await Post.findById(id);
+
+        if (!existingPost) {
+            console.log(`>>> deletePost: Post with ID ${id} not found.`);
+            return res.status(404).json({ message: "Post not found." });
+        }
+
+        // --- SECURITY CHECK ---
+        if (existingPost.user_id !== user.id) {
+            console.warn(`>>> deletePost: Unauthorized delete attempt by user ${user.id}.`);
+            return res.status(403).json({ message: "You are not authorized to delete this post." });
+        }
+
+        // --- LOGGING ---
+        console.log(`>>> deletePost: Calling Post.deletePost for ID ${id}`);
+        await Post.deletePost(id);
+
+        // --- SUCCESS ---
+        console.log(`>>> deletePost: Post ${id} deleted successfully.`);
+        res.status(200).json({ message: "Post deleted successfully." });
+    } catch (error) {
+        // --- LOGGING ---
+        console.error(`>>> deletePost: Error deleting post ${req.params.id}:`, error);
+        next(error);
+    }
+};
+
+
 // Export all controller functions
 module.exports = {
     createPost,
     getAllPosts,
     getMyPosts,
     getPostById,
+    updatePost,
+    deletePost // ✅ Added new export
 };
-

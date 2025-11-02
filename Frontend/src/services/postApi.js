@@ -79,3 +79,30 @@ export const getPostById = async (postId) => {
     return handleResponse(response);
 };
 
+/**
+ * Updates an existing post by its ID.
+ * @param {string} postId - The ID of the post
+ * @param {object} updatedData - The updated fields (title, subtitle, content, tags, etc.)
+ */
+export const updatePost = async (postId, updatedData) => {
+  const response = await fetch(`${BASE_URL}/${postId}`, {
+    method: 'PUT',
+    headers: getAuthHeaders(), // Requires Auth
+    body: JSON.stringify(updatedData),
+  });
+  return handleResponse(response);
+};
+
+/**
+ * Deletes a post by its ID.
+ * @param {string} postId - The ID of the post
+ */
+export const deletePost = async (postId) => {
+  const response = await fetch(`${BASE_URL}/${postId}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(), // Requires Auth
+  });
+  return handleResponse(response);
+};
+
+

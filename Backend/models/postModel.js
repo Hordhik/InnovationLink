@@ -32,6 +32,7 @@ const Post = {
         }
         return [];
     },
+
     async init() {
         // Create base table if needed, WITHOUT the images column
         await db.query(`
@@ -160,8 +161,72 @@ const Post = {
             ...post,
             tags: Post._parseTags(post.tags),
         }));
-    }
+    },
+
+    /**
+     * Updates an existing post by its ID.
+     * Allows editing of title, subtitle, content, and tags.
+     * @param {number} postId - The ID of the post to update.
+     * @param {object} updatedData - Fields to update (title, subtitle, content, tags)
+     */
+    async updatePost(postId, { title, subtitle, content, tags }) {
+        // --- LOGGING ---
+        console.log(`>>> Post.updatePost called for ID: ${postId}`);
+
+        // Convert tags to JSON string (null if empty)
+        const tagsJson = tags && Array.isArray(tags) && tags.length > 0
+            ? JSON.stringify(tags)
+            : null;
+
+        try {
+            // --- LOGGING ---
+            console.log(">>> Post.updatePost: Executing UPDATE query...");
+
+            const [result] = await db.execute(
+                `UPDATE posts
+                 SET title = ?, subtitle = ?, content = ?, tags = ?
+                 WHERE id = ?`,
+                [title, subtitle || null, content, tagsJson, postId]
+            );
+
+            if (result.affectedRows === 0) {
+                console.warn(`>>> Post.updatePost: No rows affected. Post ID ${postId} may not exist.`);
+                return null;
+            }
+
+            // --- LOGGING ---
+            console.log(`>>> Post.updatePost: Post ID ${postId} updated successfully.`);
+            return result;
+        } catch (error) {
+            // --- LOGGING ---
+            console.error(`>>> Post.updatePost: Database update failed for ID ${postId}:`, error);
+            throw error;
+        }
+    },
+        /**
+     * Deletes a post by its ID.
+     * @param {number} postId - The ID of the post to delete.
+     */
+    async deletePost(postId) {
+        // --- LOGGING ---
+        console.log(`>>> Post.deletePost called for ID: ${postId}`);
+
+        try {
+            const [result] = await db.execute(`DELETE FROM posts WHERE id = ?`, [postId]);
+
+            if (result.affectedRows === 0) {
+                console.warn(`>>> Post.deletePost: No post found for ID ${postId}`);
+                return null;
+            }
+
+            // --- LOGGING ---
+            console.log(`>>> Post.deletePost: Post ID ${postId} deleted successfully.`);
+            return result;
+        } catch (error) {
+            console.error(`>>> Post.deletePost: Database delete failed for ID ${postId}:`, error);
+            throw error;
+        }
+    },
 };
 
 module.exports = Post;
-

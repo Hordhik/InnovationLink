@@ -98,3 +98,38 @@
     /* Line clamping styles will be added dynamically by the component */
     /* This will automatically adjust height if content is short */
 }
+
+.blog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.edit-btn,
+.delete-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.edit-btn {
+  background-color: #2d6cdf;
+  color: #fff;
+}
+
+.edit-btn:hover {
+  background-color: #1c4fb7;
+}
+
+.delete-btn {
+  background-color: #e63946;
+  color: #fff;
+}
+
+.delete-btn:hover {
+  background-color: #c72d3b;
+}

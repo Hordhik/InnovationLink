@@ -99,6 +99,12 @@ const Blogs = () => {
     }
   };
 
+  // --- Delete Handler for Blogs ---
+  const handleDeleteBlog = (id) => {
+    setBlogs(prev => prev.filter(blog => blog.id !== id));
+  };
+
+
   // --- Client-side filtering ---
   const finalBlogs = selectedOption
     ? blogs.filter(blog => blog.tags?.includes(selectedOption))
@@ -144,7 +150,7 @@ const Blogs = () => {
           </Link>
         </div>
 
-        <div className="Blogs portal-blogs-layout">
+        <div className="Blogs">
           <div className="filters">
             <div className="filter">
               <div className="filter-name">Trending</div>
@@ -161,11 +167,15 @@ const Blogs = () => {
               </div>
             </div>
           </div>
-
           <div className="blog-list portal-blog-list">
             {finalBlogs.length > 0 ? (
               finalBlogs.map(blog => (
-                <BlogCard key={blog.id} blog={blog} />
+                <BlogCard
+                  key={blog.id}
+                  blog={blog}
+                  isOwner={showOnlyUserBlogs} // ✅ Only show edit/delete in "Your Blogs"
+                  onDelete={handleDeleteBlog} // ✅ Pass delete handler
+                />
               ))
             ) : (
               <p className="empty-blogs-message">
@@ -177,7 +187,9 @@ const Blogs = () => {
             )}
           </div>
         </div>
-      </div>
+
+
+        </div>
     );
   }
 
