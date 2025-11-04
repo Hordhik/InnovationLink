@@ -1,7 +1,8 @@
 // Frontend/src/services/investorApi.js
 import { getToken } from '../auth.js';
 
-const BASE_URL = 'http://localhost:5001/api/investors';
+const API_ROOT = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const BASE_URL = `${API_ROOT}/api/investors`;
 
 // Helper function to handle fetch responses
 async function handleResponse(response) {
@@ -60,6 +61,30 @@ export const getInvestorById = async (investorId) => {
         headers: getAuthHeaders(),
     });
     console.log(`Fetch details response status for ID ${investorId}:`, response.status);
+    return handleResponse(response);
+};
+
+/**
+ * Fetches the profile details for the logged-in investor.
+ */
+export const getMyInvestorProfile = async () => {
+    const response = await fetch(`${BASE_URL}/me`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+};
+
+/**
+ * Saves profile changes for the logged-in investor.
+ * @param {object} payload - Investor profile payload
+ */
+export const saveMyInvestorProfile = async (payload) => {
+    const response = await fetch(`${BASE_URL}/me`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(payload),
+    });
     return handleResponse(response);
 };
 

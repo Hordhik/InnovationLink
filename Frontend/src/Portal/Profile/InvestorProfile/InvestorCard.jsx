@@ -10,8 +10,8 @@ export default function InvestorCard({ data, onClick }) {
     >
       <div className="investor-card-header">
         <img
-          src="https://via.placeholder.com/80"
-          alt={data.name}
+          src={data.image || 'https://placehold.co/120x120/eef2ff/4f46e5?text=Photo'}
+          alt={data.name || 'Investor avatar'}
           className="investor-avatar"
         />
         <div className="investor-card-info">

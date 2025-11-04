@@ -8,7 +8,7 @@ export default function AboutSection({ about, name, onClick }) {
       style={{ cursor: 'pointer' }}
     >
       <h3>About {name}</h3>
-      <p>{about}</p>
+      <p className="about-text">{about}</p>
     </div>
   );
 }

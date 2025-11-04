@@ -66,6 +66,8 @@ exports.register = async (req, res) => {
         user_id: userId,
         name: companyName || username,
         about_me: aboutMe || '',
+        contact_email: email,
+        contact_phone: phone || null,
         preferences: preferences || {}
       });
     }

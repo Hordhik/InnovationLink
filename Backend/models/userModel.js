@@ -38,6 +38,35 @@ const User = {
   async findById(id) {
     const [rows] = await db.query("SELECT * FROM users WHERE id = ?", [id]);
     return rows[0];
+  },
+
+  async findByEmailExcluding(email, excludeId) {
+    const [rows] = await db.query(
+      "SELECT * FROM users WHERE email = ? AND id <> ?",
+      [email, excludeId]
+    );
+    return rows[0];
+  },
+
+  async updateById(id, fields = {}) {
+    const allowedKeys = ['email', 'phone'];
+    const updates = [];
+    const values = [];
+
+    for (const key of allowedKeys) {
+      if (Object.prototype.hasOwnProperty.call(fields, key) && fields[key] !== undefined) {
+        updates.push(`${key} = ?`);
+        values.push(fields[key]);
+      }
+    }
+
+    if (!updates.length) {
+      return this.findById(id);
+    }
+
+    const sql = `UPDATE users SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
+    await db.query(sql, [...values, id]);
+    return this.findById(id);
   }
 };
 

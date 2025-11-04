@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './InvestorForm.css';
 
 const PREDEFINED_SECTORS = [
@@ -9,10 +9,17 @@ const PREDEFINED_STAGES = [
   'Pre-seed', 'Seed', 'MVP Ready', 'Growth', 'Series A+'
 ];
 
-const InvestorForm = ({ initialData = {}, onSubmit }) => {
+const ensureExpertiseList = (list) => {
+  if (Array.isArray(list) && list.length) {
+    return list;
+  }
+  return [''];
+};
+
+const InvestorForm = ({ initialData = {}, onSubmit, statusMessage, errorMessage, isSubmitting }) => {
   const fileInputRef = useRef(null);
   const [logoPreview, setLogoPreview] = useState(initialData.image || '');
-  const [expertise, setExpertise] = useState(initialData.expertise || ['']);
+  const [expertise, setExpertise] = useState(ensureExpertiseList(initialData.expertise));
   const [sectors, setSectors] = useState(initialData.sectors || []);
   const [stages, setStages] = useState(initialData.stages || []);
   const [investFocus, setInvestFocus] = useState(initialData.investLike || '');
@@ -21,10 +28,29 @@ const InvestorForm = ({ initialData = {}, onSubmit }) => {
     title: initialData.title || '',
     location: initialData.location || '',
     email: initialData.email || '',
+    phone: initialData.phone || '',
     linkedin: initialData.linkedin || '',
     twitter: initialData.twitter || '',
     about: initialData.about || '',
   });
+
+  useEffect(() => {
+    setLogoPreview(initialData.image || '');
+    setExpertise(ensureExpertiseList(initialData.expertise));
+    setSectors(initialData.sectors || []);
+    setStages(initialData.stages || []);
+    setInvestFocus(initialData.investLike || '');
+    setFormData({
+      name: initialData.name || '',
+      title: initialData.title || '',
+      location: initialData.location || '',
+      email: initialData.email || initialData.contactEmail || '',
+      phone: initialData.phone || initialData.contactPhone || '',
+      linkedin: initialData.linkedin || '',
+      twitter: initialData.twitter || '',
+      about: initialData.about || '',
+    });
+  }, [initialData]);
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -45,16 +71,29 @@ const InvestorForm = ({ initialData = {}, onSubmit }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const trimmedExpertise = expertise
+      .map((item) => (item ?? '').trim())
+      .filter((item) => item.length > 0);
+    const uniqueExpertise = Array.from(new Set(trimmedExpertise));
     const finalData = {
       ...formData,
-      expertise: expertise.filter(Boolean),
+      email: (formData.email || '').trim(),
+      phone: (formData.phone || '').trim(),
+      location: (formData.location || '').trim(),
+      name: (formData.name || '').trim(),
+      title: (formData.title || '').trim(),
+      linkedin: (formData.linkedin || '').trim(),
+      twitter: (formData.twitter || '').trim(),
+      about: (formData.about || '').trim(),
+      expertise: uniqueExpertise,
       sectors,
       stages,
       image: logoPreview,
-      investLike: investFocus,
+      investLike: (investFocus || '').trim(),
     };
-    if (onSubmit) onSubmit(finalData);
-    console.log('Investor Profile:', finalData);
+    if (onSubmit) {
+      onSubmit(finalData);
+    }
   };
 
   return (
@@ -63,6 +102,9 @@ const InvestorForm = ({ initialData = {}, onSubmit }) => {
         <div className="form-card">
           <h1 className="form-title">Create Your Investor Profile</h1>
           <p className="form-subtitle">Fill in your personal and investment details below.</p>
+
+          {errorMessage && <div className="form-status error">{errorMessage}</div>}
+          {statusMessage && !errorMessage && <div className="form-status success">{statusMessage}</div>}
 
           <form onSubmit={handleSubmit}>
             {/* --- Profile Picture --- */}
@@ -137,6 +179,17 @@ const InvestorForm = ({ initialData = {}, onSubmit }) => {
                 placeholder="investor@email.com"
                 value={formData.email}
                 onChange={(e) => handleChange('email', e.target.value)}
+              />
+            </div>
+
+            <div className="input-wrapper" style={{ marginTop: '1.5rem' }}>
+              <label className="form-label" htmlFor="phone">Phone</label>
+              <input
+                id="phone"
+                className="form-input"
+                placeholder="e.g., +91 98765 43210"
+                value={formData.phone}
+                onChange={(e) => handleChange('phone', e.target.value)}
               />
             </div>
 
@@ -271,8 +324,12 @@ const InvestorForm = ({ initialData = {}, onSubmit }) => {
 
             {/* --- Save Button --- */}
             <div className="form-actions">
-              <button type="submit" className="btn btn-primary">
-                Save Investor Profile
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Saving...' : 'Save Investor Profile'}
               </button>
             </div>
           </form>

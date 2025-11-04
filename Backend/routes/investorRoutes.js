@@ -1,12 +1,25 @@
 // Backend/routes/investorRoutes.js
 const express = require('express');
 const router = express.Router();
-const { getAllInvestors, getInvestorById } = require('../controllers/investorController.js'); // Import both
+const {
+    getAllInvestors,
+    getInvestorById,
+    getMyInvestorProfile,
+    upsertMyInvestorProfile,
+} = require('../controllers/investorController.js');
 const requireAuth = require('../middleware/auth.js');
 const roleCheck = require('../middleware/roleCheck.js');
 
 // Protect all investor routes - only logged-in users can access
 router.use(requireAuth);
+
+// GET /api/investors/me
+// Fetch the logged-in investor's profile
+router.get('/me', roleCheck('investor'), getMyInvestorProfile);
+
+// PUT /api/investors/me
+// Create or update the logged-in investor's profile
+router.put('/me', roleCheck('investor'), upsertMyInvestorProfile);
 
 // GET /api/investors
 // Fetches a list of all investor usernames. Accessible only by startups.

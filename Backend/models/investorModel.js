@@ -1,5 +1,80 @@
 const db = require("../config/db");
 
+const JSON_FIELDS = ['preferences', 'expertise', 'sectors', 'stages'];
+
+const safeJsonParse = (value, fallback) => {
+  if (!value && value !== 0) return fallback;
+  try {
+    if (typeof value === 'string') {
+      return JSON.parse(value);
+    }
+    return value;
+  } catch (error) {
+    console.error('Error parsing JSON column in investors table:', error.message);
+    return fallback;
+  }
+};
+
+const serializeArray = (value) => {
+  if (!Array.isArray(value)) return null;
+  const cleaned = value
+    .map((item) => (item ?? '').toString().trim())
+    .filter((item) => item.length > 0);
+  return cleaned.length ? JSON.stringify(cleaned) : null;
+};
+
+const serializeJson = (value) => {
+  if (value === undefined || value === null) return null;
+  try {
+    return JSON.stringify(value);
+  } catch (error) {
+    console.error('Failed to stringify investor JSON payload:', error.message);
+    return null;
+  }
+};
+
+const normalizeRecord = (payload = {}) => {
+  const record = {
+    user_id: payload.user_id,
+    name: payload.name ?? null,
+    about_me: payload.about_me ?? null,
+    preferences: payload.preferences ? serializeJson(payload.preferences) : null,
+    title: payload.title ?? null,
+    location: payload.location ?? null,
+    contact_email: payload.contact_email ?? null,
+    contact_phone: payload.contact_phone ?? null,
+    linkedin_url: payload.linkedin_url ?? null,
+    twitter_url: payload.twitter_url ?? null,
+    invest_thesis: payload.invest_thesis ?? null,
+    expertise: serializeArray(payload.expertise),
+    sectors: serializeArray(payload.sectors),
+    stages: serializeArray(payload.stages),
+    profile_image: payload.profile_image ?? null,
+  };
+
+  // Ensure JSON columns default to null when empty arrays were provided
+  if (!record.preferences && payload.preferences === null) {
+    record.preferences = null;
+  }
+  return record;
+};
+
+const hydrateRow = (row) => {
+  if (!row) return null;
+  const hydrated = { ...row };
+
+  for (const field of JSON_FIELDS) {
+    hydrated[field] = safeJsonParse(hydrated[field], field === 'preferences' ? null : []);
+  }
+
+  // Ensure array fields default to []
+  hydrated.expertise = Array.isArray(hydrated.expertise) ? hydrated.expertise : [];
+  hydrated.sectors = Array.isArray(hydrated.sectors) ? hydrated.sectors : [];
+  hydrated.stages = Array.isArray(hydrated.stages) ? hydrated.stages : [];
+
+  return hydrated;
+};
+
 const Investor = {
   async init() {
     try {
@@ -10,138 +85,141 @@ const Investor = {
           name VARCHAR(100),
           about_me TEXT,
           preferences JSON,
+          title VARCHAR(120),
+          location VARCHAR(120),
+          contact_email VARCHAR(150),
+          contact_phone VARCHAR(30),
+          linkedin_url VARCHAR(255),
+          twitter_url VARCHAR(255),
+          invest_thesis TEXT,
+          expertise JSON,
+          sectors JSON,
+          stages JSON,
+          profile_image MEDIUMTEXT,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
           FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
       `);
       console.log('✅ investors table ready');
-      await this.checkAndAddColumns(); // Ensure columns exist
+      await this.checkAndAddColumns();
     } catch (error) {
       console.error("Error initializing investors table:", error);
-      await this.checkAndAddColumns(); // Attempt adding columns even if CREATE fails
+      // Attempt the column sync even if CREATE TABLE failed (likely already exists)
+      await this.checkAndAddColumns();
     }
   },
 
   async checkAndAddColumns() {
-    // ... (keep the checkAndAddColumns function as provided before) ...
     const columns = [
       { name: 'name', type: 'VARCHAR(100)' },
       { name: 'about_me', type: 'TEXT' },
       { name: 'preferences', type: 'JSON' },
+      { name: 'title', type: 'VARCHAR(120)' },
+      { name: 'location', type: 'VARCHAR(120)' },
+      { name: 'contact_email', type: 'VARCHAR(150)' },
+      { name: 'contact_phone', type: 'VARCHAR(30)' },
+      { name: 'linkedin_url', type: 'VARCHAR(255)' },
+      { name: 'twitter_url', type: 'VARCHAR(255)' },
+      { name: 'invest_thesis', type: 'TEXT' },
+      { name: 'expertise', type: 'JSON' },
+      { name: 'sectors', type: 'JSON' },
+      { name: 'stages', type: 'JSON' },
+      { name: 'profile_image', type: 'MEDIUMTEXT' }
     ];
-    let structureUpToDate = true;
-    for (const col of columns) {
+
+    for (const column of columns) {
       try {
-        await db.query(`ALTER TABLE investors ADD COLUMN ${col.name} ${col.type}`);
-        console.log(`✅ Added '${col.name}' column to investors table.`);
-        structureUpToDate = false; // Structure changed
+        await db.query(`ALTER TABLE investors ADD COLUMN ${column.name} ${column.type}`);
+        console.log(`✅ Added '${column.name}' column to investors table.`);
       } catch (error) {
-        if (error.code === 'ER_DUP_FIELDNAME') {
-          // Column already exists, which is fine
-        } else {
-          console.error(`Error adding column ${col.name}:`, error);
-          structureUpToDate = false; // Assume structure might be inconsistent
+        if (error.code !== 'ER_DUP_FIELDNAME') {
+          console.error(`Error ensuring column ${column.name}:`, error.message);
         }
       }
     }
-    if (structureUpToDate) {
-      console.log('✅ investors table structure is up-to-date.');
-    } else {
-      console.log('✅ investors table structure check complete (changes might have occurred).');
-    }
   },
 
-
   async create(investor) {
-    // ... (keep the create function as provided before) ...
-    const name = investor.name || null;
-    const about_me = investor.about_me || null;
-    const preferences = investor.preferences ? JSON.stringify(investor.preferences) : null;
+    const record = normalizeRecord(investor);
+    const columns = Object.keys(record);
+    const placeholders = columns.map(() => '?').join(', ');
+    const values = columns.map((key) => record[key]);
 
     const [result] = await db.query(
-      "INSERT INTO investors (user_id, name, about_me, preferences) VALUES (?, ?, ?, ?)",
-      [investor.user_id, name, about_me, preferences]
+      `INSERT INTO investors (${columns.join(', ')}) VALUES (${placeholders})`,
+      values
     );
     return result.insertId;
   },
 
-  async findByUserId(userId) {
-    // ... (keep the findByUserId function as provided before) ...
-    const [rows] = await db.query("SELECT * FROM investors WHERE user_id = ?", [userId]);
-    if (rows[0] && rows[0].preferences) {
-      try {
-        rows[0].preferences = JSON.parse(rows[0].preferences);
-      } catch (e) {
-        console.error("Error parsing investor preferences:", e);
-        rows[0].preferences = null;
-      }
+  async updateByUserId(userId, payload = {}) {
+    const record = normalizeRecord({ ...payload, user_id: userId });
+    delete record.user_id;
+
+    const entries = Object.entries(record).filter(([, value]) => value !== undefined);
+    if (!entries.length) {
+      return this.findByUserId(userId);
     }
-    return rows[0];
+
+    const assignments = entries.map(([key]) => `${key} = ?`).join(', ');
+    const values = entries.map(([, value]) => value);
+    await db.query(
+      `UPDATE investors SET ${assignments}, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?`,
+      [...values, userId]
+    );
+    return this.findByUserId(userId);
+  },
+
+  async upsertByUserId(userId, payload = {}) {
+    const existing = await this.findByUserId(userId);
+    if (existing) {
+      await this.updateByUserId(userId, payload);
+    } else {
+      await this.create({ ...payload, user_id: userId });
+    }
+    return this.findByUserId(userId);
+  },
+
+  async findByUserId(userId) {
+    const [rows] = await db.query("SELECT * FROM investors WHERE user_id = ?", [userId]);
+    return hydrateRow(rows[0]);
+  },
+
+  async findDetailedByUserId(userId) {
+    const [rows] = await db.execute(
+      `SELECT * FROM investors WHERE user_id = ?`,
+      [userId]
+    );
+    return hydrateRow(rows[0]);
   },
 
   async findAllWithUsername() {
-    // ... (keep the findAllWithUsername function as provided before) ...
     const [rows] = await db.execute(`
       SELECT
-        i.id,          -- Investor profile ID
-        i.user_id,     -- User ID (FK)
-        i.name,        -- Investor's specific name (might be null)
-        u.username     -- User's login username
-      FROM investors i
-      JOIN users u ON i.user_id = u.id
-      WHERE u.userType = 'investor'
-      ORDER BY u.username
-    `);
-    return rows;
-  },
-
-  // --- NEW FUNCTION ---
-  /**
-   * Fetches investor details by their investor profile ID (i.id).
-   * Joins with users table to get username.
-   */
-  async findByIdWithDetails(investorProfileId) {
-    const [rows] = await db.execute(`
-      SELECT
-        i.id, i.user_id, i.name, i.about_me, i.preferences,
+        i.id,
+        i.user_id,
+        i.name,
         u.username
       FROM investors i
       JOIN users u ON i.user_id = u.id
-      WHERE i.id = ? AND u.userType = 'investor'
-    `, [investorProfileId]);
+      WHERE u.userType = 'investor'
+      ORDER BY COALESCE(i.name, u.username)
+    `);
+    return rows.map((row) => ({
+      id: row.id,
+      user_id: row.user_id,
+      name: row.name,
+      username: row.username
+    }));
+  },
 
-    if (rows.length === 0) return null;
-
-    const investor = rows[0];
-    // Parse preferences
-    if (investor.preferences) {
-      try {
-        investor.preferences = JSON.parse(investor.preferences);
-      } catch (e) {
-        console.error(`Error parsing preferences for investor ID ${investorProfileId}:`, e);
-        investor.preferences = null;
-      }
-    } else {
-      investor.preferences = null; // Ensure it's null if stored JSON is null/invalid
-    }
-
-    // *** TODO: Fetch real counts/tags later ***
-    // For now, return the basic profile data + username
-    return {
-      id: investor.id,
-      user_id: investor.user_id,
-      name: investor.name, // Specific name from investors table
-      username: investor.username, // Username from users table
-      about_me: investor.about_me,
-      preferences: investor.preferences,
-      // Add dummy data for fields not yet in DB/fetched
-      title: "Investor Title Placeholder",
-      mentoredCount: 0,
-      investmentsCount: 0,
-      thesis: investor.about_me || "Investment thesis placeholder.", // Use about_me if available
-      tags: investor.preferences?.tags || ["Placeholder Tag"] // Example: extract tags from preferences
-    };
+  async findByIdWithDetails(investorProfileId) {
+    const [rows] = await db.execute(
+      `SELECT * FROM investors WHERE id = ?`,
+      [investorProfileId]
+    );
+    return hydrateRow(rows[0]);
   }
 };
 
