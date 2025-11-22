@@ -15,6 +15,7 @@ import Events from '../Website/Events/Events';
 import Inbox from './Inbox/Inbox';
 import Schedule from './Schedule/Schedule';
 import PublicStartupProfile from './Profile/StartupProfile/PublicStartupProfile';
+import PublicInvestorProfile from './Profile/InvestorProfile/PublicInvestorProfile';
 // PublicStartupDock is imported by PublicStartupProfile, not routed directly
 // import PublicStartupDock from './Profile/StartupProfile/PublicStartupDock';
 import Notifications from './Notifications/Notifications'; // Corrected import path
@@ -59,6 +60,7 @@ function Portal() {
             {/* This route is for an INVESTOR to view a STARTUP's profile */}
             {/* It will match URLs like /I/startup/startup-username */}
             <Route path="/home/startup/:username" element={<PublicStartupProfile />} />
+            <Route path="home/investor/:username" element={<PublicInvestorProfile />} />
 
             {/* This empty route seems intentional from your file */}
             <Route path="" />

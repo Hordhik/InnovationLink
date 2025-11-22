@@ -201,6 +201,46 @@
   color: var(--primary-blue);
 }
 
+/* Mentor request action buttons */
+.notification-actions {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.notification-action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-size: 1.125rem;
+}
+
+.notification-action-btn.accept {
+  color: #10B981;
+}
+
+.notification-action-btn.accept:hover {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+.notification-action-btn.reject {
+  color: #EF4444;
+}
+
+.notification-action-btn.reject:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #DC2626;
+}
+
 .unread-dot {
   width: 8px;
   height: 8px;
@@ -227,6 +267,20 @@
   color: var(--text-dark);
   margin: 0;
   line-height: 1.4;
+}
+
+.status-badge {
+  margin-left: 6px;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.status-badge.accepted {
+  color: #10B981;
+}
+
+.status-badge.rejected {
+  color: #EF4444;
 }
 
 .notification-time {

@@ -1,90 +1,86 @@
 // Frontend/src/services/investorApi.js
-import { getToken } from '../auth.js';
+import axios from "axios";
+import { getToken } from "../auth.js";
 
-const API_ROOT = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const API_ROOT = import.meta.env.VITE_API_URL || "http://localhost:5001";
 const BASE_URL = `${API_ROOT}/api/investors`;
 
-// Helper function to handle fetch responses
-async function handleResponse(response) {
-    // ... (keep handleResponse as provided before) ...
-    if (!response.ok) {
-        const data = await response.json().catch(() => ({})); // Try to parse error
-        throw new Error(data.message || `API request failed: ${response.status} ${response.statusText}`);
-    }
-    const contentType = response.headers.get("content-type");
-    if (contentType && contentType.indexOf("application/json") !== -1) {
-        return response.json();
-    }
-    return {};
-}
+// -------------------------------------------------------------
+//  AXIOS INSTANCE
+// -------------------------------------------------------------
+const api = axios.create({
+  baseURL: API_ROOT,
+  headers: { "Content-Type": "application/json" },
+});
 
-// Helper function to create authenticated headers
-function getAuthHeaders() {
-    // ... (keep getAuthHeaders as provided before) ...
-    const token = getToken();
-    const headers = {
-        'Content-Type': 'application/json',
-    };
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-}
+// Inject token automatically
+api.interceptors.request.use((config) => {
+  const token = getToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Normalize errors
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    const message =
+      err?.response?.data?.message ||
+      err?.message ||
+      "API Request Failed";
+
+    return Promise.reject(new Error(message));
+  }
+);
+
+// -------------------------------------------------------------
+//  PUBLIC / PRIVATE INVESTOR ENDPOINTS
+// -------------------------------------------------------------
 
 /**
- * Fetches the list of all investors (basic info: id, user_id, username).
- * Requires authentication as a startup user.
+ * Fetch list of all investors (basic info)
  */
 export const getAllInvestors = async () => {
-    console.log("Attempting to fetch investors list...");
-    const response = await fetch(BASE_URL, {
-        method: 'GET',
-        headers: getAuthHeaders(),
-    });
-    console.log("Fetch list response status:", response.status);
-    return handleResponse(response);
+  console.log("Attempting to fetch investors list...");
+  const res = await api.get(`/api/investors`);
+  return res.data;
 };
 
-// --- NEW FUNCTION ---
 /**
- * Fetches details for a single investor by their profile ID.
- * Requires authentication as a startup user.
- * @param {number} investorId - The ID of the investor profile (i.id)
+ * Fetch single investor by ID
  */
 export const getInvestorById = async (investorId) => {
-    console.log(`Attempting to fetch details for investor ID: ${investorId}...`);
-    if (!investorId) {
-        throw new Error("Investor ID is required.");
-    }
-    const response = await fetch(`${BASE_URL}/${investorId}`, {
-        method: 'GET',
-        headers: getAuthHeaders(),
-    });
-    console.log(`Fetch details response status for ID ${investorId}:`, response.status);
-    return handleResponse(response);
+  if (!investorId) throw new Error("Investor ID is required.");
+
+  console.log(`Fetching details for investor ID: ${investorId}`);
+  const res = await api.get(`/api/investors/${investorId}`);
+  return res.data;
 };
 
 /**
- * Fetches the profile details for the logged-in investor.
+ * Fetch logged-in investor profile
  */
 export const getMyInvestorProfile = async () => {
-    const response = await fetch(`${BASE_URL}/me`, {
-        method: 'GET',
-        headers: getAuthHeaders(),
-    });
-    return handleResponse(response);
+  const res = await api.get(`/api/investors/me`);
+  return res.data;
 };
 
 /**
- * Saves profile changes for the logged-in investor.
- * @param {object} payload - Investor profile payload
+ * Save logged-in investor profile
  */
 export const saveMyInvestorProfile = async (payload) => {
-    const response = await fetch(`${BASE_URL}/me`, {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(payload),
-    });
-    return handleResponse(response);
+  const res = await api.put(`/api/investors/me`, payload);
+  return res.data;
 };
 
+/**
+ * Fetch investor by PUBLIC username (for profile)
+ * /investor/public/:username
+ */
+export const getInvestorByUsername = async (username) => {
+  if (!username) throw new Error("Username is required.");
+  const res = await api.get(`/api/investors/public/${username}`);
+  return res.data;
+};

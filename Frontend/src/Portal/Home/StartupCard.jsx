@@ -12,7 +12,6 @@ const StartupCard = ({
   description,
   domain,
   teamCount,
-  profileUrl, // This prop will no longer be used for navigation
   username,
 }) => {
   const navigate = useNavigate();

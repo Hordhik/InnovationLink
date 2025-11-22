@@ -41,7 +41,7 @@ export default function InvestorCard({ data, onClick }) {
             e.stopPropagation();
           }}
         >
-          Connect
+          My Connections
         </button>
       </div>
     </div>

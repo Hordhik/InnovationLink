@@ -359,7 +359,7 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
             <button className="connect-btn" onClick={() => {
               const prefix = `/${(window.location.pathname.split('/')[1] || 'I')}`;
               navigate(`${prefix}/inbox`, { state: { initialChat: { username: data?.username, companyName: data?.name } } });
-            }}><img src={user} alt="" />Connect</button>
+            }}><img src={user} alt="" />My Connections</button>
           </div>
         </div>
         { /* DESCRIPTION */}
