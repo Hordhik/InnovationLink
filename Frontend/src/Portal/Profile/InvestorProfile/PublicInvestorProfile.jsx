@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getInvestorByUsername } from "../../../services/investorApi"; 
+import { getInvestorByUsername } from "../../../services/investorApi";
 // import "./PublicInvestorProfile.css";
 
 import mentorship from "../../../assets/Portal/StartupCard/mentorship.png";
 import active from "../../../assets/Portal/StartupCard/active.png";
+import "./InvestorProfile.css"
 
 const PublicInvestorProfile = () => {
   const { username } = useParams();
@@ -31,8 +32,8 @@ const PublicInvestorProfile = () => {
         console.error("Failed to load public investor profile:", err);
         setError(
           err?.response?.data?.message ||
-            err?.message ||
-            "Could not load investor profile"
+          err?.message ||
+          "Could not load investor profile"
         );
       } finally {
         setLoading(false);

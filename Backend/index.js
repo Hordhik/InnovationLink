@@ -11,6 +11,8 @@ const teamRoutes = require('./routes/teamRoutes');
 const postRoutes = require('./routes/postRoutes');
 const startupDockRoutes = require('./routes/startupDockRoutes');
 const investorRoutes = require('./routes/investorRoutes'); // ✅ Make sure this is included
+// Fallback direct import for public investor route if router not registering
+const { getInvestorPublicProfile } = require('./controllers/investorController');
 
 // Error handler
 const errorHandler = require('./middleware/errorHandler');
@@ -74,6 +76,7 @@ app.use('/api/public', publicRoutes);
 app.use('/api/team', teamRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/startup-dock', startupDockRoutes);
+// Temporary explicit public route (diagnostic) before mounting router
 app.use('/api/investors', investorRoutes); // ✅ Ensure investor routes are mounted
 
 // Centralized error handler - MUST be last middleware

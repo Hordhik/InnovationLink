@@ -221,6 +221,15 @@ const Investor = {
     );
     return hydrateRow(rows[0]);
   }
+  ,
+  async findUserIdByInvestorName(name) {
+    if (!name) return null;
+    const [rows] = await db.execute(
+      `SELECT user_id FROM investors WHERE name = ? LIMIT 1`,
+      [name]
+    );
+    return rows[0]?.user_id || null;
+  }
 };
 
 module.exports = Investor;

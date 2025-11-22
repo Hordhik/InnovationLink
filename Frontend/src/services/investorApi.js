@@ -43,8 +43,7 @@ api.interceptors.response.use(
  * Fetch list of all investors (basic info)
  */
 export const getAllInvestors = async () => {
-  console.log("Attempting to fetch investors list...");
-  const res = await api.get(`/api/investors`);
+  const res = await api.get(`${BASE_URL}`);
   return res.data;
 };
 
@@ -53,9 +52,7 @@ export const getAllInvestors = async () => {
  */
 export const getInvestorById = async (investorId) => {
   if (!investorId) throw new Error("Investor ID is required.");
-
-  console.log(`Fetching details for investor ID: ${investorId}`);
-  const res = await api.get(`/api/investors/${investorId}`);
+  const res = await api.get(`${BASE_URL}/${investorId}`);
   return res.data;
 };
 
@@ -63,7 +60,7 @@ export const getInvestorById = async (investorId) => {
  * Fetch logged-in investor profile
  */
 export const getMyInvestorProfile = async () => {
-  const res = await api.get(`/api/investors/me`);
+  const res = await api.get(`${BASE_URL}/me`);
   return res.data;
 };
 
@@ -71,7 +68,7 @@ export const getMyInvestorProfile = async () => {
  * Save logged-in investor profile
  */
 export const saveMyInvestorProfile = async (payload) => {
-  const res = await api.put(`/api/investors/me`, payload);
+  const res = await api.put(`${BASE_URL}/me`, payload);
   return res.data;
 };
 
@@ -81,6 +78,6 @@ export const saveMyInvestorProfile = async (payload) => {
  */
 export const getInvestorByUsername = async (username) => {
   if (!username) throw new Error("Username is required.");
-  const res = await api.get(`/api/investors/public/${username}`);
+  const res = await api.get(`${BASE_URL}/public/${encodeURIComponent(username)}`);
   return res.data;
 };

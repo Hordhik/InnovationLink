@@ -6,28 +6,34 @@ const {
     getInvestorById,
     getMyInvestorProfile,
     upsertMyInvestorProfile,
+    getInvestorPublicProfile,
 } = require('../controllers/investorController.js');
 const requireAuth = require('../middleware/auth.js');
 const roleCheck = require('../middleware/roleCheck.js');
 
-// Protect all investor routes - only logged-in users can access
-router.use(requireAuth);
+// Diagnostic middleware to log incoming investor route requests and whether auth will run
+router.use((req, _res, next) => {
+    console.log(`[InvestorRoutes] Incoming ${req.method} ${req.originalUrl}`);
+    next();
+});
 
-// GET /api/investors/me
-// Fetch the logged-in investor's profile
-router.get('/me', roleCheck('investor'), getMyInvestorProfile);
+// Public route: view investor profile by username (no auth required)
+router.get('/public/:username', getInvestorPublicProfile);
 
-// PUT /api/investors/me
-// Create or update the logged-in investor's profile
-router.put('/me', roleCheck('investor'), upsertMyInvestorProfile);
+// Private routes (explicitly protected with requireAuth to avoid accidental global ordering issues)
+router.get('/me', requireAuth, roleCheck('investor'), getMyInvestorProfile);
+router.put('/me', requireAuth, roleCheck('investor'), upsertMyInvestorProfile);
+router.get('/', requireAuth, roleCheck('startup'), getAllInvestors);
+router.get('/:id', requireAuth, roleCheck('startup'), getInvestorById);
 
-// GET /api/investors
-// Fetches a list of all investor usernames. Accessible only by startups.
-router.get('/', roleCheck('startup'), getAllInvestors);
-
-// GET /api/investors/:id
-// Fetches details for a specific investor profile. Accessible only by startups.
-router.get('/:id', roleCheck('startup'), getInvestorById); // Add the new route
+// Log registered route paths for diagnostics at load time
+console.log('[InvestorRoutes] Registered routes:');
+router.stack
+    .filter((layer) => layer.route)
+    .forEach((layer) => {
+        const methods = Object.keys(layer.route.methods).map(m => m.toUpperCase()).join(',');
+        console.log(`  ${methods} /api/investors${layer.route.path}`);
+    });
 
 module.exports = router;
 

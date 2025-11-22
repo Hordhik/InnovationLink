@@ -30,8 +30,30 @@ const User = {
   },
 
   async findByUsername(username) {
-    const [rows] = await db.query("SELECT * FROM users WHERE username = ?", [username]);
-    return rows[0];
+    // Fixed: column is 'username', not 'name'
+    // Support both possible schemas: 'username' primary, fallback to legacy 'name'
+    if (!username) return undefined;
+    // Primary lookup
+    const [uRows] = await db.query("SELECT * FROM users WHERE username = ?", [username]);
+    if (uRows[0]) return uRows[0];
+    // Legacy / alternate column name fallback
+    try {
+      const [nRows] = await db.query("SELECT * FROM users WHERE name = ?", [username]);
+      if (nRows[0]) return nRows[0];
+    } catch (e) {
+      // Ignore if 'name' column does not exist
+    }
+    // Case-insensitive fallback (username)
+    try {
+      const [ciRows] = await db.query("SELECT * FROM users WHERE LOWER(username) = LOWER(?)", [username]);
+      if (ciRows[0]) return ciRows[0];
+    } catch (e) { }
+    // Case-insensitive fallback (name)
+    try {
+      const [ciNameRows] = await db.query("SELECT * FROM users WHERE LOWER(name) = LOWER(?)", [username]);
+      if (ciNameRows[0]) return ciNameRows[0];
+    } catch (e) { }
+    return undefined;
   },
 
 

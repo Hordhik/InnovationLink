@@ -247,10 +247,66 @@ const getInvestorById = async (req, res) => {
 };
 
 
+// Export object will be finalized after defining public profile handler.
+/**
+ * PUBLIC: Fetch investor profile by username (no auth required, limited fields).
+ * Route: GET /api/investors/public/:username
+ */
+const getInvestorPublicProfile = async (req, res) => {
+    try {
+        const { username } = req.params;
+        if (!username) {
+            return res.status(400).json({ message: 'Username is required.' });
+        }
+
+        // Debug logging to help trace public profile fetch issues
+        console.log('[PublicInvestorProfile] Incoming request for username:', username);
+
+        // Unified lookup: userModel now supports multiple column & case-insensitive resolution.
+        let user = await User.findByUsername(username);
+        // Additional fallback: treat supplied segment as investor display name if still not found.
+        if (!user) {
+            const userIdFromInvestorName = await Investor.findUserIdByInvestorName(username);
+            if (userIdFromInvestorName) {
+                user = await User.findById(userIdFromInvestorName);
+                console.log('[PublicInvestorProfile] Fallback matched investor name to user_id:', userIdFromInvestorName);
+            }
+        }
+        if (!user || user.userType !== 'investor') {
+            console.log('[PublicInvestorProfile] User not found or not investor:', !!user ? user.userType : 'null');
+            return res.status(404).json({ message: 'Investor user not found.' });
+        }
+
+        const investor = await Investor.findDetailedByUserId(user.id);
+        console.log('[PublicInvestorProfile] Investor row exists:', !!investor);
+        const profile = formatInvestorProfile(investor, user, { includeAccountFields: false });
+        if (!profile) {
+            console.log('[PublicInvestorProfile] Format returned null profile for user id:', user.id);
+            return res.status(404).json({ message: 'Investor profile not found.' });
+        }
+
+        // Remove direct contact channels for public view
+        delete profile.email;
+        delete profile.phone;
+
+        // Provide placeholder counts / arrays (extend once data model supports them)
+        profile.mentoredCount = investor?.mentoredCount || 0;
+        profile.investmentsCount = investor?.investmentsCount || 0;
+        profile.startups = Array.isArray(investor?.startups) ? investor.startups : [];
+
+        console.log('[PublicInvestorProfile] Returning sanitized public profile for:', username);
+        return res.status(200).json({ investor: profile });
+    } catch (error) {
+        console.error('Error fetching public investor profile:', error);
+        return res.status(500).json({ message: 'Server error while fetching investor public profile' });
+    }
+};
+
 module.exports = {
     getAllInvestors,
     getMyInvestorProfile,
     upsertMyInvestorProfile,
     getInvestorById,
+    getInvestorPublicProfile,
 };
 
