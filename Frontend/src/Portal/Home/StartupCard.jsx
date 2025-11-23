@@ -58,7 +58,7 @@ const StartupCard = ({
             </div>
           </div>
           <div className="card-actions">
-            <button className="connect-button" onClick={startChat}>Connect</button>
+            <button className="connect-button" onClick={() => navigate(correctProfileUrl)}>Connect</button>
             <button className="request-button" onClick={startChat}>Request a Meeting</button>
           </div>
         </div>

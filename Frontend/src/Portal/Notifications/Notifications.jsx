@@ -1,61 +1,102 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Notifications.css'; // Make sure this CSS file exists
 import { FiX, FiBell, FiCalendar, FiUserCheck, FiMessageSquare, FiSettings, FiCheck, FiCircle, FiCheckCircle, FiXCircle } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
-
-// --- Initial Mock Data ---
-const initialNotifications = [
-  {
-    id: 1,
-    read: false,
-    icon: <FiCalendar />,
-    text: 'New meeting request from TechGrowth.',
-    time: '5m ago',
-    link: '/schedules'
-  },
-  {
-    id: 2,
-    read: false,
-    icon: <FiUserCheck />,
-    text: 'MentorConnect accepted your connection request.',
-    time: '1h ago',
-    link: '/profile/connections'
-  },
-  {
-    id: 3,
-    read: true,
-    icon: <FiMessageSquare />,
-    text: 'You have 2 new messages in your inbox.',
-    time: 'Yesterday',
-    link: '/inbox'
-  },
-  {
-    id: 4,
-    read: true,
-    icon: <FiSettings />,
-    text: 'Your profile has been verified successfully.',
-    time: '2 days ago',
-    link: '/profile'
-  },
-  {
-    id: 5,
-    read: false,
-    icon: <FiUserCheck />,
-    text: 'Innovation Link sent you a mentor request.',
-    time: '1h ago',
-    link: '/profile/connections',
-    type: 'mentor_request',
-    status: null
-  }
-];
-// -----------------
+import { getNotifications, markNotificationAsRead, acceptConnectionRequest, rejectConnectionRequest } from '../../services/connectionApi';
 
 // Renamed to 'Notifications' and removed the 'onClose' prop
 const Notifications = () => {
   const [activeTab, setActiveTab] = useState('All'); // 'All' or 'Unread'
-  const [notifications, setNotifications] = useState(initialNotifications);
+  const [notifications, setNotifications] = useState([]);
   const [isClosing, setIsClosing] = useState(false);
   const navigate = useNavigate(); // Get the navigate function
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const data = await getNotifications();
+      const mapped = data.map(n => ({
+        id: n.id,
+        read: !!n.is_read,
+        icon: getIconForType(n.type),
+        text: n.message,
+        time: new Date(n.created_at).toLocaleDateString(),
+        link: getLinkForType(n.type),
+        type: n.type,
+        senderId: n.sender_id // Store sender_id for actions
+      }));
+      setNotifications(mapped);
+    } catch (error) {
+      console.error("Failed to fetch notifications", error);
+    }
+  };
+
+  const handleAccept = async (e, notif) => {
+    e.stopPropagation();
+    console.log("Attempting to accept notification:", notif);
+
+    if (!notif.senderId) {
+      console.error("Missing senderId in notification:", notif);
+      alert("Error: Cannot accept request (missing sender information)");
+      return;
+    }
+
+    try {
+      await acceptConnectionRequest(null, notif.senderId);
+      // Mark as read and update UI
+      await toggleNotificationRead(notif.id);
+      // Optionally refresh notifications or show success
+      alert("Connection accepted!");
+      fetchData();
+    } catch (err) {
+      console.error("Failed to accept:", err);
+      if (err.response && err.response.status === 404) {
+        console.error("Debug Info:", err.response.data);
+        alert("Request not found. Check console for details.");
+      } else {
+        alert("Failed to accept request");
+      }
+    }
+  };
+
+  const handleReject = async (e, notif) => {
+    e.stopPropagation();
+    if (!notif.senderId) {
+      console.error("Missing senderId in notification:", notif);
+      alert("Error: Cannot reject request (missing sender information)");
+      return;
+    }
+
+    try {
+      await rejectConnectionRequest(null, notif.senderId);
+      await toggleNotificationRead(notif.id);
+      alert("Connection rejected.");
+      fetchData();
+    } catch (err) {
+      console.error("Failed to reject:", err);
+      alert("Failed to reject request");
+    }
+  };
+
+  const getIconForType = (type) => {
+    switch (type) {
+      case 'connection_request': return <FiUserCheck />;
+      case 'connection_accepted': return <FiUserCheck />;
+      default: return <FiBell />;
+    }
+  };
+
+  const getLinkForType = (type) => {
+    const portalPrefix = `/${(window.location.pathname.split("/")[1] || "S")}`;
+    switch (type) {
+      case 'connection_request': return `${portalPrefix}/profile#connections`;
+      case 'connection_accepted': return `${portalPrefix}/profile#connections`;
+      default: return `${portalPrefix}/home`;
+    }
+  };
 
   // Function to close the modal with animation
   const handleClose = React.useCallback(() => {
@@ -77,49 +118,35 @@ const Notifications = () => {
   }, [handleClose]);
 
   // Function to mark all notifications as read
-  const handleMarkAllAsRead = () => {
+  const handleMarkAllAsRead = async () => {
+    // Optimistic update
     setNotifications(notifications.map(notif => ({ ...notif, read: true })));
+    // TODO: Implement bulk mark read API
+    for (const n of notifications) {
+      if (!n.read) await markNotificationAsRead(n.id);
+    }
   };
 
   // Function to toggle read/unread status of a single notification
-  const toggleNotificationRead = (id) => {
-    setNotifications(notifications.map(notif => 
-      notif.id === id ? { ...notif, read: !notif.read } : notif
-    ));
+  const toggleNotificationRead = async (id) => {
+    try {
+      await markNotificationAsRead(id);
+      setNotifications(notifications.map(notif =>
+        notif.id === id ? { ...notif, read: true } : notif
+      ));
+    } catch (error) {
+      console.error("Failed to mark read", error);
+    }
   };
 
   // Function to mark a notification as read when clicked
-  const handleNotificationClick = (id, link) => {
+  const handleNotificationClick = async (id, link) => {
     // Mark as read
-    setNotifications(notifications.map(notif => 
-      notif.id === id ? { ...notif, read: true } : notif
-    ));
+    await toggleNotificationRead(id);
     // Navigate to the link
     if (link) {
       navigate(link);
     }
-  };
-
-  // Function to accept a mentor request
-  const handleMentorAccept = (id, e) => {
-    e.stopPropagation();
-    // Update the notification status to accepted
-    setNotifications(notifications.map(notif => 
-      notif.id === id ? { ...notif, status: 'Accepted' } : notif
-    ));
-    // Add your API call here to accept the mentor request
-    console.log(`Mentor request ${id} accepted`);
-  };
-
-  // Function to reject a mentor request
-  const handleMentorReject = (id, e) => {
-    e.stopPropagation();
-    // Update the notification status to rejected
-    setNotifications(notifications.map(notif => 
-      notif.id === id ? { ...notif, status: 'Rejected' } : notif
-    ));
-    // Add your API call here to reject the mentor request
-    console.log(`Mentor request ${id} rejected`);
   };
 
   // Filter notifications based on the active tab
@@ -134,7 +161,7 @@ const Notifications = () => {
     <div className="notification-panel-overlay" onClick={handleClose}>
       {/* Add onClick with stopPropagation to prevent clicks inside from closing */}
       <div className={`notification-panel ${isClosing ? 'closing' : ''}`} onClick={(e) => e.stopPropagation()}>
-        
+
         {/* 1. Header */}
         <div className="notification-header">
           <h3>Notifications</h3>
@@ -168,77 +195,46 @@ const Notifications = () => {
           {filteredNotifications.length > 0 ? (
             filteredNotifications.map((notif) => (
               <div key={notif.id} className="notification-item-wrapper">
-                {notif.type === 'mentor_request' ? (
-                  <div 
-                    className="notification-item"
-                    onClick={() => handleNotificationClick(notif.id, notif.link)}
-                  >
-                    {!notif.read && <div className="unread-dot"></div>}
-                    <div className="notification-icon">
-                      {notif.icon}
-                    </div>
-                    <div className="notification-content">
-                      <p className="notification-text">
-                        {notif.text}
-                        {notif.status && (
-                          <span className={`status-badge ${notif.status.toLowerCase()}`}>
-                            ({notif.status})
-                          </span>
-                        )}
-                      </p>
-                      <p className="notification-time">{notif.time}</p>
-                    </div>
+                <div
+                  className="notification-item"
+                  onClick={() => handleNotificationClick(notif.id, notif.link)}
+                >
+                  {!notif.read && <div className="unread-dot"></div>}
+                  <div className="notification-icon">
+                    {notif.icon}
                   </div>
-                ) : (
-                  <div 
-                    className="notification-item"
-                    onClick={() => handleNotificationClick(notif.id, notif.link)}
-                  >
-                    {!notif.read && <div className="unread-dot"></div>}
-                    <div className="notification-icon">
-                      {notif.icon}
-                    </div>
-                    <div className="notification-content">
-                      <p className="notification-text">{notif.text}</p>
-                      <p className="notification-time">{notif.time}</p>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Show action buttons for mentor requests */}
-                {notif.type === 'mentor_request' ? (
-                  <>
-                    {!notif.status && (
-                      <div className="notification-actions">
+                  <div className="notification-content">
+                    <p className="notification-text">{notif.text}</p>
+                    <p className="notification-time">{notif.time}</p>
+                    {notif.type === 'connection_request' && (
+                      <div className="notification-actions" style={{ marginTop: '8px', display: 'flex', gap: '8px' }}>
                         <button
+                          onClick={(e) => handleAccept(e, notif)}
                           className="notification-action-btn accept"
-                          onClick={(e) => handleMentorAccept(notif.id, e)}
-                          title="Accept mentor request"
                         >
-                          <FiCheckCircle size={18} />
+                          Accept
                         </button>
                         <button
+                          onClick={(e) => handleReject(e, notif)}
                           className="notification-action-btn reject"
-                          onClick={(e) => handleMentorReject(notif.id, e)}
-                          title="Reject mentor request"
                         >
-                          <FiXCircle size={18} />
+                          Reject
                         </button>
                       </div>
                     )}
-                  </>
-                ) : (
-                  <button
-                    className="notification-read-toggle"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleNotificationRead(notif.id);
-                    }}
-                    title={notif.read ? "Mark as unread" : "Mark as read"}
-                  >
-                    {notif.read ? <FiCircle size={16} /> : <FiCheck size={16} />}
-                  </button>
-                )}
+                  </div>
+                </div>
+
+                <button
+                  className="notification-read-toggle"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleNotificationRead(notif.id);
+                  }}
+                  title={notif.read ? "Mark as unread" : "Mark as read"}
+                >
+                  {notif.read ? <FiCircle size={16} /> : <FiCheck size={16} />}
+                </button>
               </div>
             ))
           ) : (

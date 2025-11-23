@@ -1,7 +1,7 @@
 import React from 'react';
 import { Mail, Twitter, Linkedin, Briefcase } from 'lucide-react';
 
-export default function InvestorCard({ data, onClick }) {
+export default function InvestorCard({ data, onClick, onMyConnectionsClick }) {
   return (
     <div
       className="card investor-card"
@@ -39,6 +39,7 @@ export default function InvestorCard({ data, onClick }) {
           className="btn-connect"
           onClick={(e) => {
             e.stopPropagation();
+            if (onMyConnectionsClick) onMyConnectionsClick();
           }}
         >
           My Connections

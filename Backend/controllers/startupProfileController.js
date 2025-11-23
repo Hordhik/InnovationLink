@@ -264,6 +264,11 @@ exports.getPublicProfileByUsername = async (req, res) => {
             return res.status(404).json({ message: 'Startup profile not found.' });
         }
 
+        // Ensure userId is available in camelCase for frontend
+        if (profile && profile.user_id) {
+            profile.userId = profile.user_id;
+        }
+
         // Convert logo to Base64
         if (profile.logo) {
             try {

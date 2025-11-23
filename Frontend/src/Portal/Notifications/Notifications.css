@@ -6,17 +6,19 @@
   --bg-light: #FFFFFF;
   --border-color: #E5E7EB;
   --bg-hover: #F9FAFB;
-  
+
   /* --- ADJUST THESE TO MATCH YOUR LAYOUT --- */
   --top-bar-height: 60px;
-  --side-bar-width: 240px; /* Guessing 240px, change if needed */
+  --side-bar-width: 240px;
+  /* Guessing 240px, change if needed */
 }
 
 /* The overlay now correctly positions itself 
   inside the main content area.
 */
 .notification-panel-overlay {
-  position: absolute; /* Use absolute to stay in place on scroll */
+  position: absolute;
+  /* Use absolute to stay in place on scroll */
   top: 0;
   left: 0;
   width: 100%;
@@ -33,19 +35,24 @@
 */
 .notification-panel {
   position: absolute;
-  top: 24px;           /* CHANGED: Was 0. Adds gap from the top. */
-  left: 24px;          /* CHANGED: Was 0. Adds gap from the sidebar. */
-  bottom: 24px;        /* ADDED: Adds gap from the bottom. */
-  height: auto;        /* CHANGED: Was 100%. Lets top/bottom define height. */
+  top: 24px;
+  /* CHANGED: Was 0. Adds gap from the top. */
+  left: 24px;
+  /* CHANGED: Was 0. Adds gap from the sidebar. */
+  bottom: 24px;
+  /* ADDED: Adds gap from the bottom. */
+  height: auto;
+  /* CHANGED: Was 100%. Lets top/bottom define height. */
   width: 100%;
   max-width: 380px;
   background-color: var(--bg-light);
-  box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.1); /* Softer shadow */
+  box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.1);
+  /* Softer shadow */
   display: flex;
   flex-direction: column;
   z-index: 999;
   border-radius: 20px;
-  
+
   /* Your animation properties are fine */
   animation: genieEffect 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   transform-origin: bottom left;
@@ -62,6 +69,7 @@
     transform: scale(0, 0);
     opacity: 0;
   }
+
   100% {
     transform: scale(1, 1);
     opacity: 1;
@@ -74,6 +82,7 @@
     transform: scale(1, 1);
     opacity: 1;
   }
+
   100% {
     transform: scale(0, 0);
     opacity: 0;
@@ -214,31 +223,32 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 6px 8px;
+  padding: 6px 12px;
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  font-size: 1.125rem;
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
 .notification-action-btn.accept {
-  color: #10B981;
+  background-color: #4CAF50;
+  color: white;
 }
 
 .notification-action-btn.accept:hover {
-  background-color: rgba(16, 185, 129, 0.1);
-  color: #059669;
+  background-color: #45a049;
 }
 
 .notification-action-btn.reject {
-  color: #EF4444;
+  background-color: #EF4444;
+  color: white;
 }
 
 .notification-action-btn.reject:hover {
-  background-color: rgba(239, 68, 68, 0.1);
-  color: #DC2626;
+  background-color: #d32f2f;
 }
 
 .unread-dot {
@@ -254,7 +264,8 @@
 .notification-icon {
   color: var(--primary-blue);
   flex-shrink: 0;
-  font-size: 1.25rem; /* 20px */
+  font-size: 1.25rem;
+  /* 20px */
   margin-top: 2px;
 }
 
@@ -301,7 +312,8 @@
 }
 
 .notification-empty svg {
-  color: #D1D5DB; /* Lighter gray */
+  color: #D1D5DB;
+  /* Lighter gray */
   margin-bottom: 16px;
 }
 

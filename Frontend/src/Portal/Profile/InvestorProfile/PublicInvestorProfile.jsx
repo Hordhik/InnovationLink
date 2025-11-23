@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getInvestorByUsername } from "../../../services/investorApi";
+import { getConnectionStatus, sendConnectionRequest } from "../../../services/connectionApi";
 // import "./PublicInvestorProfile.css";
 
 import mentorship from "../../../assets/Portal/StartupCard/mentorship.png";
@@ -14,6 +15,7 @@ const PublicInvestorProfile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [investor, setInvestor] = useState(null);
+  const [connectionStatus, setConnectionStatus] = useState({ status: 'none', role: 'none' });
 
   const portalPrefix = `/${(window.location.pathname.split("/")[1] || "I")}`;
 
@@ -28,6 +30,16 @@ const PublicInvestorProfile = () => {
         }
 
         setInvestor(data.investor);
+
+        // Check connection status
+        if (data.investor.userId) {
+          try {
+            const statusData = await getConnectionStatus(data.investor.userId);
+            setConnectionStatus(statusData);
+          } catch (connErr) {
+            console.error("Failed to check connection status:", connErr);
+          }
+        }
       } catch (err) {
         console.error("Failed to load public investor profile:", err);
         setError(
@@ -42,6 +54,52 @@ const PublicInvestorProfile = () => {
 
     loadProfile();
   }, [username]);
+
+  const handleConnect = async () => {
+    try {
+      await sendConnectionRequest(investor.userId);
+      setConnectionStatus({ status: 'pending', role: 'sender' });
+      // Optional: Show toast
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to send request');
+    }
+  };
+
+  const renderConnectButton = () => {
+    if (connectionStatus.status === 'accepted') {
+      return (
+        <button
+          className="connect-btn"
+          onClick={() =>
+            navigate(`${portalPrefix}/inbox`, {
+              state: {
+                initialChat: {
+                  username: investor.username,
+                  companyName: investor.name,
+                },
+              },
+            })
+          }
+        >
+          Message
+        </button>
+      );
+    }
+    if (connectionStatus.status === 'pending') {
+      if (connectionStatus.role === 'sender') {
+        return <button className="connect-btn" disabled>Request Sent</button>;
+      }
+      return <button className="connect-btn" disabled>Pending Request</button>;
+    }
+    if (connectionStatus.status === 'blocked') {
+      return null;
+    }
+    return (
+      <button className="connect-btn" onClick={handleConnect}>
+        Connect
+      </button>
+    );
+  };
 
   if (loading) {
     return <div className="public-investor-layout">Loading profile…</div>;
@@ -82,21 +140,7 @@ const PublicInvestorProfile = () => {
         </div>
 
         <div className="piv-header-right">
-          <button
-            className="connect-btn"
-            onClick={() =>
-              navigate(`${portalPrefix}/inbox`, {
-                state: {
-                  initialChat: {
-                    username: investor.username,
-                    companyName: investor.name,
-                  },
-                },
-              })
-            }
-          >
-            Connect
-          </button>
+          {renderConnectButton()}
         </div>
       </div>
 
