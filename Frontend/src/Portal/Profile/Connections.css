@@ -1,0 +1,68 @@
+.connections-page {
+  padding: 20px;
+}
+
+.page-title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.connections-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.connection-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  padding: 18px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.conn-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.conn-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.conn-name {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.conn-role {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.conn-view-btn {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #1e40af;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.conn-view-btn:hover {
+  background: #1e3a8a;
+}
+
+.empty-text {
+  color: #6b7280;
+  margin-top: 10px;
+}

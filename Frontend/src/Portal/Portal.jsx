@@ -20,6 +20,9 @@ import PublicInvestorProfile from './Profile/InvestorProfile/PublicInvestorProfi
 // import PublicStartupDock from './Profile/StartupProfile/PublicStartupDock';
 import Notifications from './Notifications/Notifications'; // Corrected import path
 import AddBlog from '../Website/Blogs/AddBlog'; // <-- IMPORTED AddBlog
+import InvestorConnections from './Profile/InvestorProfile/MyConnections';
+import StartupConnections from './Profile/StartupProfile/MyConnections';
+
 
 function Portal() {
   const userType = window.location.pathname.split('/')[1] || 'S';
@@ -55,6 +58,9 @@ function Portal() {
 
             {/* This route shows the user's OWN profile */}
             <Route path="profile" element={userType === 'I' ? <InvestorProfile /> : <StartupProfile />} />
+
+            {/* Connections page - shows investor connections for I, startup connections for S */}
+            <Route path="connections" element={userType === 'I' ? <InvestorConnections /> : <StartupConnections />} />
 
             {/* --- ADDED ROUTE --- */}
             {/* This route is for an INVESTOR to view a STARTUP's profile */}

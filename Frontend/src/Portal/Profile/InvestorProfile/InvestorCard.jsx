@@ -1,7 +1,10 @@
 import React from 'react';
 import { Mail, Twitter, Linkedin, Briefcase } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function InvestorCard({ data, onClick }) {
+  const navigate = useNavigate();
+  const userType = window.location.pathname.split('/')[1] || 'I';
   return (
     <div
       className="card investor-card"
@@ -39,6 +42,7 @@ export default function InvestorCard({ data, onClick }) {
           className="btn-connect"
           onClick={(e) => {
             e.stopPropagation();
+            navigate(`/${userType}/connections`);
           }}
         >
           My Connections

@@ -7,7 +7,6 @@ import workerSrc from 'pdfjs-dist/legacy/build/pdf.worker.mjs?url';
 pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
 import FilePreview from "./FilePreview";
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import user from '../../../assets/Portal/user.svg';
 import feedback from '../../../assets/Portal/feedback.png';
 
 // -----------------------------------------------------------------
@@ -357,9 +356,9 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
           <div className="spv-actions">
             <button className="feedback"><img src={feedback} alt="" />FeedBack</button>
             <button className="connect-btn" onClick={() => {
-              const prefix = `/${(window.location.pathname.split('/')[1] || 'I')}`;
-              navigate(`${prefix}/inbox`, { state: { initialChat: { username: data?.username, companyName: data?.name } } });
-            }}><img src={user} alt="" />My Connections</button>
+              const prefix = `/${(window.location.pathname.split('/')[1] || 'S')}`;
+              navigate(`${prefix}/connections`);
+            }}>My Connections</button>
           </div>
         </div>
         { /* DESCRIPTION */}
