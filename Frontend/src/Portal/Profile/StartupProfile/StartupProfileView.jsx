@@ -8,6 +8,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
 import FilePreview from "./FilePreview";
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import feedback from '../../../assets/Portal/feedback.png';
+import user from '../../../assets/Portal/user.svg';
 
 // -----------------------------------------------------------------
 // 1. IMPORT THE NEW API SERVICE
