@@ -54,6 +54,20 @@ const InvestorCard = ({ investorId, initialUsername }) => {
           initialUsername ||
           `Investor #${investorId}`;
 
+        // Backend provides about (bio) and investLike (investment thesis). Prefer about; fall back to investLike.
+        const aboutText =
+          response.investor.about ||
+          response.investor.investLike ||
+          response.investor.thesis ||
+          defaultInvestorData.thesis;
+
+        // Build tags aggregate (expertise + sectors + stages) for richer context.
+        const aggregateTags = [
+          ...(Array.isArray(response.investor.expertise) ? response.investor.expertise : []),
+          ...(Array.isArray(response.investor.sectors) ? response.investor.sectors : []),
+          ...(Array.isArray(response.investor.stages) ? response.investor.stages : []),
+        ].slice(0, 12); // limit to avoid overflow
+
         setInvestorData({
           id: response.investor.id,
           name: fetchedName,
@@ -61,8 +75,8 @@ const InvestorCard = ({ investorId, initialUsername }) => {
           title: response.investor.title || defaultInvestorData.title,
           mentoredCount: response.investor.mentoredCount ?? defaultInvestorData.mentoredCount,
           investmentsCount: response.investor.investmentsCount ?? defaultInvestorData.investmentsCount,
-          thesis: response.investor.thesis || defaultInvestorData.thesis,
-          tags: Array.isArray(response.investor.tags) ? response.investor.tags : defaultInvestorData.tags,
+          thesis: aboutText,
+          tags: aggregateTags.length ? aggregateTags : defaultInvestorData.tags,
         });
 
       } catch (err) {
@@ -86,7 +100,7 @@ const InvestorCard = ({ investorId, initialUsername }) => {
   const displayTitle = investorData.title;
   const displayMentored = investorData.mentoredCount;
   const displayInvestments = investorData.investmentsCount;
-  const displayThesis = investorData.thesis;
+  const displayThesis = investorData.thesis; // primary description (about or fallback)
   const displayTags = investorData.tags;
 
   const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayInitials)}&background=e9ecef&color=495057&bold=true&size=60`;
@@ -97,7 +111,7 @@ const InvestorCard = ({ investorId, initialUsername }) => {
   if (isLoading) {
     return (
       <div className="investor-card loading">
-        <p>Loading details for {initialUsername || `Investor #${investorId}`}...</p>
+        <p style={{ padding: '4px 2px' }}>Loading details for {initialUsername || `Investor #${investorId}`}...</p>
       </div>
     );
   }
@@ -115,12 +129,11 @@ const InvestorCard = ({ investorId, initialUsername }) => {
     <div className="investor-card">
       <div className="card-header">
         <div className="startup-info">
-          <div className="avatar">
+          <div className="avatar avatar--round">
             <img
               src={avatarUrl}
               alt={`${displayName} initials`}
               onError={(e) => { e.target.onerror = null; e.target.src = placeholderAvatar; }}
-              style={{ width: '60px', height: '60px', borderRadius: '50%' }}
             />
           </div>
           <div className="text-info">
@@ -128,7 +141,6 @@ const InvestorCard = ({ investorId, initialUsername }) => {
             <p className="founder-name">{displayTitle}</p>
           </div>
         </div>
-
         <div className="connect">
           <div className="mentor-info">
             <div className="mentors-engaged">
@@ -146,17 +158,15 @@ const InvestorCard = ({ investorId, initialUsername }) => {
           </div>
         </div>
       </div>
-
       <div className="card-body">
-        <p className="description">{displayThesis}</p>
-
+        {displayThesis && (
+          <p className="description description--clamp">{displayThesis}</p>
+        )}
         <div className="tags">
           {displayTags.map((tag, index) => (
             <p key={index} className="tag">{tag}</p>
           ))}
         </div>
-
-        {/* FIXED: View Profile works now */}
         <Link to={correctProfileUrl} className="view-profile-link">
           <span>View Full Profile</span>
           <span className="arrow-icon">→</span>

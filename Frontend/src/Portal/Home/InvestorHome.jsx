@@ -26,9 +26,7 @@ const InvestorHome = () => {
   }, []);
 
   return (
-    <div
-      style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
-    >
+    <div className="home-content">
       <AdvancedSearch />
       {loading && <div style={{ padding: '8px 4px' }}>Loading startups…</div>}
       {error && (

@@ -5,8 +5,22 @@
   box-sizing: border-box;
 }
 
+/* Unified inner content width for both Startup and Investor views */
+.home-content {
+  width: 100%;
+  max-width: 1120px; /* consistent readable line-length */
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 @media (max-width: 720px) {
   .home-container {
     padding: 16px 18px;
+  }
+  .home-content {
+    max-width: 100%;
+    gap: 16px;
   }
 }

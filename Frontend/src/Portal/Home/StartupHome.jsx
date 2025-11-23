@@ -44,7 +44,7 @@ const StartupHome = () => {
   }, []); // Run once on mount
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div className="home-content">
       {/* --- Render Filter and Search as before --- */}
       <Filter />
       {/* <AdvancedSearch /> */} {/* Still commented out */}
@@ -62,11 +62,10 @@ const StartupHome = () => {
       {/* --- Render Investor List (if not loading and no error) --- */}
       {!isLoading && !error && investorList.length > 0 && (
         investorList.map((investor) => (
-          // --- FIX: Pass investorId and initialUsername ---
           <InvestorCard
-            key={investor.id} // Use the investor profile ID as key
-            investorId={investor.id} // Pass the investor profile ID for fetching
-            initialUsername={investor.username} // Pass the username for initial display
+            key={investor.id}
+            investorId={investor.id}
+            initialUsername={investor.username}
           />
         ))
       )}

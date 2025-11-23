@@ -2,7 +2,6 @@
 .investor-card {
   background-color: #fff;
   border: 1px solid #e5e7eb;
-  /* subtle border */
   border-radius: 15px;
   padding: 20px 28px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
@@ -32,9 +31,69 @@
   flex-wrap: wrap;
   gap: 10px;
   height: 120px;
+  width: 120px;
   border-radius: 12px;
-  /* square avatar */
   margin-right: 15px;
+  object-fit: cover;
+}
+
+/* Rounded variant for investor avatar */
+.investor-card .avatar.avatar--round img {
+  border-radius: 50%;
+}
+
+/* Investor-specific layout refinements */
+.investor-card .card-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto; /* avatar+text | metrics | actions */
+  align-items: center;
+  gap: 28px; /* breathing room */
+}
+
+.investor-card .startup-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Slightly smaller avatar for investors */
+.investor-card .avatar.avatar--round img {
+  width: 76px; /* slight increase for visual balance */
+  height: 76px;
+  object-fit: cover;
+}
+
+/* Keep mentor stats horizontally aligned rather than stacked for investor card */
+.investor-card .mentor-info {
+  flex-direction: row; /* horizontal metrics inline */
+  gap: 32px;
+  align-items: center;
+}
+
+/* Ensure buttons align to stats block baseline */
+.investor-card .card-actions {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+/* Place metrics and actions side-by-side inside header */
+.investor-card .connect {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 36px;
+}
+
+/* Ensure text block does not stretch excessively */
+.investor-card .text-info {
+  min-width: 180px;
+}
+
+/* Description / loading text left aligned consistently */
+.investor-card .card-body .description,
+.investor-card.loading p {
+  text-align: left;
 }
 
 .text-info {
