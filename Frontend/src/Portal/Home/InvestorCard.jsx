@@ -3,7 +3,7 @@ import mentorship from '../../assets/Portal/StartupCard/mentorship.png';
 import active from '../../assets/Portal/StartupCard/active.png';
 import './StartupCard.css';
 import { getInvestorById } from '../../services/investorApi.js';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const placeholderAvatar = "https://ui-avatars.com/api/?name=N+A&background=e9ecef&color=495057&bold=true&size=60";
 
@@ -18,6 +18,7 @@ const defaultInvestorData = {
 };
 
 const InvestorCard = ({ investorId, initialUsername }) => {
+  const navigate = useNavigate();
   const [investorData, setInvestorData] = useState({
     ...defaultInvestorData,
     name: initialUsername || "Investor",
@@ -153,7 +154,7 @@ const InvestorCard = ({ investorId, initialUsername }) => {
             </div>
           </div>
           <div className="card-actions">
-            <button className="connect-button">Connect</button>
+            <button className="connect-button" onClick={() => navigate(correctProfileUrl)}>Connect</button>
             <button className="request-button">Request a Meeting</button>
           </div>
         </div>

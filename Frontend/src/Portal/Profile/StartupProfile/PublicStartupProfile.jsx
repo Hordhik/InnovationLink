@@ -8,11 +8,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getPublicProfile } from '../../../services/startupProfileApi';
+import { getConnectionStatus, sendConnectionRequest } from '../../../services/connectionApi';
 import StartupProfileHeader from './StartupProfileHeader'; // Reusing your header
 import PublicStartupDock from './PublicStartupDock'; // Using our new dock component
 import './PublicStartupProfile.css'; // Public-specific overrides and imports the shared StartupProfile.css
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import TeamMemberModal from './TeamMemberModal';
+import userIcon from '../../../assets/Portal/user.svg';
 
 // Re-using the team rendering logic from StartupProfileView.jsx
 const TeamSection = ({ team, onMemberClick }) => {
@@ -66,6 +68,7 @@ const PublicStartupProfile = () => {
     const [team, setTeam] = useState([]);
     const [dockFiles, setDockFiles] = useState({ pitch: [], demo: [], patent: [] });
     const [focusedMemberIndex, setFocusedMemberIndex] = useState(null);
+    const [connectionStatus, setConnectionStatus] = useState({ status: 'none', role: 'none' });
 
     useEffect(() => {
         const loadData = async () => {
@@ -84,6 +87,16 @@ const PublicStartupProfile = () => {
                 setTeam(data.team);
                 setDockFiles(data.dockFiles || { pitch: [], demo: [], patent: [] });
 
+                // Check connection status
+                if (data.profile.userId) {
+                    try {
+                        const statusData = await getConnectionStatus(data.profile.userId);
+                        setConnectionStatus(statusData);
+                    } catch (connErr) {
+                        console.error("Failed to check connection status:", connErr);
+                    }
+                }
+
             } catch (err) {
                 console.error("Failed to load public profile:", err);
                 setError(err.response?.data?.message || err.message || 'Could not load startup profile.');
@@ -93,6 +106,54 @@ const PublicStartupProfile = () => {
         };
         loadData();
     }, [username]);
+
+    const handleConnect = async () => {
+        try {
+            await sendConnectionRequest(profileData.userId);
+            setConnectionStatus({ status: 'pending', role: 'sender' });
+            alert('Connection request sent!');
+        } catch (err) {
+            alert(err.response?.data?.message || 'Failed to send request');
+        }
+    };
+
+    const renderConnectButton = () => {
+        const prefix = `/${(window.location.pathname.split('/')[1] || 'I')}`;
+
+        if (connectionStatus.status === 'accepted') {
+            return (
+                <button
+                    className="connect-btn"
+                    onClick={() =>
+                        navigate(`${prefix}/inbox`, {
+                            state: {
+                                initialChat: {
+                                    username: profileData.username,
+                                    companyName: profileData.company_name,
+                                },
+                            },
+                        })
+                    }
+                >
+                    <img src={userIcon} alt="" />Message
+                </button>
+            );
+        }
+        if (connectionStatus.status === 'pending') {
+            if (connectionStatus.role === 'sender') {
+                return <button className="connect-btn" disabled><img src={userIcon} alt="" />Request Sent</button>;
+            }
+            return <button className="connect-btn" disabled><img src={userIcon} alt="" />Pending Request</button>;
+        }
+        if (connectionStatus.status === 'blocked') {
+            return null;
+        }
+        return (
+            <button className="connect-btn" onClick={handleConnect}>
+                <img src={userIcon} alt="" />Connect
+            </button>
+        );
+    };
 
     if (loading) {
         return <div className="public-profile-layout"><p>Loading profile...</p></div>;
@@ -127,17 +188,7 @@ const PublicStartupProfile = () => {
                         isEditing={false}
                         editStateProps={{}} // Pass empty object as it's not in edit mode
                         publicView={true}
-                        onConnect={() => {
-                            const prefix = `/${(window.location.pathname.split('/')[1] || 'I')}`;
-                            navigate(`${prefix}/inbox`, {
-                                state: {
-                                    initialChat: {
-                                        username: headerData?.username,
-                                        companyName: headerData?.name,
-                                    },
-                                },
-                            });
-                        }}
+                        customConnectButton={renderConnectButton()}
                     />
 
                     {/* 2. Public Startup Dock (New Component) */}

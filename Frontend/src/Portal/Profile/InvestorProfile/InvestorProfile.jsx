@@ -310,6 +310,17 @@ export default function InvestorProfile() {
     };
   }, [forceProfileViewPending, applyInvestorSnapshot, location.pathname, navigate]);
 
+  useEffect(() => {
+    if (location.hash === '#connections') {
+      const el = document.getElementById('connected-startups-section');
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }, 500);
+      }
+    }
+  }, [location]);
+
   const persistProfile = async (partialUpdate, { context = 'profile', successMessage } = {}) => {
     setIsSaving(true);
     if (context === 'profile') {
@@ -452,6 +463,11 @@ export default function InvestorProfile() {
     navigate(`/${roleSegment}/profile`, { replace: true, state: { forceProfileView: true } });
   };
 
+  const scrollToConnections = () => {
+    const el = document.getElementById('connected-startups-section');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
   if (loading) {
     return (
       <div className="investor-profile-page">
@@ -493,7 +509,7 @@ export default function InvestorProfile() {
       )}
 
       <div className="investor-row">
-        <InvestorCard data={investorData} onClick={handleOpenHeader} />
+        <InvestorCard data={investorData} onClick={handleOpenHeader} onMyConnectionsClick={scrollToConnections} />
         <AboutSection about={investorData.about || ''} name={investorData.name || 'You'} onClick={handleOpenDesc} />
         <ExpertiseSection expertise={investorData.expertise || []} onClick={handleOpenExpertise} />
       </div>
@@ -504,7 +520,7 @@ export default function InvestorProfile() {
         <StageFocus stages={investorData.stages || []} onClick={handleOpenStage} />
       </div>
 
-      <div className="investor-row full-width">
+      <div className="investor-row full-width" id="connected-startups-section">
         <ConnectedStartups startups={investorData.startups || []} />
       </div>
 

@@ -4,7 +4,7 @@ import './StartupProfile.css';
 import userIcon from '../../../assets/Portal/user.svg';
 import feedbackIcon from '../../../assets/Portal/feedback.png';
 
-const StartupProfileHeader = ({ profileData, isEditing, editStateProps, publicView = false, onConnect }) => {
+const StartupProfileHeader = ({ profileData, isEditing, editStateProps, publicView = false, onConnect, customConnectButton }) => {
   const p = editStateProps || {};
   p.fileInputRef = p.fileInputRef || { current: null };
   const [showReadMore, setShowReadMore] = useState(false);
@@ -108,12 +108,14 @@ const StartupProfileHeader = ({ profileData, isEditing, editStateProps, publicVi
           </div>
           <div className="left-actions big" style={{ marginTop: 6 }}>
             <button className="feedback"><img src={feedbackIcon} alt="" />FeedBack</button>
-            <button
-              className="connect-btn"
-              onClick={typeof onConnect === 'function' ? () => onConnect(profileData) : undefined}
-            >
-              <img src={userIcon} alt="" />Connect
-            </button>
+            {customConnectButton ? customConnectButton : (
+              <button
+                className="connect-btn"
+                onClick={typeof onConnect === 'function' ? () => onConnect(profileData) : undefined}
+              >
+                <img src={userIcon} alt="" />Connect
+              </button>
+            )}
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 // File: StartupProfileView.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './StartupProfile.css';
 import { Document, Page, pdfjs } from 'react-pdf';
 import workerSrc from 'pdfjs-dist/legacy/build/pdf.worker.mjs?url';
@@ -14,6 +14,7 @@ import feedback from '../../../assets/Portal/feedback.png';
 // -----------------------------------------------------------------
 import * as startupDockApi from '../../../services/startupDockApi.js';
 import { getToken } from '../../../auth.js'; // Need this for file URLs
+import ConnectedInvestors from './ConnectedInvestors';
 
 // Helper function to read file as Data URI
 const fileToDataUrl = (file) =>
@@ -246,6 +247,7 @@ export function EditModal({ open, title, children, onSave, onCancel, initialFocu
 /* ------------------------- StartupProfileView (main UI) ------------------------- */
 export default function StartupProfileView({ profileData = {}, isEditing, editStateProps }) {
   const navigate = useNavigate();
+  const location = useLocation();
   //  🔧  REMOVED OLD LOCAL FILE STATES
 
   const { onStartEdit, edit, setEdit, addTeamMember, openMember } = editStateProps || {};
@@ -273,6 +275,17 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
     loadDockFiles();
   }, []);
 
+  useEffect(() => {
+    if (location.hash === '#connections') {
+      const el = document.getElementById('connected-investors-section');
+      if (el) {
+        // Small timeout to ensure rendering
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }, 500);
+      }
+    }
+  }, [location]);
 
   //  🔧  REMOVED OLD LOCAL savePitch, savePatent, saveDemo functions
 
@@ -356,9 +369,9 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
           <div className="spv-actions">
             <button className="feedback"><img src={feedback} alt="" />FeedBack</button>
             <button className="connect-btn" onClick={() => {
-              const prefix = `/${(window.location.pathname.split('/')[1] || 'S')}`;
-              navigate(`${prefix}/connections`);
-            }}>My Connections</button>
+              const el = document.getElementById('connected-investors-section');
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }}><img src={user} alt="" />My Connections</button>
           </div>
         </div>
         { /* DESCRIPTION */}
@@ -437,6 +450,12 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
       { /* --- Market Analysis / GTM / Achievements --- */}
       <div className="more">
         { /* 🚀  STARTUP DOCK */}
+
+        {/* --- Connected Investors --- */}
+        <div className="card connected-investors-section" id="connected-investors-section" style={{ marginBottom: '1rem' }}>
+          <ConnectedInvestors />
+        </div>
+
         { /* Achievements */}
         <div className="card achievements">
           <div className="ach-header">

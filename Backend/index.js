@@ -11,6 +11,8 @@ const teamRoutes = require('./routes/teamRoutes');
 const postRoutes = require('./routes/postRoutes');
 const startupDockRoutes = require('./routes/startupDockRoutes');
 const investorRoutes = require('./routes/investorRoutes'); // ✅ Make sure this is included
+const connectionRoutes = require('./routes/connectionRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 // Fallback direct import for public investor route if router not registering
 const { getInvestorPublicProfile } = require('./controllers/investorController');
 
@@ -25,6 +27,8 @@ const StartupProfile = require('./models/startupProfileModel');
 const Team = require('./models/teamModel');
 const Post = require('./models/postModel');
 const StartupDock = require('./models/startupDockModel');
+const Connection = require('./models/connectionModel');
+const Notification = require('./models/notificationModel');
 
 // Allow multiple local frontend origins during development. Prefer FRONTEND_URL env var when set.
 const frontendDefault = process.env.FRONTEND_URL || 'http://localhost:5173';
@@ -58,6 +62,8 @@ async function initDb() {
     await Team.init();
     await Post.init();
     await StartupDock.init();
+    await Connection.init();
+    await Notification.init();
     console.log("Database tables initialized successfully.");
   } catch (error) {
     console.error("Error initializing database tables:", error);
@@ -78,6 +84,8 @@ app.use('/api/posts', postRoutes);
 app.use('/api/startup-dock', startupDockRoutes);
 // Temporary explicit public route (diagnostic) before mounting router
 app.use('/api/investors', investorRoutes); // ✅ Ensure investor routes are mounted
+app.use('/api/connections', connectionRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Centralized error handler - MUST be last middleware
 app.use(errorHandler);

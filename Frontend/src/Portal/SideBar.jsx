@@ -22,25 +22,25 @@ const SideBar = () => {
   const navigate = useNavigate();
   const location = useLocation(); // Already here, which is perfect
   const [hoveredItem, setHoveredItem] = useState(null);
-  
+
   // Extract userType from URL (e.g., /S/home -> S)
   const [userType] = location.pathname.split('/').slice(1, 2);
   const safeUserType = userType || 'S';
 
   const mainItems = [
-  { name: 'Home', img1: home,img2: home2, path: `/${safeUserType}/home` },
-  { name: 'Schedules', img1: schedules,img2: schedules2, path: `/${safeUserType}/schedules` },
-  { name: 'Inbox', img1: inbox,img2: inbox2, path: `/${safeUserType}/inbox` },
-  { name: 'Blogs', img1: blogs,img2: blogs2, path: `/${safeUserType}/blogs` },
-  { name: 'Events', img1: events,img2: events2, path: `/${safeUserType}/events` },
-  { name: 'Profile', img1: profile,img2: profile2, path: `/${safeUserType}/profile` },
+    { name: 'Home', img1: home, img2: home2, path: `/${safeUserType}/home` },
+    { name: 'Schedules', img1: schedules, img2: schedules2, path: `/${safeUserType}/schedules` },
+    { name: 'Inbox', img1: inbox, img2: inbox2, path: `/${safeUserType}/inbox` },
+    { name: 'Blogs', img1: blogs, img2: blogs2, path: `/${safeUserType}/blogs` },
+    { name: 'Events', img1: events, img2: events2, path: `/${safeUserType}/events` },
+    { name: 'Profile', img1: profile, img2: profile2, path: `/${safeUserType}/profile` },
   ];
 
   const essentialItems = [
     // Your paths are already dynamic, which is great
-  { name: 'Notifications', img: notifications, path: `/${safeUserType}/notifications` },
-  { name: 'Support Tickets', img: support, path: `/${safeUserType}/support-tickets` },
-  { name: 'Settings', img: settings, path: `/${safeUserType}/settings` },
+    { name: 'Notifications', img: notifications, path: `/${safeUserType}/notifications` },
+    { name: 'Support Tickets', img: support, path: `/${safeUserType}/support-tickets` },
+    { name: 'Settings', img: settings, path: `/${safeUserType}/settings` },
   ];
 
   const handleItemClick = (path) => {
@@ -65,8 +65,8 @@ const SideBar = () => {
               const isHovered = hoveredItem === item.name;
               const shouldShowImg2 = isActive || isHovered;
               return (
-                <div 
-                  className={`main-item ${isActive ? 'active' : ''}`} 
+                <div
+                  className={`main-item ${isActive ? 'active' : ''}`}
                   key={item.name}
                   onClick={() => handleItemClick(item.path)}
                   onMouseEnter={() => handleMouseEnter(item.name)}
@@ -86,7 +86,7 @@ const SideBar = () => {
         <div className="essential-items">
           {essentialItems.map((item) => {
             const isActive = location.pathname === item.path;
-            
+
             // --- This is the new logic ---
             // If it's the Notifications item, handle toggle behavior
             if (item.name === 'Notifications') {
@@ -117,8 +117,8 @@ const SideBar = () => {
 
             // Otherwise (for Support Tickets, Settings), render the normal div
             return (
-              <div 
-                className={`essential-item ${isActive ? 'active' : ''}`} 
+              <div
+                className={`essential-item ${isActive ? 'active' : ''}`}
                 key={item.name}
                 onClick={() => handleItemClick(item.path)}
                 style={{ cursor: 'pointer' }}
