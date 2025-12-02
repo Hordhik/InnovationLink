@@ -2,11 +2,17 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getInvestorByUsername } from "../../../services/investorApi";
 import { getConnectionStatus, sendConnectionRequest } from "../../../services/connectionApi";
-// import "./PublicInvestorProfile.css";
+import { Mail, Twitter, Linkedin, Briefcase } from 'lucide-react';
+
+import AboutSection from './AboutSection.jsx';
+import ExpertiseSection from './ExpertiseSection.jsx';
+import InvestLike from './InvestLike.jsx';
+import SectorsInterested from './SectorsInterested.jsx';
+import StageFocus from './StageFocus.jsx';
 
 import mentorship from "../../../assets/Portal/StartupCard/mentorship.png";
 import active from "../../../assets/Portal/StartupCard/active.png";
-import "./InvestorProfile.css"
+import "./InvestorProfile.css";
 
 const PublicInvestorProfile = () => {
   const { username } = useParams();
@@ -69,7 +75,7 @@ const PublicInvestorProfile = () => {
     if (connectionStatus.status === 'accepted') {
       return (
         <button
-          className="connect-btn"
+          className="btn-meet"
           onClick={() =>
             navigate(`${portalPrefix}/inbox`, {
               state: {
@@ -87,27 +93,27 @@ const PublicInvestorProfile = () => {
     }
     if (connectionStatus.status === 'pending') {
       if (connectionStatus.role === 'sender') {
-        return <button className="connect-btn" disabled>Request Sent</button>;
+        return <button className="btn-connect" disabled>Request Sent</button>;
       }
-      return <button className="connect-btn" disabled>Pending Request</button>;
+      return <button className="btn-connect" disabled>Pending Request</button>;
     }
     if (connectionStatus.status === 'blocked') {
       return null;
     }
     return (
-      <button className="connect-btn" onClick={handleConnect}>
+      <button className="btn-connect" onClick={handleConnect}>
         Connect
       </button>
     );
   };
 
   if (loading) {
-    return <div className="public-investor-layout">Loading profile…</div>;
+    return <div className="investor-profile-page">Loading profile…</div>;
   }
 
   if (error) {
     return (
-      <div className="public-investor-layout" style={{ color: "red" }}>
+      <div className="investor-profile-page" style={{ color: "red" }}>
         {error}
       </div>
     );
@@ -115,7 +121,7 @@ const PublicInvestorProfile = () => {
 
   if (!investor) {
     return (
-      <div className="public-investor-layout">Investor not found.</div>
+      <div className="investor-profile-page">Investor not found.</div>
     );
   }
 
@@ -126,130 +132,141 @@ const PublicInvestorProfile = () => {
     )}&background=0D8ABC&color=fff`;
 
   return (
-    <div className="public-investor-layout piv-root">
+    <div className="investor-profile-page">
 
-      {/* HEADER */}
-      <div className="piv-header card">
-        <div className="piv-header-left">
-          <img src={avatar} alt={investor.name} className="piv-avatar" />
-          <div>
-            <h2 className="piv-name">{investor.name}</h2>
-            <p className="piv-title">{investor.title}</p>
-            <p className="piv-location">{investor.location}</p>
-          </div>
-        </div>
-
-        <div className="piv-header-right">
-          {renderConnectButton()}
-        </div>
-      </div>
-
-      {/* STATS */}
-      <div className="piv-stats-row">
-        <div className="card piv-stat">
-          <img src={mentorship} alt="" className="piv-stat-icon" />
-          <p><strong>{investor.mentoredCount || 0}</strong></p>
-          <p>Startups Mentored</p>
-        </div>
-
-        <div className="card piv-stat">
-          <img src={active} alt="" className="piv-stat-icon" />
-          <p><strong>{investor.investmentsCount || 0}</strong></p>
-          <p>Active Investments</p>
-        </div>
-      </div>
-
-      {/* ABOUT */}
-      <div className="card piv-about">
-        <div className="card-title">About</div>
-        <p className="piv-about-text">{investor.about || "No details provided."}</p>
-      </div>
-
-      {/* Expertise */}
-      <div className="card piv-tags-card">
-        <div className="card-title">Expertise</div>
-        <div className="piv-tags">
-          {(investor.expertise || []).map((t, i) => (
-            <span key={i} className="tag">{t}</span>
-          ))}
-        </div>
-      </div>
-
-      {/* Sectors */}
-      <div className="card piv-tags-card">
-        <div className="card-title">Sectors Interested</div>
-        <div className="piv-tags">
-          {(investor.sectors || []).map((t, i) => (
-            <span key={i} className="tag">{t}</span>
-          ))}
-        </div>
-      </div>
-
-      {/* Stages */}
-      <div className="card piv-tags-card">
-        <div className="card-title">Stage Focus</div>
-        <div className="piv-tags">
-          {(investor.stages || []).map((t, i) => (
-            <span key={i} className="tag">{t}</span>
-          ))}
-        </div>
-      </div>
-
-      {/* INVESTMENT THESIS */}
-      <div className="card piv-about">
-        <div className="card-title">Investment Thesis</div>
-        <p className="piv-about-text">{investor.investLike || "No thesis provided."}</p>
-      </div>
-
-      {/* CONNECTED STARTUPS */}
-      <div className="card piv-startups">
-        <div className="card-title">Connected Startups</div>
-        <div className="piv-startup-grid">
-          {(investor.startups || []).map((s, i) => (
-            <div key={i} className="piv-startup-card">
-              <p className="piv-startup-name">{s.name}</p>
-              <p className="piv-startup-founder">{s.founder}</p>
-              <div className="piv-tags">
-                {(s.tags || []).map((t, idx) => (
-                  <span key={idx} className="tag">{t}</span>
-                ))}
+      {/* ROW 1: Card, About, Expertise */}
+      <div className="investor-row">
+        {/* Inline Investor Card */}
+        <div className="card investor-card">
+          <div className="investor-card-header">
+            <img src={avatar} alt={investor.name} className="investor-avatar" />
+            <div className="investor-card-info">
+              <h2>{investor.name}</h2>
+              <p className="investor-role">
+                <Briefcase size={14} /> {investor.title} | {investor.location}
+              </p>
+              <div className="investor-social">
+                <Mail size={20} />
+                <Twitter size={20} />
+                <Linkedin size={20} />
               </div>
             </div>
-          ))}
+          </div>
+          <div className="investor-actions">
+            <button className="btn-meet">Request A Meet</button>
+            {renderConnectButton()}
+          </div>
+        </div>
+
+        <AboutSection
+          about={investor.about || "No details provided."}
+          name={investor.name}
+          onClick={() => { }} // No-op for public view
+        />
+
+        <ExpertiseSection
+          expertise={investor.expertise || []}
+          onClick={() => { }} // No-op
+        />
+      </div>
+
+      {/* ROW 2: InvestLike, Sectors, Stages */}
+      <div className="investor-row">
+        <InvestLike
+          description={investor.investLike || "No thesis provided."}
+          onClick={() => { }}
+        />
+        <SectorsInterested
+          sectors={investor.sectors || []}
+          onClick={() => { }}
+        />
+        <StageFocus
+          stages={investor.stages || []}
+          onClick={() => { }}
+        />
+      </div>
+
+      {/* ROW 3: Connected Startups */}
+      <div className="investor-row full-width">
+        <div className="card connected-startups">
+          <div className="header-row">
+            <h3>Connected Startups</h3>
+          </div>
+          <div className="startup-list">
+            {(investor.startups || []).length === 0 ? (
+              <p className="empty-text">No connected startups visible.</p>
+            ) : (
+              (investor.startups || []).slice(0, 3).map((s, i) => (
+                <div key={i} className="startup-card">
+                  <img
+                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=random`}
+                    alt={s.name}
+                    className="startup-logo"
+                  />
+                  <div className="startup-info">
+                    <h4>{s.name}</h4>
+                    <p className="founder">{s.founder}</p>
+                    <div className="tags">
+                      {(s.tags || []).slice(0, 2).map((t, idx) => (
+                        <span key={idx} className="tag-mini">{t}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
 
-      {/* ACHIEVEMENTS */}
-      <div className="card piv-achievements">
-        <div className="card-title">Achievements</div>
-        <div className="piv-ach-grid">
-          {[
-            { title: "Angel Network Summit", date: "2024", outcome: "Top Mentor Award" },
-            { title: "SeedStars Jury", date: "2023", outcome: "Jury Speaker" },
-          ].map((a, i) => (
-            <div className="ach-item" key={i}>
-              <p className="ach-title">{a.title}</p>
-              <p className="ach-outcome">{a.outcome}</p>
-              <p className="ach-date">{a.date}</p>
+      {/* ROW 4: Stats & Achievements (Custom for Public View) */}
+      <div className="investor-row">
+        <div className="card">
+          <h3>Impact Stats</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', height: '100%' }}>
+            <div style={{ textAlign: 'center' }}>
+              <img src={mentorship} alt="" style={{ width: 40, marginBottom: 10 }} />
+              <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>{investor.mentoredCount || 0}</p>
+              <p style={{ fontSize: '0.9rem' }}>Startups Mentored</p>
             </div>
-          ))}
+            <div style={{ textAlign: 'center' }}>
+              <img src={active} alt="" style={{ width: 40, marginBottom: 10 }} />
+              <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>{investor.investmentsCount || 0}</p>
+              <p style={{ fontSize: '0.9rem' }}>Active Investments</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <h3>Achievements</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {[
+              { title: "Angel Network Summit", date: "2024", outcome: "Top Mentor Award" },
+              { title: "SeedStars Jury", date: "2023", outcome: "Jury Speaker" },
+            ].map((a, i) => (
+              <div key={i} style={{ paddingBottom: '0.5rem', borderBottom: i === 0 ? '1px solid #f3f4f6' : 'none' }}>
+                <p style={{ fontWeight: 600, color: '#1f2937' }}>{a.title}</p>
+                <p style={{ fontSize: '0.85rem', color: '#4b5563' }}>{a.outcome} • {a.date}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="card">
+          <h3>Recent Posts</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ paddingBottom: '0.5rem', borderBottom: '1px solid #f3f4f6' }}>
+              <p style={{ fontWeight: 600, color: '#1f2937' }}>Why Early-Stage Mentorship Matters</p>
+              <p style={{ fontSize: '0.85rem', color: '#6b7280' }}>Jan 2025 • Investing</p>
+            </div>
+            <div>
+              <p style={{ fontWeight: 600, color: '#1f2937' }}>Picking Founders, Not Ideas</p>
+              <p style={{ fontSize: '0.85rem', color: '#6b7280' }}>Dec 2024 • Insight</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* BLOGS */}
-      <div className="card piv-blogs">
-        <div className="card-title">Recent Posts</div>
-        <div className="blog-grid">
-          <div className="blog-card">
-            <p className="blog-title">Why Early-Stage Mentorship Matters</p>
-            <p className="blog-meta">Jan 2025 • Investing</p>
-          </div>
-          <div className="blog-card">
-            <p className="blog-title">Picking Founders, Not Ideas</p>
-            <p className="blog-meta">Dec 2024 • Insight</p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
