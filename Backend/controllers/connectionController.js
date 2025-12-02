@@ -169,7 +169,38 @@ exports.blockUser = async (req, res) => {
 
 exports.getConnections = async (req, res) => {
     try {
-        const connections = await Connection.getConnections(req.user.id);
+        const rawConnections = await Connection.getConnections(req.user.id);
+
+        const connections = rawConnections.map(conn => {
+            const out = { ...conn };
+            if (out.image) {
+                console.log(`[DEBUG] Connection ${out.username} (${out.userType}): image type=${typeof out.image}, isBuffer=${Buffer.isBuffer(out.image)}`);
+                if (typeof out.image === 'string') {
+                    console.log(`[DEBUG] Image string prefix: ${out.image.substring(0, 50)}`);
+                } else if (Buffer.isBuffer(out.image)) {
+                    console.log(`[DEBUG] Image buffer length: ${out.image.length}`);
+                }
+            }
+
+            if (out.image && Buffer.isBuffer(out.image)) {
+                if (out.userType === 'investor') {
+                    // Investor images are stored as Base64 strings but returned as Buffers
+                    out.image = out.image.toString('utf8');
+                } else {
+                    // Startup logos are stored as BLOBs (binary)
+                    try {
+                        const b64 = out.image.toString('base64');
+                        const mime = out.image_mime || 'application/octet-stream';
+                        out.image = `data:${mime};base64,${b64}`;
+                    } catch (e) {
+                        console.error('Failed to convert connection image buffer:', e);
+                        out.image = null;
+                    }
+                }
+            }
+            return out;
+        });
+
         res.status(200).json({ connections });
     } catch (error) {
         console.error('Get Connections Error:', error);
@@ -179,7 +210,27 @@ exports.getConnections = async (req, res) => {
 
 exports.getPendingRequests = async (req, res) => {
     try {
-        const requests = await Connection.getPendingRequests(req.user.id);
+        const rawRequests = await Connection.getPendingRequests(req.user.id);
+
+        const requests = rawRequests.map(req => {
+            const out = { ...req };
+            if (out.image && Buffer.isBuffer(out.image)) {
+                if (out.userType === 'investor') {
+                    out.image = out.image.toString('utf8');
+                } else {
+                    try {
+                        const b64 = out.image.toString('base64');
+                        const mime = out.image_mime || 'application/octet-stream';
+                        out.image = `data:${mime};base64,${b64}`;
+                    } catch (e) {
+                        console.error('Failed to convert request image buffer:', e);
+                        out.image = null;
+                    }
+                }
+            }
+            return out;
+        });
+
         res.status(200).json({ requests });
     } catch (error) {
         console.error('Get Pending Requests Error:', error);

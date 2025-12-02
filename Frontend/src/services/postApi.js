@@ -85,12 +85,12 @@ export const getPostById = async (postId) => {
  * @param {object} updatedData - The updated fields (title, subtitle, content, tags, etc.)
  */
 export const updatePost = async (postId, updatedData) => {
-  const response = await fetch(`${BASE_URL}/${postId}`, {
-    method: 'PUT',
-    headers: getAuthHeaders(), // Requires Auth
-    body: JSON.stringify(updatedData),
-  });
-  return handleResponse(response);
+    const response = await fetch(`${BASE_URL}/${postId}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(), // Requires Auth
+        body: JSON.stringify(updatedData),
+    });
+    return handleResponse(response);
 };
 
 /**
@@ -98,11 +98,21 @@ export const updatePost = async (postId, updatedData) => {
  * @param {string} postId - The ID of the post
  */
 export const deletePost = async (postId) => {
-  const response = await fetch(`${BASE_URL}/${postId}`, {
-    method: 'DELETE',
-    headers: getAuthHeaders(), // Requires Auth
-  });
-  return handleResponse(response);
+    const response = await fetch(`${BASE_URL}/${postId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(), // Requires Auth
+    });
+    return handleResponse(response);
 };
 
-
+/**
+ * Fetches posts by a specific user ID.
+ * @param {string} userId - The ID of the user
+ */
+export const getPostsByUserId = async (userId) => {
+    const response = await fetch(`${BASE_URL}/user/${userId}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+    });
+    return handleResponse(response);
+};

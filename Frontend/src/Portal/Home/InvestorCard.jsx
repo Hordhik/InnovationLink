@@ -9,12 +9,13 @@ const placeholderAvatar = "https://ui-avatars.com/api/?name=N+A&background=e9ece
 
 const defaultInvestorData = {
   name: "Loading...",
-  title: "Investor Title Placeholder",
+  title: "",
   mentoredCount: 0,
   investmentsCount: 0,
-  thesis: "Loading details...",
+  thesis: "",
   tags: [],
   initials: "...",
+  image: null,
 };
 
 const InvestorCard = ({ investorId, initialUsername, isConnected }) => {
@@ -44,9 +45,10 @@ const InvestorCard = ({ investorId, initialUsername, isConnected }) => {
       setError(null);
       try {
         const response = await getInvestorById(investorId);
-        console.log(`Fetched details for ID ${investorId}:`, response);
+        console.log(`[InvestorCard] Fetched details for ID ${investorId}:`, response);
 
-        if (!response.investor) {
+        if (!response || !response.investor) {
+          console.error(`[InvestorCard] Invalid response for ID ${investorId}:`, response);
           throw new Error("Investor details not found.");
         }
 
@@ -77,7 +79,9 @@ const InvestorCard = ({ investorId, initialUsername, isConnected }) => {
           mentoredCount: response.investor.mentoredCount ?? defaultInvestorData.mentoredCount,
           investmentsCount: response.investor.investmentsCount ?? defaultInvestorData.investmentsCount,
           thesis: aboutText,
+          thesis: aboutText,
           tags: aggregateTags.length ? aggregateTags : defaultInvestorData.tags,
+          image: response.investor.image || null,
         });
 
       } catch (err) {
@@ -104,7 +108,7 @@ const InvestorCard = ({ investorId, initialUsername, isConnected }) => {
   const displayThesis = investorData.thesis; // primary description (about or fallback)
   const displayTags = investorData.tags;
 
-  const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayInitials)}&background=e9ecef&color=495057&bold=true&size=60`;
+  const avatarUrl = investorData.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayInitials)}&background=e9ecef&color=495057&bold=true&size=60`;
 
   // Build correct route: "/I/home/investor/:username"
   const correctProfileUrl = `${portalPrefix}/home/investor/${displayName}`;
@@ -130,7 +134,7 @@ const InvestorCard = ({ investorId, initialUsername, isConnected }) => {
     <div className="investor-card">
       <div className="card-header">
         <div className="startup-info">
-          <div className="avatar avatar--round">
+          <div className="avatar">
             <img
               src={avatarUrl}
               alt={`${displayName} initials`}
@@ -139,7 +143,7 @@ const InvestorCard = ({ investorId, initialUsername, isConnected }) => {
           </div>
           <div className="text-info">
             <p className="startup-name">{displayName}</p>
-            <p className="founder-name">{displayTitle}</p>
+            <p className="founder-name">{displayTitle || 'Investor'}</p>
           </div>
         </div>
         <div className="connect">
@@ -166,8 +170,10 @@ const InvestorCard = ({ investorId, initialUsername, isConnected }) => {
         </div>
       </div>
       <div className="card-body">
-        {displayThesis && (
+        {displayThesis ? (
           <p className="description description--clamp">{displayThesis}</p>
+        ) : (
+          <p className="description description--clamp" style={{ fontStyle: 'italic', color: '#999' }}>No description provided.</p>
         )}
         <div className="tags">
           {displayTags.map((tag, index) => (

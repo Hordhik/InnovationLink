@@ -54,7 +54,9 @@ const formatInvestorProfile = (investorRow, userRow, { includeAccountFields = fa
         expertise: investorRow?.expertise ?? investorRow?.preferences?.expertise ?? [],
         sectors: investorRow?.sectors ?? investorRow?.preferences?.sectors ?? [],
         stages: investorRow?.stages ?? investorRow?.preferences?.stages ?? [],
-        image: investorRow?.profile_image ?? '',
+        image: (investorRow?.profile_image && Buffer.isBuffer(investorRow.profile_image))
+            ? investorRow.profile_image.toString('utf8')
+            : (investorRow?.profile_image ?? ''),
         linkedin: investorRow?.linkedin_url ?? '',
         twitter: investorRow?.twitter_url ?? '',
         contactEmail: investorRow?.contact_email ?? userRow.email ?? '',
