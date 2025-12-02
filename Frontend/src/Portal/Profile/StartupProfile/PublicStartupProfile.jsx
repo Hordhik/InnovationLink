@@ -1,37 +1,21 @@
-//
-// FILE: Frontend/src/components/Portal/Profile/PublicStartupProfile.jsx (New File)
-//
-// This is the new page component an investor sees.
-// It reuses your existing components like StartupProfileHeader.
-//
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getPublicProfile } from '../../../services/startupProfileApi';
 import { getConnectionStatus, sendConnectionRequest } from '../../../services/connectionApi';
-import StartupProfileHeader from './StartupProfileHeader'; // Reusing your header
-import PublicStartupDock from './PublicStartupDock'; // Using our new dock component
-import './PublicStartupProfile.css'; // Public-specific overrides and imports the shared StartupProfile.css
+import PublicStartupDock from './PublicStartupDock';
+import './PublicStartupProfile.css';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import TeamMemberModal from './TeamMemberModal';
 import userIcon from '../../../assets/Portal/user.svg';
+import feedbackIcon from '../../../assets/Portal/feedback.png';
 
 // Re-using the team rendering logic from StartupProfileView.jsx
 const TeamSection = ({ team, onMemberClick }) => {
-    if (!team || team.length === 0) {
-        return (
-            <div className="card spv-team">
-                <div className="card-title">Team</div>
-                <p style={{ padding: '0 16px 16px', color: '#6b7280' }}>No team members have been added yet.</p>
-            </div>
-        );
-    }
-
     return (
         <div className="card spv-team">
             <div className="card-title">Team</div>
             <div className="team-grid">
-                {team.map((m, idx) => (
+                {(team || []).map((m, idx) => (
                     <div
                         key={idx}
                         className="team-item"
@@ -53,12 +37,14 @@ const TeamSection = ({ team, onMemberClick }) => {
                         </div>
                     </div>
                 ))}
+                {(!team || team.length === 0) && (
+                    <p style={{ padding: '0 16px 16px', color: '#6b7280' }}>No team members visible.</p>
+                )}
             </div>
         </div>
     );
 };
 
-// Main Page Component
 const PublicStartupProfile = () => {
     const { username } = useParams();
     const navigate = useNavigate();
@@ -69,6 +55,7 @@ const PublicStartupProfile = () => {
     const [dockFiles, setDockFiles] = useState({ pitch: [], demo: [], patent: [] });
     const [focusedMemberIndex, setFocusedMemberIndex] = useState(null);
     const [connectionStatus, setConnectionStatus] = useState({ status: 'none', role: 'none' });
+    const [isAchievementsOpen, setAchievementsOpen] = useState(false);
 
     useEffect(() => {
         const loadData = async () => {
@@ -82,12 +69,10 @@ const PublicStartupProfile = () => {
                 setError('');
                 const data = await getPublicProfile(username);
 
-                // Set all data from the single API call
                 setProfileData(data.profile);
                 setTeam(data.team);
                 setDockFiles(data.dockFiles || { pitch: [], demo: [], patent: [] });
 
-                // Check connection status
                 if (data.profile.userId) {
                     try {
                         const statusData = await getConnectionStatus(data.profile.userId);
@@ -156,42 +141,63 @@ const PublicStartupProfile = () => {
     };
 
     if (loading) {
-        return <div className="public-profile-layout"><p>Loading profile...</p></div>;
+        return <div className="spv-root"><div style={{ padding: '2rem' }}>Loading profile...</div></div>;
     }
 
     if (error) {
-        return <div className="public-profile-layout"><p style={{ color: 'red' }}>Error: {error}</p></div>;
+        return <div className="spv-root"><div style={{ padding: '2rem', color: 'red' }}>Error: {error}</div></div>;
     }
 
     if (!profileData) {
-        return <div className="public-profile-layout"><p>Startup profile not found.</p></div>;
+        return <div className="spv-root"><div style={{ padding: '2rem' }}>Startup profile not found.</div></div>;
     }
-
-    // This data structure is what StartupProfileHeader expects
-    const headerData = {
-        name: profileData.company_name,
-        founder: profileData.founder,
-        description: profileData.description,
-        domain: profileData.domain,
-        logo: profileData.logo,
-        username: profileData.username
-        // We pass 'isEditing={false}' so no edit props are needed
-    };
 
     return (
         <>
-            <div className="public-profile-layout spv-root">
-                {/* 1. Header (reused) */}
+            <div className="spv-root public-profile-layout">
+                {/* 1. Top Grid: Header + Description + Dock */}
                 <div className="spv-topgrid">
-                    <StartupProfileHeader
-                        profileData={headerData}
-                        isEditing={false}
-                        editStateProps={{}} // Pass empty object as it's not in edit mode
-                        publicView={true}
-                        customConnectButton={renderConnectButton()}
-                    />
+                    {/* Header Card */}
+                    <div className="card spv-header">
+                        <div className='main-details'>
+                            <div className="spv-logo">
+                                {profileData.logo ? (
+                                    <img src={profileData.logo} alt="logo" />
+                                ) : (
+                                    <div className="spv-logo-placeholder">
+                                        {(profileData.company_name || '').split(' ').map(s => s[0]).slice(0, 2).join('')}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="spv-hmeta">
+                                <h2 className="spv-title">{profileData.company_name || '—'}</h2>
+                                <div className="spv-sub">
+                                    Founder: <strong>{profileData.founder || '—'}</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="spv-actions">
+                            <button className="feedback"><img src={feedbackIcon} alt="" />FeedBack</button>
+                            {renderConnectButton()}
+                        </div>
+                    </div>
 
-                    {/* 2. Public Startup Dock (New Component) */}
+                    {/* Description Card */}
+                    <div className="card spv-desc">
+                        <div className="card-title">Project Description</div>
+                        <div className="card-body">
+                            <p className="desc-text">{profileData.description || 'No description provided.'}</p>
+                        </div>
+                        <div className="spv-tags">
+                            {(String(profileData.domain || '')).split(',').filter(Boolean).slice(0, 3).map((t, i) => (
+                                <span key={i} className="chip">
+                                    {t.trim()}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Startup Dock */}
                     <div className="card startup-dock">
                         <div className="card-title">Startup Dock</div>
                         <div className="card-body" style={{ display: 'block', padding: '10px 16px' }}>
@@ -200,7 +206,7 @@ const PublicStartupProfile = () => {
                     </div>
                 </div>
 
-                {/* 2. Team Section (Reused layout) */}
+                {/* 2. Team + GTM */}
                 <div className="spv-row">
                     <TeamSection team={team} onMemberClick={(idx, isFounder) => setFocusedMemberIndex({ idx, isFounder })} />
                     <div className="card gtm">
@@ -213,13 +219,15 @@ const PublicStartupProfile = () => {
                     </div>
                 </div>
 
-                {/* More section: Achievements • Market Analysis • Recent Posts */}
+                {/* 3. More section: Connected Investors • Achievements • Market Analysis • Recent Posts */}
                 <div className="more">
+
+
                     {/* Achievements */}
                     <div className="card achievements">
                         <div className="ach-header">
                             <div className="card-title">Achievements</div>
-                            <button className="view-all-btn" disabled title="Read-only on public view">View All</button>
+                            <button className="view-all-btn" onClick={() => setAchievementsOpen(true)}>View All</button>
                         </div>
                         <div className="ach-grid">
                             {[
@@ -275,7 +283,7 @@ const PublicStartupProfile = () => {
                         <div className="card-title">Recent Posts</div>
                         <div className="card-body">
                             <div className="blog-grid">
-                                <div className='blog-card' style={{ cursor: 'pointer' }}>
+                                <div className='blog-card' style={{ cursor: 'pointer', borderBottom: '1px solid #e5e7eb', paddingBottom: '10px', marginBottom: '10px' }}>
                                     <p className='blog-title'>Deploying tiny ML to the field</p>
                                     <p className='blog-meta'>Jan 2025 • Tech</p>
                                 </div>
@@ -288,6 +296,7 @@ const PublicStartupProfile = () => {
                     </div>
                 </div>
             </div>
+
             <TeamMemberModal
                 focusedMemberIndex={focusedMemberIndex}
                 isEditing={false}
@@ -303,6 +312,36 @@ const PublicStartupProfile = () => {
                 openMember={() => { }}
                 readOnly={true}
             />
+
+            {isAchievementsOpen && (
+                <div className="epm-backdrop" onClick={() => setAchievementsOpen(false)}>
+                    <div className="epm-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="epm-header">
+                            <h3>All Achievements & Event Participation</h3>
+                            <button className="epm-close" onClick={() => setAchievementsOpen(false)}>✕</button>
+                        </div>
+                        <div className="epm-body">
+                            <div className="ach-modal-list">
+                                {[
+                                    { title: "Startup India Summit", date: "Sep 2024", outcome: "Top 10 Finalist", desc: "Recognized among top 10 national startups for healthcare innovation." },
+                                    { title: "Hack4Change 2024", date: "Jul 2024", outcome: "2nd Runner-up", desc: "Developed a data-driven donation matching app within 24 hours." },
+                                    { title: "TechForGood Expo", date: "Jan 2025", outcome: "Best Social Impact Pitch", desc: "Awarded for innovative AI-enabled accessibility tool for NGOs." },
+                                    { title: "AI Ignite Challenge", date: "Feb 2025", outcome: "Top 5 Teams", desc: "Built a predictive model that reduced logistics costs by 18%." }
+                                ].map((a, i) => (
+                                    <div key={i} className="ach-modal-item">
+                                        <h4>{a.title}</h4>
+                                        <p className="ach-date">{a.date} • <strong>{a.outcome}</strong></p>
+                                        <p className="ach-desc">{a.desc}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="epm-footer">
+                            <button className="epm-btn epm-cancel" onClick={() => setAchievementsOpen(false)}>Close</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 };

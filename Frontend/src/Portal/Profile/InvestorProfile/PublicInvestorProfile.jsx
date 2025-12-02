@@ -186,38 +186,7 @@ const PublicInvestorProfile = () => {
         />
       </div>
 
-      {/* ROW 3: Connected Startups */}
-      <div className="investor-row full-width">
-        <div className="card connected-startups">
-          <div className="header-row">
-            <h3>Connected Startups</h3>
-          </div>
-          <div className="startup-list">
-            {(investor.startups || []).length === 0 ? (
-              <p className="empty-text">No connected startups visible.</p>
-            ) : (
-              (investor.startups || []).slice(0, 3).map((s, i) => (
-                <div key={i} className="startup-card">
-                  <img
-                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=random`}
-                    alt={s.name}
-                    className="startup-logo"
-                  />
-                  <div className="startup-info">
-                    <h4>{s.name}</h4>
-                    <p className="founder">{s.founder}</p>
-                    <div className="tags">
-                      {(s.tags || []).slice(0, 2).map((t, idx) => (
-                        <span key={idx} className="tag-mini">{t}</span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
+
 
       {/* ROW 4: Stats & Achievements (Custom for Public View) */}
       <div className="investor-row">
