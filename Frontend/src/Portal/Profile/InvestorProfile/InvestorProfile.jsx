@@ -6,7 +6,7 @@ import ExpertiseSection from './ExpertiseSection.jsx';
 import InvestLike from './InvestLike.jsx';
 import SectorsInterested from './SectorsInterested.jsx';
 import StageFocus from './StageFocus.jsx';
-import ConnectedStartups from './ConnectedStartups.jsx';
+
 import InvestorForm from './InvestorForm.jsx';
 import './InvestorProfile.css';
 import { getMyInvestorProfile, saveMyInvestorProfile } from '../../../services/investorApi.js';
@@ -520,9 +520,7 @@ export default function InvestorProfile() {
         <StageFocus stages={investorData.stages || []} onClick={handleOpenStage} />
       </div>
 
-      <div className="investor-row full-width" id="connected-startups-section">
-        <ConnectedStartups startups={investorData.startups || []} />
-      </div>
+
 
       <EditModal
         open={isDescOpen}

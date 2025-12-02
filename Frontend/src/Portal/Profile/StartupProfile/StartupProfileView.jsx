@@ -16,7 +16,7 @@ import user from '../../../assets/Portal/user.svg';
 import * as startupDockApi from '../../../services/startupDockApi.js';
 import { getPostsByUserId } from '../../../services/postApi.js';
 import { getToken } from '../../../auth.js'; // Need this for file URLs
-import ConnectedInvestors from './ConnectedInvestors';
+
 
 // Helper function to read file as Data URI
 const fileToDataUrl = (file) =>
@@ -483,9 +483,7 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
         { /* 🚀  STARTUP DOCK */}
 
         {/* --- Connected Investors --- */}
-        <div className="card connected-investors-section" id="connected-investors-section" style={{ marginBottom: '1rem' }}>
-          <ConnectedInvestors />
-        </div>
+
 
         { /* Achievements */}
         <div className="card achievements">
