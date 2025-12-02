@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getPublicProfile } from '../../../services/startupProfileApi';
 import { getConnectionStatus, sendConnectionRequest } from '../../../services/connectionApi';
+import { getPostsByUserId } from '../../../services/postApi';
 import PublicStartupDock from './PublicStartupDock';
 import './PublicStartupProfile.css';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
@@ -56,6 +57,7 @@ const PublicStartupProfile = () => {
     const [focusedMemberIndex, setFocusedMemberIndex] = useState(null);
     const [connectionStatus, setConnectionStatus] = useState({ status: 'none', role: 'none' });
     const [isAchievementsOpen, setAchievementsOpen] = useState(false);
+    const [posts, setPosts] = useState([]);
 
     useEffect(() => {
         const loadData = async () => {
@@ -75,10 +77,14 @@ const PublicStartupProfile = () => {
 
                 if (data.profile.userId) {
                     try {
-                        const statusData = await getConnectionStatus(data.profile.userId);
+                        const [statusData, postsData] = await Promise.all([
+                            getConnectionStatus(data.profile.userId),
+                            getPostsByUserId(data.profile.userId).catch(() => ({ posts: [] }))
+                        ]);
                         setConnectionStatus(statusData);
+                        setPosts(postsData.posts || []);
                     } catch (connErr) {
-                        console.error("Failed to check connection status:", connErr);
+                        console.error("Failed to load additional data:", connErr);
                     }
                 }
 
@@ -282,16 +288,25 @@ const PublicStartupProfile = () => {
                     <div className="card spv-blogs">
                         <div className="card-title">Recent Posts</div>
                         <div className="card-body">
-                            <div className="blog-grid">
-                                <div className='blog-card' style={{ cursor: 'pointer', borderBottom: '1px solid #e5e7eb', paddingBottom: '10px', marginBottom: '10px' }}>
-                                    <p className='blog-title'>Deploying tiny ML to the field</p>
-                                    <p className='blog-meta'>Jan 2025 • Tech</p>
+                            {posts.length === 0 ? (
+                                <p style={{ color: '#6b7280', padding: '10px 0' }}>No posts yet.</p>
+                            ) : (
+                                <div className="blog-grid">
+                                    {posts.slice(0, 2).map((post) => (
+                                        <div
+                                            key={post.id}
+                                            className='blog-card'
+                                            style={{ cursor: 'pointer', borderBottom: '1px solid #e5e7eb', paddingBottom: '10px', marginBottom: '10px' }}
+                                            onClick={() => navigate(`/posts/${post.id}`)}
+                                        >
+                                            <p className='blog-title'>{post.title}</p>
+                                            <p className='blog-meta'>
+                                                {new Date(post.created_at).toLocaleDateString()} • {post.tags && post.tags[0] ? post.tags[0] : 'General'}
+                                            </p>
+                                        </div>
+                                    ))}
                                 </div>
-                                <div className='blog-card' style={{ cursor: 'pointer' }}>
-                                    <p className='blog-title'>Deploying tiny ML to the field</p>
-                                    <p className='blog-meta'>Jan 2025 • Tech</p>
-                                </div>
-                            </div>
+                            )}
                         </div>
                     </div>
                 </div>

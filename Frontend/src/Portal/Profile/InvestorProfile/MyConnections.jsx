@@ -1,39 +1,31 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../Connections.css";
-
-const dummyStartups = [
-  {
-    username: "agrobyte",
-    company_name: "AgroByte Labs",
-    founder: "Sameer R",
-    logo: "",
-  },
-  {
-    username: "aqua_sync",
-    company_name: "AquaSync IoT",
-    founder: "Jasmine T",
-    logo: "",
-  },
-  {
-    username: "fintegrix",
-    company_name: "Fintegrix",
-    founder: "Rahul Dev",
-    logo: "",
-  },
-];
+import { getConnections } from "../../../services/connectionApi";
 
 const InvestorConnections = () => {
   const [connections, setConnections] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const prefix = `/${window.location.pathname.split("/")[1] || "I"}`;
 
   useEffect(() => {
-    // simulate loading
-    setTimeout(() => {
-      setConnections(dummyStartups);
-    }, 500);
+    const fetchConnections = async () => {
+      try {
+        const data = await getConnections();
+        setConnections(data || []);
+      } catch (error) {
+        console.error("Failed to fetch connections:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchConnections();
   }, []);
+
+  if (loading) {
+    return <div className="connections-page"><p>Loading connections...</p></div>;
+  }
 
   return (
     <div className="connections-page">
@@ -43,11 +35,18 @@ const InvestorConnections = () => {
         <p className="empty-text">No connections yet.</p>
       ) : (
         <div className="connections-grid">
-          {connections.map((st, i) => {
+          {connections.map((conn, i) => {
+            // The API returns connection objects. We need the 'other' user.
+            // Assuming the API returns a list of users directly or connection objects with a 'connectedUser' field.
+            // Based on previous context, getConnections returns a list of connected users.
+            // Let's assume the structure matches what we need or adapt.
+            // If getConnections returns { connections: [...] }, and each item is a user object:
+
+            const st = conn; // Assuming conn is the user object
             const avatar =
               st.logo ||
               `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                st.company_name
+                st.company_name || st.username || 'Startup'
               )}&background=0D8ABC&color=fff`;
 
             return (
@@ -55,8 +54,8 @@ const InvestorConnections = () => {
                 <img src={avatar} className="conn-avatar" alt={st.company_name} />
 
                 <div className="conn-info">
-                  <p className="conn-name">{st.company_name}</p>
-                  <p className="conn-role">Founder: {st.founder}</p>
+                  <p className="conn-name">{st.company_name || st.username}</p>
+                  <p className="conn-role">Founder: {st.founder || '—'}</p>
                 </div>
 
                 <button

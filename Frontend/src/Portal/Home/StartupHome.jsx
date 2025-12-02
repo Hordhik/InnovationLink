@@ -6,12 +6,14 @@ import Filter from './Filter.jsx';             // Kept import
 
 // --- Added API import ---
 import { getAllInvestors } from '../../services/investorApi.js'; // Corrected path
+import { getConnections } from '../../services/connectionApi.js';
 
 // --- Dummy Details are NOT needed here, InvestorCard fetches/uses its own ---
 
 const StartupHome = () => {
   // --- State for fetched data (basic list), loading, error ---
   const [investorList, setInvestorList] = useState([]); // Stores { id, username }
+  const [connectedIds, setConnectedIds] = useState(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -22,15 +24,34 @@ const StartupHome = () => {
       setError(null);
       try {
         // Fetch only the list of IDs and usernames
-        const data = await getAllInvestors();
-        console.log("Fetched investor list data:", data);
+        const [investorsData, connectionsData] = await Promise.all([
+          getAllInvestors(),
+          getConnections().catch(err => {
+            console.error("Failed to fetch connections:", err);
+            return [];
+          })
+        ]);
 
-        if (!Array.isArray(data.investors)) {
+        console.log("Fetched investor list data:", investorsData);
+
+        if (!Array.isArray(investorsData.investors)) {
           throw new Error("Invalid data format received from server. Expected 'investors' array.");
         }
 
         // Store the basic list { id, username }
-        setInvestorList(data.investors);
+        setInvestorList(investorsData.investors);
+
+        // Create a Set of connected user IDs (or usernames if ID is missing)
+        const connectedSet = new Set();
+        if (Array.isArray(connectionsData)) {
+          connectionsData.forEach(c => {
+            // Prefer ID for matching if available, else username
+            if (c.id) connectedSet.add(c.id);
+            else if (c.userId) connectedSet.add(c.userId); // Check if connection object has userId
+            else if (c.username) connectedSet.add(c.username);
+          });
+        }
+        setConnectedIds(connectedSet);
 
       } catch (err) {
         console.error("Failed to fetch investor list:", err);
@@ -66,6 +87,7 @@ const StartupHome = () => {
             key={investor.id}
             investorId={investor.id}
             initialUsername={investor.username}
+            isConnected={connectedIds.has(investor.id) || connectedIds.has(investor.username)}
           />
         ))
       )}

@@ -163,6 +163,19 @@ const Post = {
         }));
     },
 
+    async getPostsByUserId(userId) {
+        // Same as getMyPosts but named generically for public access
+        const [rows] = await db.execute(
+            `SELECT id, user_id, username, userType, title, subtitle, content, tags, created_at
+              FROM posts WHERE user_id = ? ORDER BY created_at DESC`,
+            [userId]
+        );
+        return rows.map(post => ({
+            ...post,
+            tags: Post._parseTags(post.tags),
+        }));
+    },
+
     /**
      * Updates an existing post by its ID.
      * Allows editing of title, subtitle, content, and tags.
@@ -203,10 +216,10 @@ const Post = {
             throw error;
         }
     },
-        /**
-     * Deletes a post by its ID.
-     * @param {number} postId - The ID of the post to delete.
-     */
+    /**
+ * Deletes a post by its ID.
+ * @param {number} postId - The ID of the post to delete.
+ */
     async deletePost(postId) {
         // --- LOGGING ---
         console.log(`>>> Post.deletePost called for ID: ${postId}`);

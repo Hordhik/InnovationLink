@@ -509,7 +509,7 @@ export default function InvestorProfile() {
       )}
 
       <div className="investor-row">
-        <InvestorCard data={investorData} onClick={handleOpenHeader} onMyConnectionsClick={scrollToConnections} />
+        <InvestorCard data={investorData} onClick={handleOpenHeader} onMyConnectionsClick={() => navigate('/I/connections')} />
         <AboutSection about={investorData.about || ''} name={investorData.name || 'You'} onClick={handleOpenDesc} />
         <ExpertiseSection expertise={investorData.expertise || []} onClick={handleOpenExpertise} />
       </div>

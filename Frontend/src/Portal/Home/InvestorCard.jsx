@@ -17,7 +17,7 @@ const defaultInvestorData = {
   initials: "...",
 };
 
-const InvestorCard = ({ investorId, initialUsername }) => {
+const InvestorCard = ({ investorId, initialUsername, isConnected }) => {
   const navigate = useNavigate();
   const [investorData, setInvestorData] = useState({
     ...defaultInvestorData,
@@ -154,7 +154,13 @@ const InvestorCard = ({ investorId, initialUsername }) => {
             </div>
           </div>
           <div className="card-actions">
-            <button className="connect-button" onClick={() => navigate(correctProfileUrl)}>Connect</button>
+            {isConnected ? (
+              <button className="connect-button" onClick={() => navigate(`${portalPrefix}/inbox`, {
+                state: { initialChat: { username: displayName, companyName: displayName } }
+              })}>Message</button>
+            ) : (
+              <button className="connect-button" onClick={() => navigate(correctProfileUrl)}>Connect</button>
+            )}
             <button className="request-button">Request a Meeting</button>
           </div>
         </div>

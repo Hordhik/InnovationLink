@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getInvestorByUsername } from "../../../services/investorApi";
 import { getConnectionStatus, sendConnectionRequest } from "../../../services/connectionApi";
+import { getPostsByUserId } from "../../../services/postApi";
 import { Mail, Twitter, Linkedin, Briefcase } from 'lucide-react';
 
 import AboutSection from './AboutSection.jsx';
@@ -22,6 +23,7 @@ const PublicInvestorProfile = () => {
   const [error, setError] = useState("");
   const [investor, setInvestor] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState({ status: 'none', role: 'none' });
+  const [posts, setPosts] = useState([]);
 
   const portalPrefix = `/${(window.location.pathname.split("/")[1] || "I")}`;
 
@@ -40,10 +42,14 @@ const PublicInvestorProfile = () => {
         // Check connection status
         if (data.investor.userId) {
           try {
-            const statusData = await getConnectionStatus(data.investor.userId);
+            const [statusData, postsData] = await Promise.all([
+              getConnectionStatus(data.investor.userId),
+              getPostsByUserId(data.investor.userId).catch(() => ({ posts: [] }))
+            ]);
             setConnectionStatus(statusData);
+            setPosts(postsData.posts || []);
           } catch (connErr) {
-            console.error("Failed to check connection status:", connErr);
+            console.error("Failed to load additional data:", connErr);
           }
         }
       } catch (err) {
@@ -224,14 +230,22 @@ const PublicInvestorProfile = () => {
         <div className="card">
           <h3>Recent Posts</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ paddingBottom: '0.5rem', borderBottom: '1px solid #f3f4f6' }}>
-              <p style={{ fontWeight: 600, color: '#1f2937' }}>Why Early-Stage Mentorship Matters</p>
-              <p style={{ fontSize: '0.85rem', color: '#6b7280' }}>Jan 2025 • Investing</p>
-            </div>
-            <div>
-              <p style={{ fontWeight: 600, color: '#1f2937' }}>Picking Founders, Not Ideas</p>
-              <p style={{ fontSize: '0.85rem', color: '#6b7280' }}>Dec 2024 • Insight</p>
-            </div>
+            {posts.length === 0 ? (
+              <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>No posts yet.</p>
+            ) : (
+              posts.slice(0, 2).map((post) => (
+                <div
+                  key={post.id}
+                  style={{ paddingBottom: '0.5rem', borderBottom: '1px solid #f3f4f6', cursor: 'pointer' }}
+                  onClick={() => navigate(`/posts/${post.id}`)}
+                >
+                  <p style={{ fontWeight: 600, color: '#1f2937' }}>{post.title}</p>
+                  <p style={{ fontSize: '0.85rem', color: '#6b7280' }}>
+                    {new Date(post.created_at).toLocaleDateString()} • {post.tags && post.tags[0] ? post.tags[0] : 'General'}
+                  </p>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

@@ -14,6 +14,7 @@ import user from '../../../assets/Portal/user.svg';
 // 1. IMPORT THE NEW API SERVICE
 // -----------------------------------------------------------------
 import * as startupDockApi from '../../../services/startupDockApi.js';
+import { getPostsByUserId } from '../../../services/postApi.js';
 import { getToken } from '../../../auth.js'; // Need this for file URLs
 import ConnectedInvestors from './ConnectedInvestors';
 
@@ -276,6 +277,38 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
     loadDockFiles();
   }, []);
 
+  // -----------------------------------------------------------------
+  // 4. ADD POSTS FETCHING
+  // -----------------------------------------------------------------
+  const [posts, setPosts] = useState([]);
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        // If we have a user ID in profileData (public view context) use that,
+        // otherwise assume we are the logged-in user and fetch "my posts"
+        if (profileData?.userId) {
+          const data = await getPostsByUserId(profileData.userId);
+          setPosts(data.posts || []);
+        } else {
+          // Fallback or default to my posts if no specific user ID is passed
+          // This assumes the parent component might pass userId even for own profile,
+          // or we can use getMyPosts if imported.
+          // For now, let's try to use getMyPosts if available or skip.
+          try {
+            const { getMyPosts } = await import('../../../services/postApi');
+            const data = await getMyPosts();
+            setPosts(data.posts || []);
+          } catch (e) {
+            console.log("Could not fetch my posts", e);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch posts for profile view", err);
+      }
+    };
+    fetchPosts();
+  }, [profileData?.userId]);
+
   useEffect(() => {
     if (location.hash === '#connections') {
       const el = document.getElementById('connected-investors-section');
@@ -369,10 +402,7 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
           </div>
           <div className="spv-actions">
             <button className="feedback"><img src={feedback} alt="" />FeedBack</button>
-            <button className="connect-btn" onClick={() => {
-              const el = document.getElementById('connected-investors-section');
-              if (el) el.scrollIntoView({ behavior: 'smooth' });
-            }}><img src={user} alt="" />My Connections</button>
+            <button className="connect-btn" onClick={() => navigate('/S/connections')}><img src={user} alt="" />My Connections</button>
           </div>
         </div>
         { /* DESCRIPTION */}
@@ -514,16 +544,25 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
         <div className="card spv-blogs">
           <div className="card-title">Recent Posts</div>
           <div className="card-body">
-            <div className="blog-grid">
-              <div className='BlogCardShort' style={{ cursor: 'pointer' }}>
-                <p className='blog-title'>Deploying tiny ML to the field</p>
-                <p className='blog-meta'>Jan 2025 • Tech</p>
+            {posts.length === 0 ? (
+              <p style={{ color: '#6b7280', padding: '10px 0' }}>No posts yet.</p>
+            ) : (
+              <div className="blog-grid">
+                {posts.slice(0, 2).map((post) => (
+                  <div
+                    key={post.id}
+                    className='BlogCardShort'
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => navigate(`/posts/${post.id}`)}
+                  >
+                    <p className='blog-title'>{post.title}</p>
+                    <p className='blog-meta'>
+                      {new Date(post.created_at).toLocaleDateString()} • {post.tags && post.tags[0] ? post.tags[0] : 'General'}
+                    </p>
+                  </div>
+                ))}
               </div>
-              <div className='BlogCardShort' style={{ cursor: 'pointer' }}>
-                <p className='blog-title'>Deploying tiny ML to the field</p>
-                <p className='blog-meta'>Jan 2025 • Tech</p>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

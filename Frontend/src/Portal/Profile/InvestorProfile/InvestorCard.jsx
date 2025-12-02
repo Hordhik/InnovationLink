@@ -40,7 +40,14 @@ export default function InvestorCard({ data, onClick, onMyConnectionsClick }) {
           className="btn-connect"
           onClick={(e) => {
             e.stopPropagation();
-            if (onMyConnectionsClick) onMyConnectionsClick();
+            if (onMyConnectionsClick) {
+              onMyConnectionsClick();
+            } else {
+              // Fallback if no handler provided (though parent should provide one or we navigate directly)
+              // But since we want to enforce navigation, we might just want to use navigate() here directly
+              // However, InvestorCard is used in InvestorProfile.jsx which passes onMyConnectionsClick.
+              // Let's check InvestorProfile.jsx to see what it passes.
+            }
           }}
         >
           My Connections

@@ -13,6 +13,7 @@ const StartupCard = ({
   domain,
   teamCount,
   username,
+  isConnected,
 }) => {
   const navigate = useNavigate();
   const portalPrefix = `/${(window.location.pathname.split('/')[1] || 'I')}`; // '/I' or '/S'
@@ -58,7 +59,11 @@ const StartupCard = ({
             </div>
           </div>
           <div className="card-actions">
-            <button className="connect-button" onClick={() => navigate(correctProfileUrl)}>Connect</button>
+            {isConnected ? (
+              <button className="connect-button" onClick={startChat}>Message</button>
+            ) : (
+              <button className="connect-button" onClick={() => navigate(correctProfileUrl)}>Connect</button>
+            )}
             <button className="request-button" onClick={startChat}>Request a Meeting</button>
           </div>
         </div>

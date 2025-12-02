@@ -3,9 +3,11 @@ import React, { useEffect, useState } from 'react';
 import AdvancedSearch from './AdvancedSearch';
 import StartupCard from './StartupCard';
 import { getAllStartups } from '../../services/startupProfileApi';
+import { getConnections } from '../../services/connectionApi';
 
 const InvestorHome = () => {
   const [startups, setStartups] = useState([]);
+  const [connectedUsernames, setConnectedUsernames] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -14,8 +16,26 @@ const InvestorHome = () => {
     (async () => {
       try {
         setLoading(true);
-        const data = await getAllStartups();
-        if (!cancelled) setStartups(Array.isArray(data?.startups) ? data.startups : []);
+        const [startupsData, connectionsData] = await Promise.all([
+          getAllStartups(),
+          getConnections().catch(err => {
+            console.error("Failed to fetch connections:", err);
+            return [];
+          })
+        ]);
+
+        if (!cancelled) {
+          setStartups(Array.isArray(startupsData?.startups) ? startupsData.startups : []);
+
+          // Create a Set of connected usernames for O(1) lookup
+          const connectedSet = new Set();
+          if (Array.isArray(connectionsData)) {
+            connectionsData.forEach(c => {
+              if (c.username) connectedSet.add(c.username);
+            });
+          }
+          setConnectedUsernames(connectedSet);
+        }
       } catch (e) {
         if (!cancelled) setError(e?.response?.data?.message || e?.message || 'Failed to load startups');
       } finally {
@@ -46,6 +66,7 @@ const InvestorHome = () => {
           teamCount={s.teamCount}
           profileUrl={`/startup/${s.username}`}
           username={s.username}
+          isConnected={connectedUsernames.has(s.username)}
         />
       ))}
     </div>

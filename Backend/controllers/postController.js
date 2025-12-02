@@ -77,6 +77,22 @@ const getMyPosts = async (req, res, next) => { // Added next
 };
 
 /**
+ * Get all posts for a specific user (public).
+ */
+const getPostsByUser = async (req, res, next) => {
+    console.log(`>>> getPostsByUser controller reached for userID: ${req.params.userId}`);
+    try {
+        const { userId } = req.params;
+        const posts = await Post.getPostsByUserId(userId);
+        console.log(`>>> getPostsByUser: Found ${posts.length} posts for user ${userId}.`);
+        res.status(200).json({ posts });
+    } catch (error) {
+        console.error(`>>> getPostsByUser: Error fetching posts for user ${req.params.userId}:`, error);
+        next(error);
+    }
+};
+
+/**
  * Get a single post by its ID.
  */
 const getPostById = async (req, res, next) => { // Added next
@@ -205,6 +221,7 @@ module.exports = {
     getAllPosts,
     getMyPosts,
     getPostById,
+    getPostsByUser, // ✅ Added new export
     updatePost,
     deletePost // ✅ Added new export
 };

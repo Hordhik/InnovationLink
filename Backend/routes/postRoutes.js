@@ -8,6 +8,7 @@ const {
     createPost,
     getAllPosts,
     getMyPosts,
+    getPostsByUser, // ✅ Added
     getPostById,
     updatePost // ✅ Added updatePost controller import
 } = require('../controllers/postController.js');
@@ -29,6 +30,9 @@ router.get('/me', requireAuth, getMyPosts);
 // POST /api/posts (Protected)
 // --- FIX: Middleware applied directly ---
 router.post('/', requireAuth, createPost);
+
+// GET /api/posts/user/:userId (Public)
+router.get('/user/:userId', getPostsByUser);
 
 // GET /api/posts/:id (Public)
 // --- FIX: Defined *after* /me ---
