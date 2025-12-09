@@ -26,7 +26,7 @@ export const setMyTeam = async (team) => {
             });
             // eslint-disable-next-line no-console
             console.log('[TEAM DEBUG] Sending team payload summary:', summary);
-        } catch (e) { /* ignore logging errors */ }
+        } catch {"Error in set MY team"} { /* ignore logging errors */ }
     }
     const resp = await axios.post(`${API_URL}/api/team/bulk`, { team }, {
         headers: { Authorization: `Bearer ${token}` }
@@ -54,7 +54,7 @@ export const addTeamMember = async (member) => {
             }
             // eslint-disable-next-line no-console
             console.log('[TEAM DEBUG] Adding member:', { name: member?.name || '', hasPhoto: !!photo, mime, b64Len: size });
-        } catch { }
+        } catch {"Error in add team Member"}
     }
     const resp = await axios.post(`${API_URL}/api/team`, member, {
         headers: { Authorization: `Bearer ${token}` }

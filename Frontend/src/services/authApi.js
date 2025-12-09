@@ -51,7 +51,7 @@ export async function getSession() {
         });
         // Refresh stored user for consistent display across components
         if (data?.user) {
-            try { setAuth({ user: data.user }); } catch { }
+            try { setAuth({ user: data.user }); } catch {"Error in Auth"}
         }
         return data; // { authenticated: true, user }
     } catch (error) {
