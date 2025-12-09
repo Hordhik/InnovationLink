@@ -1,7 +1,15 @@
 // This file handles all API calls to your backend's post routes.
 import { getToken } from '../auth.js';
 
-const BASE_URL = 'http://localhost:5001/api/posts';
+let API_URL;
+
+if (import.meta.env.VITE_API_URL) {
+  API_URL = import.meta.env.VITE_API_URL;
+} else if (window.location.hostname === "localhost") {
+  API_URL = "http://localhost:5001";
+} else {
+  API_URL = "http://10.123.23.187:5001";
+}
 
 // Helper function to handle fetch responses
 async function handleResponse(response) {
@@ -37,7 +45,7 @@ function getAuthHeaders() {
  * @param {object} postData - { title, subtitle, content, tags }
  */
 export const createPost = async (postData) => {
-    const response = await fetch(BASE_URL, {
+    const response = await fetch(API_URL, {
         method: 'POST',
         headers: getAuthHeaders(), // Requires Auth
         body: JSON.stringify(postData),
@@ -49,7 +57,7 @@ export const createPost = async (postData) => {
  * Fetches all posts for the public feed.
  */
 export const getAllPosts = async () => {
-    const response = await fetch(BASE_URL, {
+    const response = await fetch(API_URL, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
     });
@@ -60,7 +68,7 @@ export const getAllPosts = async () => {
  * Fetches only the posts for the logged-in user.
  */
 export const getMyPosts = async () => {
-    const response = await fetch(`${BASE_URL}/me`, {
+    const response = await fetch(`${API_URL}/me`, {
         method: 'GET',
         headers: getAuthHeaders(), // Requires Auth
     });
@@ -72,7 +80,7 @@ export const getMyPosts = async () => {
  * @param {string} postId - The ID of the post
  */
 export const getPostById = async (postId) => {
-    const response = await fetch(`${BASE_URL}/${postId}`, {
+    const response = await fetch(`${API_URL}/${postId}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
     });
@@ -85,7 +93,7 @@ export const getPostById = async (postId) => {
  * @param {object} updatedData - The updated fields (title, subtitle, content, tags, etc.)
  */
 export const updatePost = async (postId, updatedData) => {
-    const response = await fetch(`${BASE_URL}/${postId}`, {
+    const response = await fetch(`${API_URL}/${postId}`, {
         method: 'PUT',
         headers: getAuthHeaders(), // Requires Auth
         body: JSON.stringify(updatedData),
@@ -98,7 +106,7 @@ export const updatePost = async (postId, updatedData) => {
  * @param {string} postId - The ID of the post
  */
 export const deletePost = async (postId) => {
-    const response = await fetch(`${BASE_URL}/${postId}`, {
+    const response = await fetch(`${API_URL}/${postId}`, {
         method: 'DELETE',
         headers: getAuthHeaders(), // Requires Auth
     });
@@ -110,7 +118,7 @@ export const deletePost = async (postId) => {
  * @param {string} userId - The ID of the user
  */
 export const getPostsByUserId = async (userId) => {
-    const response = await fetch(`${BASE_URL}/user/${userId}`, {
+    const response = await fetch(`${API_URL}/user/${userId}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
     });

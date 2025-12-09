@@ -1,7 +1,15 @@
 import axios from 'axios';
 import { getToken } from '../auth.js';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+let API_URL;
+
+if (import.meta.env.VITE_API_URL) {
+  API_URL = import.meta.env.VITE_API_URL;
+} else if (window.location.hostname === "localhost") {
+  API_URL = "http://localhost:5001";
+} else {
+  API_URL = "http://10.123.23.187:5001";
+}
 
 const api = axios.create({
     baseURL: API_URL,
