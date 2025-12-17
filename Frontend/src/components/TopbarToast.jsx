@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { registerToastCallback } from '../utils/toast';
 
 // Reusable toast that reads location.state.toast and auto-dismisses.
 // Accepts either a string or { message, type, duration }.
@@ -13,6 +14,31 @@ export default function TopbarToast({ topOffset = 84, defaultDuration = 2200 }) 
     const [showToast, setShowToast] = useState(false);
     const [toastLeaving, setToastLeaving] = useState(false);
     const consumedKeyRef = useRef(null);
+
+    // Register callback for direct toast calls
+    useEffect(() => {
+        const showDirectToast = (toastData) => {
+            let message = '';
+            let type = 'success';
+            let duration = defaultDuration;
+
+            if (typeof toastData === 'string') {
+                message = toastData;
+            } else if (typeof toastData === 'object') {
+                message = toastData.message || '';
+                type = toastData.type || 'success';
+                duration = toastData.duration || defaultDuration;
+            }
+
+            setToast(message);
+            setToastType(type);
+            setToastDuration(duration);
+            setShowToast(true);
+            setToastLeaving(false);
+        };
+
+        registerToastCallback(showDirectToast);
+    }, [defaultDuration]);
 
     // Consume toast from navigation state, but only once per session
     useEffect(() => {

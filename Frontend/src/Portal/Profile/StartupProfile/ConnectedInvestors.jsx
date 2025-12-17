@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getConnections, getPendingRequests, acceptConnectionRequest, rejectConnectionRequest } from '../../../services/connectionApi';
+import { showSuccess, showError } from '../../../utils/toast';
 
 export default function ConnectedInvestors() {
     const [showModal, setShowModal] = useState(false);
@@ -39,7 +40,7 @@ export default function ConnectedInvestors() {
             fetchData();
         } catch (err) {
             console.error("Failed to accept request:", err);
-            alert("Failed to accept request");
+            showError("Failed to accept request");
             // Refresh on error to sync state
             fetchData();
         }
@@ -54,7 +55,7 @@ export default function ConnectedInvestors() {
             fetchData();
         } catch (err) {
             console.error("Failed to reject request:", err);
-            alert("Failed to reject request");
+            showError("Failed to reject request");
             // Refresh on error to sync state
             fetchData();
         }

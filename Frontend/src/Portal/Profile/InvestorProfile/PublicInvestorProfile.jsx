@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getInvestorByUsername } from "../../../services/investorApi";
 import { getConnectionStatus, sendConnectionRequest } from "../../../services/connectionApi";
 import { getPostsByUserId } from "../../../services/postApi";
+import { showSuccess, showError } from "../../../utils/toast";
 import { Mail, Twitter, Linkedin, Briefcase } from 'lucide-react';
 
 import AboutSection from './AboutSection.jsx';
@@ -71,9 +72,9 @@ const PublicInvestorProfile = () => {
     try {
       await sendConnectionRequest(investor.userId);
       setConnectionStatus({ status: 'pending', role: 'sender' });
-      // Optional: Show toast
+      showSuccess('Connection request sent!');
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to send request');
+      showError(err.response?.data?.message || 'Failed to send request');
     }
   };
 

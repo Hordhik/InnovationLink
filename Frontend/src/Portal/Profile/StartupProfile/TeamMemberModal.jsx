@@ -1,5 +1,6 @@
 import React from 'react';
 import './TeamMemberModal.css';
+import { showWarning } from '../../../utils/toast';
 
 const TeamMemberModal = ({ focusedMemberIndex, isEditing, profileData, edit, memberEditing, memberDraft, setMemberEditing, setMemberDraft, closeMember, saveMemberEdits, changeTeamMember, openMember, readOnly = false }) => {
   if (!focusedMemberIndex) return null;
@@ -269,7 +270,7 @@ const TeamMemberModal = ({ focusedMemberIndex, isEditing, profileData, edit, mem
                 onClick={() => {
                   // Basic validation
                   if (!memberDraft?.name?.trim()) {
-                    alert('Please enter a name for the team member');
+                    showWarning('Please enter a name for the team member');
                     return;
                   }
                   saveMemberEdits(isFounder ? { idx: null, isFounder } : idx, memberDraft);

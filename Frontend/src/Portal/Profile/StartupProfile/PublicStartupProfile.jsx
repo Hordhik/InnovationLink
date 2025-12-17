@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getPublicProfile } from '../../../services/startupProfileApi';
 import { getConnectionStatus, sendConnectionRequest } from '../../../services/connectionApi';
 import { getPostsByUserId } from '../../../services/postApi';
+import { showSuccess, showError } from '../../../utils/toast';
 import PublicStartupDock from './PublicStartupDock';
 import './PublicStartupProfile.css';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
@@ -102,9 +103,9 @@ const PublicStartupProfile = () => {
         try {
             await sendConnectionRequest(profileData.userId);
             setConnectionStatus({ status: 'pending', role: 'sender' });
-            alert('Connection request sent!');
+            showSuccess('Connection request sent!');
         } catch (err) {
-            alert(err.response?.data?.message || 'Failed to send request');
+            showError(err.response?.data?.message || 'Failed to send request');
         }
     };
 

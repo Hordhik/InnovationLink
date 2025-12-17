@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { X, User, Calendar, Clock, Type, AlignLeft } from "lucide-react";
 import "./AddItemModal.css"; // We'll add styles to your existing CSS
+import { showWarning } from "../../utils/toast";
 
 // Helper function to convert 24-hour time to 12-hour AM/PM format
 const formatTo12Hour = (time24) => {
@@ -79,7 +80,7 @@ const AddItemModal = ({ onClose, onSave, selectedDate, editingEvent }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!title || !date || !time) {
-      alert("Please fill in at least Title, Date, and Time.");
+      showWarning("Please fill in at least Title, Date, and Time.");
       return;
     }
 

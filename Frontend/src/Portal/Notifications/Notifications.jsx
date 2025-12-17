@@ -3,6 +3,7 @@ import './Notifications.css'; // Make sure this CSS file exists
 import { FiX, FiBell, FiCalendar, FiUserCheck, FiMessageSquare, FiSettings, FiCheck, FiCircle, FiCheckCircle, FiXCircle } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { getNotifications, markNotificationAsRead, markNotificationAsUnread, acceptConnectionRequest, rejectConnectionRequest } from '../../services/connectionApi';
+import { showSuccess, showError } from '../../utils/toast';
 
 // Renamed to 'Notifications' and removed the 'onClose' prop
 const Notifications = () => {
@@ -44,7 +45,7 @@ const Notifications = () => {
 
     if (!notif.senderId) {
       console.error("Missing senderId in notification:", notif);
-      alert("Error: Cannot accept request (missing sender information)");
+      showError("Error: Cannot accept request (missing sender information)");
       return;
     }
 
@@ -52,14 +53,14 @@ const Notifications = () => {
       await acceptConnectionRequest(null, notif.senderId);
       // Refresh notifications to get updated connection status
       fetchData();
-      alert("Connection accepted!");
+      showSuccess("Connection accepted!");
     } catch (err) {
       console.error("Failed to accept:", err);
       if (err.response && err.response.status === 404) {
         console.error("Debug Info:", err.response.data);
-        alert("Request not found. Check console for details.");
+        showError("Request not found. Check console for details.");
       } else {
-        alert("Failed to accept request");
+        showError("Failed to accept request");
       }
     }
   };
@@ -68,7 +69,7 @@ const Notifications = () => {
     e.stopPropagation();
     if (!notif.senderId) {
       console.error("Missing senderId in notification:", notif);
-      alert("Error: Cannot reject request (missing sender information)");
+      showError("Error: Cannot reject request (missing sender information)");
       return;
     }
 
@@ -76,10 +77,10 @@ const Notifications = () => {
       await rejectConnectionRequest(null, notif.senderId);
       // Refresh notifications to get updated connection status
       fetchData();
-      alert("Connection rejected.");
+      showSuccess("Connection rejected.");
     } catch (err) {
       console.error("Failed to reject:", err);
-      alert("Failed to reject request");
+      showError("Failed to reject request");
     }
   };
 
