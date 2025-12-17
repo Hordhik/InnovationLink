@@ -82,7 +82,7 @@ const Blogs = () => {
     fetchBlogs();
     // --- FIX: Removed `user` and `Maps` from dependencies ---
     // Effect should re-run only when the *view* changes
-  }, [isPortalView, showOnlyUserBlogs]); // Removed navigate
+  }, [isPortalView, showOnlyUserBlogs, navigate]);
 
 
   const handleOptionClick = (option) => {

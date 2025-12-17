@@ -6,9 +6,9 @@ let API_URL;
 if (import.meta.env.VITE_API_URL) {
   API_URL = import.meta.env.VITE_API_URL;
 } else if (window.location.hostname === "localhost") {
-  API_URL = "http://localhost:5001";
+  API_URL = "http://localhost:5001/api/posts";
 } else {
-  API_URL = "http://10.123.23.187:5001";
+  API_URL = "http://10.123.23.187:5001/api/posts";
 }
 
 // Helper function to handle fetch responses
