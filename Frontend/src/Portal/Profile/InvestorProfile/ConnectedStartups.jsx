@@ -37,20 +37,30 @@ export default function ConnectedStartups({ startups: initialStartups }) {
   const handleAccept = async (connectionId) => {
     try {
       await acceptConnectionRequest(connectionId);
-      fetchData(); // Refresh list
+      // Update UI optimistically
+      setRequests(prev => prev.filter(r => r.connection_id !== connectionId));
+      // Also refresh data in background
+      fetchData();
     } catch (err) {
       console.error("Failed to accept request:", err);
       alert("Failed to accept request");
+      // Refresh on error to sync state
+      fetchData();
     }
   };
 
   const handleReject = async (connectionId) => {
     try {
       await rejectConnectionRequest(connectionId);
-      fetchData(); // Refresh list
+      // Update UI optimistically
+      setRequests(prev => prev.filter(r => r.connection_id !== connectionId));
+      // Also refresh data in background
+      fetchData();
     } catch (err) {
       console.error("Failed to reject request:", err);
       alert("Failed to reject request");
+      // Refresh on error to sync state
+      fetchData();
     }
   };
 
@@ -87,13 +97,13 @@ export default function ConnectedStartups({ startups: initialStartups }) {
             displayedConnections.map((c, idx) => (
               <div key={idx} className="startup-card">
                 <img
-                  src={c.profile_photo || "https://via.placeholder.com/80"}
-                  alt={c.name}
+                  src={c.image || "https://via.placeholder.com/80"}
+                  alt={c.display_name || c.username}
                   className="startup-logo"
                 />
                 <div className="startup-info">
-                  <h4>{c.name || c.username}</h4>
-                  <p className="founder">{c.role || 'User'}</p>
+                  <h4>{c.display_name || c.username}</h4>
+                  <p className="founder">{c.userType || 'User'}</p>
                 </div>
               </div>
             ))
@@ -135,12 +145,12 @@ export default function ConnectedStartups({ startups: initialStartups }) {
                   {connections.map((c, idx) => (
                     <div key={idx} className="connection-item">
                       <img
-                        src={c.profile_photo || "https://via.placeholder.com/50"}
-                        alt={c.name}
+                        src={c.image || "https://via.placeholder.com/50"}
+                        alt={c.display_name || c.username}
                       />
                       <div style={{ flex: 1 }}>
-                        <h4>{c.name || c.username}</h4>
-                        <p>{c.role}</p>
+                        <h4>{c.display_name || c.username}</h4>
+                        <p>{c.userType}</p>
                       </div>
                       <button className="btn-secondary">Message</button>
                     </div>
@@ -154,22 +164,22 @@ export default function ConnectedStartups({ startups: initialStartups }) {
                   {requests.map((r, idx) => (
                     <div key={idx} className="request-item">
                       <img
-                        src={r.requester?.profile_photo || "https://via.placeholder.com/50"}
-                        alt={r.requester?.name}
+                        src={r.image || "https://via.placeholder.com/50"}
+                        alt={r.display_name || r.username}
                       />
                       <div style={{ flex: 1 }}>
-                        <h4>{r.requester?.name || r.requester?.username}</h4>
-                        <p>{r.requester?.role}</p>
+                        <h4>{r.display_name || r.username}</h4>
+                        <p>{r.userType}</p>
                       </div>
                       <div className="actions">
                         <button
-                          onClick={() => handleAccept(r.id)}
+                          onClick={() => handleAccept(r.connection_id)}
                           className="btn-accept"
                         >
                           Accept
                         </button>
                         <button
-                          onClick={() => handleReject(r.id)}
+                          onClick={() => handleReject(r.connection_id)}
                           className="btn-reject"
                         >
                           Reject

@@ -26,16 +26,41 @@ const Notification = {
     },
 
     async getByUser(userId) {
-        const [rows] = await db.query(
-            "SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 50",
-            [userId]
-        );
+        const [rows] = await db.query(`
+            SELECT 
+                n.*,
+                c.status as connection_status,
+                u.username as sender_username,
+                u.userType as sender_userType,
+                CASE 
+                    WHEN u.userType = 'investor' THEN i.name 
+                    WHEN u.userType = 'startup' THEN sp.company_name 
+                END as sender_display_name
+            FROM notifications n
+            LEFT JOIN connections c ON (
+                (c.sender_id = n.sender_id AND c.receiver_id = n.user_id) OR
+                (c.sender_id = n.user_id AND c.receiver_id = n.sender_id)
+            )
+            LEFT JOIN users u ON n.sender_id = u.id
+            LEFT JOIN investors i ON u.id = i.user_id
+            LEFT JOIN startup_profile_details sp ON u.username = sp.username
+            WHERE n.user_id = ? 
+            ORDER BY n.created_at DESC 
+            LIMIT 50
+        `, [userId]);
         return rows;
     },
 
     async markAsRead(id, userId) {
         await db.query(
             "UPDATE notifications SET is_read = TRUE WHERE id = ? AND user_id = ?",
+            [id, userId]
+        );
+    },
+
+    async markAsUnread(id, userId) {
+        await db.query(
+            "UPDATE notifications SET is_read = FALSE WHERE id = ? AND user_id = ?",
             [id, userId]
         );
     },

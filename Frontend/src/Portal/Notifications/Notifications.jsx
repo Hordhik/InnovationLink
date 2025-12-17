@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './Notifications.css'; // Make sure this CSS file exists
 import { FiX, FiBell, FiCalendar, FiUserCheck, FiMessageSquare, FiSettings, FiCheck, FiCircle, FiCheckCircle, FiXCircle } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import { getNotifications, markNotificationAsRead, acceptConnectionRequest, rejectConnectionRequest } from '../../services/connectionApi';
+import { getNotifications, markNotificationAsRead, markNotificationAsUnread, acceptConnectionRequest, rejectConnectionRequest } from '../../services/connectionApi';
 
 // Renamed to 'Notifications' and removed the 'onClose' prop
 const Notifications = () => {
@@ -24,9 +24,13 @@ const Notifications = () => {
         icon: getIconForType(n.type),
         text: n.message,
         time: new Date(n.created_at).toLocaleDateString(),
-        link: getLinkForType(n.type),
+        link: getLinkForType(n.type, n.sender_username, n.sender_userType),
         type: n.type,
-        senderId: n.sender_id // Store sender_id for actions
+        senderId: n.sender_id,
+        senderUsername: n.sender_username,
+        senderUserType: n.sender_userType,
+        senderDisplayName: n.sender_display_name,
+        connectionStatus: n.connection_status
       }));
       setNotifications(mapped);
     } catch (error) {
@@ -46,11 +50,9 @@ const Notifications = () => {
 
     try {
       await acceptConnectionRequest(null, notif.senderId);
-      // Mark as read and update UI
-      await toggleNotificationRead(notif.id);
-      // Optionally refresh notifications or show success
-      alert("Connection accepted!");
+      // Refresh notifications to get updated connection status
       fetchData();
+      alert("Connection accepted!");
     } catch (err) {
       console.error("Failed to accept:", err);
       if (err.response && err.response.status === 404) {
@@ -72,9 +74,9 @@ const Notifications = () => {
 
     try {
       await rejectConnectionRequest(null, notif.senderId);
-      await toggleNotificationRead(notif.id);
-      alert("Connection rejected.");
+      // Refresh notifications to get updated connection status
       fetchData();
+      alert("Connection rejected.");
     } catch (err) {
       console.error("Failed to reject:", err);
       alert("Failed to reject request");
@@ -89,12 +91,19 @@ const Notifications = () => {
     }
   };
 
-  const getLinkForType = (type) => {
+  const getLinkForType = (type, senderUsername, senderUserType) => {
     const portalPrefix = `/${(window.location.pathname.split("/")[1] || "S")}`;
     switch (type) {
-      case 'connection_request': return `${portalPrefix}/profile#connections`;
-      case 'connection_accepted': return `${portalPrefix}/profile#connections`;
-      default: return `${portalPrefix}/home`;
+      case 'connection_request':
+        // Redirect to sender's public profile
+        if (senderUsername && senderUserType) {
+          return `${portalPrefix}/${senderUserType === 'investor' ? 'investors' : 'startups'}/${senderUsername}`;
+        }
+        return `${portalPrefix}/profile#connections`;
+      case 'connection_accepted':
+        return `${portalPrefix}/profile#connections`;
+      default:
+        return `${portalPrefix}/home`;
     }
   };
 
@@ -130,12 +139,22 @@ const Notifications = () => {
   // Function to toggle read/unread status of a single notification
   const toggleNotificationRead = async (id) => {
     try {
-      await markNotificationAsRead(id);
-      setNotifications(notifications.map(notif =>
-        notif.id === id ? { ...notif, read: true } : notif
-      ));
+      const notification = notifications.find(n => n.id === id);
+      if (notification.read) {
+        // Mark as unread
+        await markNotificationAsUnread(id);
+        setNotifications(notifications.map(notif =>
+          notif.id === id ? { ...notif, read: false } : notif
+        ));
+      } else {
+        // Mark as read
+        await markNotificationAsRead(id);
+        setNotifications(notifications.map(notif =>
+          notif.id === id ? { ...notif, read: true } : notif
+        ));
+      }
     } catch (error) {
-      console.error("Failed to mark read", error);
+      console.error("Failed to toggle notification read status", error);
     }
   };
 
@@ -206,8 +225,8 @@ const Notifications = () => {
                   <div className="notification-content">
                     <p className="notification-text">{notif.text}</p>
                     <p className="notification-time">{notif.time}</p>
-                    {notif.type === 'connection_request' && (
-                      <div className="notification-actions" style={{ marginTop: '8px', display: 'flex', gap: '8px' }}>
+                    {notif.type === 'connection_request' && (notif.connectionStatus === null || notif.connectionStatus === undefined || notif.connectionStatus === 'pending') && (
+                      <div className="notification-actions-inline" style={{ marginTop: '8px', display: 'flex', gap: '8px' }}>
                         <button
                           onClick={(e) => handleAccept(e, notif)}
                           className="notification-action-btn accept"
@@ -222,19 +241,45 @@ const Notifications = () => {
                         </button>
                       </div>
                     )}
+                    {notif.type === 'connection_request' && notif.connectionStatus === 'accepted' && (
+                      <div className="notification-status" style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px', color: '#4CAF50', fontWeight: '600' }}>
+                        <FiCheckCircle size={16} />
+                        <span>Connection with {notif.senderDisplayName || notif.senderUsername} accepted</span>
+                      </div>
+                    )}
+                    {notif.type === 'connection_request' && notif.connectionStatus === 'rejected' && (
+                      <div className="notification-status" style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px', color: '#f44336', fontWeight: '600' }}>
+                        <FiXCircle size={16} />
+                        <span>Connection with {notif.senderDisplayName || notif.senderUsername} rejected</span>
+                      </div>
+                    )}
+                    {notif.type === 'connection_request' && notif.connectionStatus === 'blocked' && (
+                      <div className="notification-status" style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px', color: '#ff9800', fontWeight: '600' }}>
+                        <FiXCircle size={16} />
+                        <span>Connection with {notif.senderDisplayName || notif.senderUsername} blocked</span>
+                      </div>
+                    )}
+                    {notif.type === 'connection_accepted' && (
+                      <div className="notification-status" style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px', color: '#4CAF50', fontWeight: '600' }}>
+                        <FiCheckCircle size={16} />
+                        <span>Connection with {notif.senderDisplayName || notif.senderUsername} accepted</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                <button
-                  className="notification-read-toggle"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleNotificationRead(notif.id);
-                  }}
-                  title={notif.read ? "Mark as unread" : "Mark as read"}
-                >
-                  {notif.read ? <FiCircle size={16} /> : <FiCheck size={16} />}
-                </button>
+                <div className="notification-controls" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                  <button
+                    className="notification-read-toggle"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleNotificationRead(notif.id);
+                    }}
+                    title={notif.read ? "Mark as unread" : "Mark as read"}
+                  >
+                    {notif.read ? <FiCircle size={16} /> : <FiCheck size={16} />}
+                  </button>
+                </div>
               </div>
             ))
           ) : (

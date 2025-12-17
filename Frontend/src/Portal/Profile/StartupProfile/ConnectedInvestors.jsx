@@ -33,20 +33,30 @@ export default function ConnectedInvestors() {
     const handleAccept = async (connectionId) => {
         try {
             await acceptConnectionRequest(connectionId);
-            fetchData(); // Refresh list
+            // Update UI optimistically
+            setRequests(prev => prev.filter(r => r.connection_id !== connectionId));
+            // Also refresh data in background
+            fetchData();
         } catch (err) {
             console.error("Failed to accept request:", err);
             alert("Failed to accept request");
+            // Refresh on error to sync state
+            fetchData();
         }
     };
 
     const handleReject = async (connectionId) => {
         try {
             await rejectConnectionRequest(connectionId);
-            fetchData(); // Refresh list
+            // Update UI optimistically
+            setRequests(prev => prev.filter(r => r.connection_id !== connectionId));
+            // Also refresh data in background
+            fetchData();
         } catch (err) {
             console.error("Failed to reject request:", err);
             alert("Failed to reject request");
+            // Refresh on error to sync state
+            fetchData();
         }
     };
 
@@ -78,14 +88,14 @@ export default function ConnectedInvestors() {
                         displayedConnections.map((c, idx) => (
                             <div key={idx} className="investor-card" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem', border: '1px solid #eee', borderRadius: '8px', minWidth: '200px' }}>
                                 <img
-                                    src={c.profile_photo || "https://via.placeholder.com/50"}
-                                    alt={c.name}
+                                    src={c.image || "https://via.placeholder.com/50"}
+                                    alt={c.display_name || c.username}
                                     className="investor-logo"
                                     style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
                                 />
                                 <div className="investor-info">
-                                    <h4 style={{ margin: 0, fontSize: '0.9rem' }}>{c.name || c.username}</h4>
-                                    <p className="role" style={{ margin: 0, fontSize: '0.8rem', color: '#666' }}>{c.role || 'Investor'}</p>
+                                    <h4 style={{ margin: 0, fontSize: '0.9rem' }}>{c.display_name || c.username}</h4>
+                                    <p className="role" style={{ margin: 0, fontSize: '0.8rem', color: '#666' }}>{c.userType || 'Investor'}</p>
                                 </div>
                             </div>
                         ))
@@ -130,13 +140,13 @@ export default function ConnectedInvestors() {
                                     {connections.map((c, idx) => (
                                         <div key={idx} className="connection-item" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.5rem', borderBottom: '1px solid #eee' }}>
                                             <img
-                                                src={c.profile_photo || "https://via.placeholder.com/50"}
-                                                alt={c.name}
+                                                src={c.image || "https://via.placeholder.com/50"}
+                                                alt={c.display_name || c.username}
                                                 style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover' }}
                                             />
                                             <div style={{ flex: 1 }}>
-                                                <h4 style={{ margin: 0 }}>{c.name || c.username}</h4>
-                                                <p style={{ margin: 0, fontSize: '0.9rem', color: '#666' }}>{c.role}</p>
+                                                <h4 style={{ margin: 0 }}>{c.display_name || c.username}</h4>
+                                                <p style={{ margin: 0, fontSize: '0.9rem', color: '#666' }}>{c.userType}</p>
                                             </div>
                                             <button className="btn-secondary" style={{ padding: '0.3rem 0.8rem', border: '1px solid #ccc', borderRadius: '4px', background: 'white', cursor: 'pointer' }}>Message</button>
                                         </div>
@@ -150,23 +160,23 @@ export default function ConnectedInvestors() {
                                     {requests.map((r, idx) => (
                                         <div key={idx} className="request-item" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.5rem', borderBottom: '1px solid #eee' }}>
                                             <img
-                                                src={r.requester?.profile_photo || "https://via.placeholder.com/50"}
-                                                alt={r.requester?.name}
+                                                src={r.image || "https://via.placeholder.com/50"}
+                                                alt={r.display_name || r.username}
                                                 style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover' }}
                                             />
                                             <div style={{ flex: 1 }}>
-                                                <h4 style={{ margin: 0 }}>{r.requester?.name || r.requester?.username}</h4>
-                                                <p style={{ margin: 0, fontSize: '0.9rem', color: '#666' }}>{r.requester?.role}</p>
+                                                <h4 style={{ margin: 0 }}>{r.display_name || r.username}</h4>
+                                                <p style={{ margin: 0, fontSize: '0.9rem', color: '#666' }}>{r.userType}</p>
                                             </div>
                                             <div className="actions" style={{ display: 'flex', gap: '0.5rem' }}>
                                                 <button
-                                                    onClick={() => handleAccept(r.id)}
+                                                    onClick={() => handleAccept(r.connection_id)}
                                                     style={{ background: '#4CAF50', color: 'white', border: 'none', padding: '0.3rem 0.8rem', borderRadius: '4px', cursor: 'pointer' }}
                                                 >
                                                     Accept
                                                 </button>
                                                 <button
-                                                    onClick={() => handleReject(r.id)}
+                                                    onClick={() => handleReject(r.connection_id)}
                                                     style={{ background: '#f44336', color: 'white', border: 'none', padding: '0.3rem 0.8rem', borderRadius: '4px', cursor: 'pointer' }}
                                                 >
                                                     Reject

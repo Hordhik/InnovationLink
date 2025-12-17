@@ -8,5 +8,6 @@ router.use(authMiddleware);
 
 router.get('/', notificationController.getNotifications);
 router.post('/read', notificationController.markAsRead);
+router.post('/unread', notificationController.markAsUnread);
 
 module.exports = router;

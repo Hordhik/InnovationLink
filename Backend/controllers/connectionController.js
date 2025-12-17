@@ -67,9 +67,9 @@ exports.acceptRequest = async (req, res) => {
         let request;
 
         if (connectionId) {
-            request = pending.find(r => r.connection_id == connectionId);
+            request = pending.find(r => r.connection_id === parseInt(connectionId));
         } else if (senderId) {
-            request = pending.find(r => r.sender_id == senderId);
+            request = pending.find(r => r.sender_id === parseInt(senderId));
         }
 
         if (!request) {

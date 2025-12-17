@@ -88,3 +88,11 @@ export async function markNotificationAsRead(notificationId) {
     );
     return data;
 }
+
+export async function markNotificationAsUnread(notificationId) {
+    const { data } = await api.post('/api/notifications/unread',
+        { notificationId },
+        { headers: getAuthHeaders() }
+    );
+    return data;
+}
