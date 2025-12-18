@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getPublicProfile } from '../../../services/startupProfileApi';
-import { getConnectionStatus, sendConnectionRequest } from '../../../services/connectionApi';
+import { getConnectionStatus, sendConnectionRequest, cancelConnectionRequest } from '../../../services/connectionApi';
 import { getPostsByUserId } from '../../../services/postApi';
 import { showSuccess, showError } from '../../../utils/toast';
 import PublicStartupDock from './PublicStartupDock';
@@ -109,6 +109,16 @@ const PublicStartupProfile = () => {
         }
     };
 
+    const handleUnsend = async () => {
+        try {
+            await cancelConnectionRequest(profileData.userId);
+            setConnectionStatus({ status: 'none', role: 'none' });
+            showSuccess('Request unsent.');
+        } catch (err) {
+            showError(err.response?.data?.message || 'Failed to unsend request');
+        }
+    };
+
     const renderConnectButton = () => {
         const prefix = `/${(window.location.pathname.split('/')[1] || 'I')}`;
 
@@ -133,7 +143,12 @@ const PublicStartupProfile = () => {
         }
         if (connectionStatus.status === 'pending') {
             if (connectionStatus.role === 'sender') {
-                return <button className="connect-btn" disabled><img src={userIcon} alt="" />Request Sent</button>;
+                return (
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <button className="connect-btn" disabled><img src={userIcon} alt="" />Request Sent</button>
+                        <button className="connect-btn" onClick={handleUnsend}><img src={userIcon} alt="" />Unsend</button>
+                    </div>
+                );
             }
             return <button className="connect-btn" disabled><img src={userIcon} alt="" />Pending Request</button>;
         }

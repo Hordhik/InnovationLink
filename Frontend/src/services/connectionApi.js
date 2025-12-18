@@ -33,6 +33,14 @@ export async function sendConnectionRequest(targetUserId) {
     return data;
 }
 
+export async function cancelConnectionRequest(targetUserId) {
+    const { data } = await api.post('/api/connections/cancel',
+        { targetUserId },
+        { headers: getAuthHeaders() }
+    );
+    return data;
+}
+
 export async function acceptConnectionRequest(connectionId, senderId) {
     const payload = connectionId ? { connectionId } : { senderId };
     const { data } = await api.post('/api/connections/accept',

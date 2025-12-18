@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getInvestorByUsername } from "../../../services/investorApi";
-import { getConnectionStatus, sendConnectionRequest } from "../../../services/connectionApi";
+import { getConnectionStatus, sendConnectionRequest, cancelConnectionRequest } from "../../../services/connectionApi";
 import { getPostsByUserId } from "../../../services/postApi";
 import { showSuccess, showError } from "../../../utils/toast";
 import { Mail, Twitter, Linkedin, Briefcase } from 'lucide-react';
@@ -78,6 +78,16 @@ const PublicInvestorProfile = () => {
     }
   };
 
+  const handleUnsend = async () => {
+    try {
+      await cancelConnectionRequest(investor.userId);
+      setConnectionStatus({ status: 'none', role: 'none' });
+      showSuccess('Request unsent.');
+    } catch (err) {
+      showError(err.response?.data?.message || 'Failed to unsend request');
+    }
+  };
+
   const renderConnectButton = () => {
     if (connectionStatus.status === 'accepted') {
       return (
@@ -100,7 +110,12 @@ const PublicInvestorProfile = () => {
     }
     if (connectionStatus.status === 'pending') {
       if (connectionStatus.role === 'sender') {
-        return <button className="btn-connect" disabled>Request Sent</button>;
+        return (
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button className="btn-connect" disabled>Request Sent</button>
+            <button className="btn-connect" onClick={handleUnsend}>Unsend</button>
+          </div>
+        );
       }
       return <button className="btn-connect" disabled>Pending Request</button>;
     }

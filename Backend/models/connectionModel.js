@@ -2,6 +2,14 @@ const db = require("../config/db");
 
 const Connection = {
   async init() {
+    if (process.env.RESET_CONNECTIONS_NOTIFICATIONS === 'true') {
+      try {
+        await db.query('DROP TABLE IF EXISTS connections');
+      } catch (e) {
+        // ignore
+      }
+    }
+
     await db.query(`
       CREATE TABLE IF NOT EXISTS connections (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -48,6 +56,13 @@ const Connection = {
 
   async updateStatus(id, status) {
     await db.query("UPDATE connections SET status = ? WHERE id = ?", [status, id]);
+  },
+
+  async resetToPending(id, senderId, receiverId) {
+    await db.query(
+      "UPDATE connections SET sender_id = ?, receiver_id = ?, status = 'pending' WHERE id = ?",
+      [senderId, receiverId, id]
+    );
   },
 
   async getConnections(userId) {
@@ -106,6 +121,10 @@ const Connection = {
       WHERE c.receiver_id = ? AND c.status = 'pending'
     `, [userId]);
     return rows;
+  },
+
+  async deleteConnection(id) {
+    await db.query("DELETE FROM connections WHERE id = ?", [id]);
   }
 };
 

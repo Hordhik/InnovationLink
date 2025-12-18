@@ -21,24 +21,57 @@ exports.sendRequest = async (req, res) => {
             return res.status(403).json({ message: 'Only startups and investors can connect' });
         }
 
-        // Check if connection already exists
-        const existing = await Connection.findByUsers(senderId, targetUserId);
-        if (existing) {
-            if (existing.status === 'blocked') return res.status(403).json({ message: 'Cannot connect with this user' });
-            if (existing.status === 'accepted') return res.status(400).json({ message: 'Already connected' });
-            if (existing.status === 'pending') return res.status(400).json({ message: 'Connection request already pending' });
-            // If rejected, maybe allow re-request? For now, let's say no.
-            if (existing.status === 'rejected') return res.status(400).json({ message: 'Connection request was rejected' });
+        // Check if a connection already exists in either direction.
+        // Prefer exact-direction checks so we can correctly "re-request" after rejection.
+        const exact = await Connection.findExact(senderId, targetUserId);
+        const reverse = await Connection.findExact(targetUserId, senderId);
+
+        let connectionId;
+
+        if (exact) {
+            if (exact.status === 'blocked') return res.status(403).json({ message: 'Cannot connect with this user' });
+            if (exact.status === 'accepted') return res.status(400).json({ message: 'Already connected' });
+            if (exact.status === 'pending') return res.status(400).json({ message: 'Connection request already pending' });
+            // Re-request after rejection: reset same row back to pending.
+            if (exact.status === 'rejected') {
+                await Connection.resetToPending(exact.id, senderId, targetUserId);
+                connectionId = exact.id;
+            }
+        } else if (reverse) {
+            // If there's a reverse-direction relationship, handle it explicitly.
+            if (reverse.status === 'blocked') return res.status(403).json({ message: 'Cannot connect with this user' });
+            if (reverse.status === 'accepted') return res.status(400).json({ message: 'Already connected' });
+            if (reverse.status === 'pending') {
+                // The other user already sent a request; don't create a second one.
+                return res.status(400).json({ message: 'You already have a pending request from this user' });
+            }
+            if (reverse.status === 'rejected') {
+                // Re-request after rejection, but the old record is reversed.
+                // Flip direction and reset to pending.
+                await Connection.resetToPending(reverse.id, senderId, targetUserId);
+                connectionId = reverse.id;
+            }
         }
 
-        await Connection.create(senderId, targetUserId);
+        if (!connectionId) {
+            connectionId = await Connection.create(senderId, targetUserId);
+        }
 
-        // Create notification
+        // Supersede any previously-active pending request notifications for this pair.
+        try {
+            await Notification.supersedeActiveConnectionRequests({ userId: targetUserId, senderId });
+        } catch (e) {
+            console.warn('Failed to supersede older connection_request notifications:', e?.message || e);
+        }
+
+        // Create notification linked to the specific connection row.
         await Notification.create({
             userId: targetUserId,
             senderId: senderId,
+            connectionId,
             type: 'connection_request',
-            message: `You have a new connection request from ${req.user.username}`
+            message: `You have a new connection request from ${req.user.username}`,
+            connectionState: 'pending'
         });
 
         res.status(200).json({ message: 'Connection request sent' });
@@ -100,10 +133,22 @@ exports.acceptRequest = async (req, res) => {
         console.log(`Match Found! Accepting connection ${request.connection_id}`);
         await Connection.updateStatus(request.connection_id, 'accepted');
 
+        // Resolve the receiver-side request notification for this sender.
+        try {
+            await Notification.resolveLatestConnectionRequest({
+                userId,
+                senderId: request.sender_id,
+                state: 'accepted'
+            });
+        } catch (e) {
+            console.warn('Failed to resolve connection_request notification (accepted):', e?.message || e);
+        }
+
         // Notify the sender
         await Notification.create({
             userId: request.sender_id,
             senderId: userId,
+            connectionId: request.connection_id,
             type: 'connection_accepted',
             message: `${req.user.username} accepted your connection request`
         });
@@ -134,6 +179,27 @@ exports.rejectRequest = async (req, res) => {
         }
 
         await Connection.updateStatus(request.connection_id, 'rejected');
+
+        // Resolve the receiver-side request notification for this sender.
+        try {
+            await Notification.resolveLatestConnectionRequest({
+                userId,
+                senderId: request.sender_id,
+                state: 'rejected'
+            });
+        } catch (e) {
+            console.warn('Failed to resolve connection_request notification (rejected):', e?.message || e);
+        }
+        
+        // Notify the sender that their request was rejected
+        await Notification.create({
+            userId: request.sender_id,
+            senderId: userId,
+            connectionId: request.connection_id,
+            type: 'connection_rejected',
+            message: `${req.user.username} declined your connection request`
+        });
+        
         res.status(200).json({ message: 'Connection rejected' });
     } catch (error) {
         console.error('Reject Request Error:', error);
@@ -251,7 +317,7 @@ exports.getConnectionStatus = async (req, res) => {
 
         let role = 'none';
         if (connection.sender_id === userId) role = 'sender';
-        if (connection.receiver_id === parseInt(userId)) role = 'receiver'; // Ensure type match if needed
+        else if (connection.receiver_id === userId) role = 'receiver';
 
         res.status(200).json({
             status: connection.status,
@@ -260,6 +326,34 @@ exports.getConnectionStatus = async (req, res) => {
         });
     } catch (error) {
         console.error('Get Connection Status Error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+exports.cancelRequest = async (req, res) => {
+    try {
+        const senderId = req.user.id;
+        const { targetUserId } = req.body;
+
+        if (!targetUserId) return res.status(400).json({ message: 'Target user ID required' });
+
+        const existing = await Connection.findExact(senderId, targetUserId);
+        if (!existing || existing.status !== 'pending') {
+            return res.status(404).json({ message: 'Pending request not found' });
+        }
+
+        await Connection.deleteConnection(existing.id);
+
+        // Resolve the receiver-side actionable request notification.
+        try {
+            await Notification.resolveLatestConnectionRequest({ userId: targetUserId, senderId, state: 'cancelled' });
+        } catch (e) {
+            console.warn('Failed to resolve request notifications during cancel:', e?.message || e);
+        }
+
+        res.status(200).json({ message: 'Connection request cancelled' });
+    } catch (error) {
+        console.error('Cancel Request Error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 };

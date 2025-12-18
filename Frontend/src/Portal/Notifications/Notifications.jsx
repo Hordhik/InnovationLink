@@ -24,16 +24,54 @@ const Notifications = () => {
         read: !!n.is_read,
         icon: getIconForType(n.type),
         text: n.message,
-        time: new Date(n.created_at).toLocaleDateString(),
+        time: n.created_at ? new Date(n.created_at).toLocaleString() : '',
+        createdAtMs: n.created_at ? new Date(n.created_at).getTime() : 0,
         link: getLinkForType(n.type, n.sender_username, n.sender_userType),
         type: n.type,
         senderId: n.sender_id,
+        connectionId: n.connection_id,
+        isActive: n.is_active,
+        connectionState: n.connection_state,
         senderUsername: n.sender_username,
         senderUserType: n.sender_userType,
         senderDisplayName: n.sender_display_name,
         connectionStatus: n.connection_status
       }));
-      setNotifications(mapped);
+
+      // Only the latest request from a sender should be actionable.
+      // This prevents older notifications from showing buttons after re-request.
+      const latestRequestBySender = new Map();
+      for (const n of mapped) {
+        if (n.type !== 'connection_request') continue;
+        if (!n.senderId) continue;
+
+        const prev = latestRequestBySender.get(n.senderId);
+        if (!prev) {
+          latestRequestBySender.set(n.senderId, { createdAtMs: n.createdAtMs, id: n.id });
+          continue;
+        }
+
+        if (n.createdAtMs > prev.createdAtMs || (n.createdAtMs === prev.createdAtMs && n.id > prev.id)) {
+          latestRequestBySender.set(n.senderId, { createdAtMs: n.createdAtMs, id: n.id });
+        }
+      }
+
+      const finalMapped = mapped.map(n => {
+        const latest = n.senderId ? latestRequestBySender.get(n.senderId) : null;
+        const isLatestFromSender =
+          n.type === 'connection_request' &&
+          !!n.senderId &&
+          !!latest &&
+          latest.createdAtMs === n.createdAtMs &&
+          latest.id === n.id;
+
+        return {
+          ...n,
+          isLatestFromSender
+        };
+      });
+
+      setNotifications(finalMapped);
     } catch (error) {
       console.error("Failed to fetch notifications", error);
     }
@@ -43,14 +81,16 @@ const Notifications = () => {
     e.stopPropagation();
     console.log("Attempting to accept notification:", notif);
 
-    if (!notif.senderId) {
-      console.error("Missing senderId in notification:", notif);
-      showError("Error: Cannot accept request (missing sender information)");
-      return;
-    }
-
     try {
-      await acceptConnectionRequest(null, notif.senderId);
+      if (notif.connectionId) {
+        await acceptConnectionRequest(notif.connectionId, null);
+      } else if (notif.senderId) {
+        await acceptConnectionRequest(null, notif.senderId);
+      } else {
+        console.error("Missing senderId/connectionId in notification:", notif);
+        showError("Error: Cannot accept request (missing sender information)");
+        return;
+      }
       // Refresh notifications to get updated connection status
       fetchData();
       showSuccess("Connection accepted!");
@@ -67,14 +107,16 @@ const Notifications = () => {
 
   const handleReject = async (e, notif) => {
     e.stopPropagation();
-    if (!notif.senderId) {
-      console.error("Missing senderId in notification:", notif);
-      showError("Error: Cannot reject request (missing sender information)");
-      return;
-    }
-
     try {
-      await rejectConnectionRequest(null, notif.senderId);
+      if (notif.connectionId) {
+        await rejectConnectionRequest(notif.connectionId, null);
+      } else if (notif.senderId) {
+        await rejectConnectionRequest(null, notif.senderId);
+      } else {
+        console.error("Missing senderId/connectionId in notification:", notif);
+        showError("Error: Cannot reject request (missing sender information)");
+        return;
+      }
       // Refresh notifications to get updated connection status
       fetchData();
       showSuccess("Connection rejected.");
@@ -88,6 +130,7 @@ const Notifications = () => {
     switch (type) {
       case 'connection_request': return <FiUserCheck />;
       case 'connection_accepted': return <FiUserCheck />;
+      case 'connection_rejected': return <FiXCircle />;
       default: return <FiBell />;
     }
   };
@@ -103,6 +146,12 @@ const Notifications = () => {
         return `${portalPrefix}/profile#connections`;
       case 'connection_accepted':
         return `${portalPrefix}/profile#connections`;
+      case 'connection_rejected':
+        // Redirect to sender's profile so they can try again
+        if (senderUsername && senderUserType) {
+          return `${portalPrefix}/${senderUserType === 'investor' ? 'investors' : 'startups'}/${senderUsername}`;
+        }
+        return `${portalPrefix}/home`;
       default:
         return `${portalPrefix}/home`;
     }
@@ -226,7 +275,10 @@ const Notifications = () => {
                   <div className="notification-content">
                     <p className="notification-text">{notif.text}</p>
                     <p className="notification-time">{notif.time}</p>
-                    {notif.type === 'connection_request' && (notif.connectionStatus === null || notif.connectionStatus === undefined || notif.connectionStatus === 'pending') && (
+                    {notif.type === 'connection_request' &&
+                      notif.isLatestFromSender &&
+                      notif.isActive !== false &&
+                      ((notif.connectionState || 'pending') === 'pending') && (
                       <div className="notification-actions-inline" style={{ marginTop: '8px', display: 'flex', gap: '8px' }}>
                         <button
                           onClick={(e) => handleAccept(e, notif)}
@@ -242,28 +294,34 @@ const Notifications = () => {
                         </button>
                       </div>
                     )}
-                    {notif.type === 'connection_request' && notif.connectionStatus === 'accepted' && (
+                    {notif.type === 'connection_request' && (notif.connectionState === 'accepted') && (
                       <div className="notification-status" style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px', color: '#4CAF50', fontWeight: '600' }}>
                         <FiCheckCircle size={16} />
                         <span>Connection with {notif.senderDisplayName || notif.senderUsername} accepted</span>
                       </div>
                     )}
-                    {notif.type === 'connection_request' && notif.connectionStatus === 'rejected' && (
+                    {notif.type === 'connection_request' && (notif.connectionState === 'rejected') && (
                       <div className="notification-status" style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px', color: '#f44336', fontWeight: '600' }}>
                         <FiXCircle size={16} />
                         <span>Connection with {notif.senderDisplayName || notif.senderUsername} rejected</span>
                       </div>
                     )}
-                    {notif.type === 'connection_request' && notif.connectionStatus === 'blocked' && (
-                      <div className="notification-status" style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px', color: '#ff9800', fontWeight: '600' }}>
+                    {notif.type === 'connection_request' && (notif.connectionState === 'cancelled') && (
+                      <div className="notification-status" style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px', color: '#6b7280', fontWeight: '600' }}>
                         <FiXCircle size={16} />
-                        <span>Connection with {notif.senderDisplayName || notif.senderUsername} blocked</span>
+                        <span>Request cancelled</span>
                       </div>
                     )}
                     {notif.type === 'connection_accepted' && (
                       <div className="notification-status" style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px', color: '#4CAF50', fontWeight: '600' }}>
                         <FiCheckCircle size={16} />
                         <span>Connection with {notif.senderDisplayName || notif.senderUsername} accepted</span>
+                      </div>
+                    )}
+                    {notif.type === 'connection_rejected' && (
+                      <div className="notification-status" style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px', color: '#f44336', fontWeight: '600' }}>
+                        <FiXCircle size={16} />
+                        <span>{notif.senderDisplayName || notif.senderUsername} declined your connection request</span>
                       </div>
                     )}
                   </div>

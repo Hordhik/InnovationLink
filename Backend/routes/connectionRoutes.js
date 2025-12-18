@@ -7,6 +7,7 @@ const authMiddleware = require('../middleware/auth');
 router.use(authMiddleware);
 
 router.post('/request', connectionController.sendRequest);
+router.post('/cancel', connectionController.cancelRequest);
 router.post('/accept', connectionController.acceptRequest);
 router.post('/reject', connectionController.rejectRequest);
 router.post('/block', connectionController.blockUser);
