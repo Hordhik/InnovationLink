@@ -100,8 +100,12 @@ const InvestorForm = ({ initialData = {}, onSubmit, statusMessage, errorMessage,
     <div className="page-background">
       <div className="form-container">
         <div className="form-card">
-          <h1 className="form-title">Create Your Investor Profile</h1>
-          <p className="form-subtitle">Fill in your personal and investment details below.</p>
+          <h1 className="form-title">Complete Your Investor Profile</h1>
+          <p className="form-subtitle">
+            Fill in the required fields below to access your profile and connect with startups.
+            <br />
+            <span style={{ color: '#dc2626', fontSize: '0.9rem' }}>* Required fields</span>
+          </p>
 
           {errorMessage && <div className="form-status error">{errorMessage}</div>}
           {statusMessage && !errorMessage && <div className="form-status success">{statusMessage}</div>}
@@ -221,7 +225,7 @@ const InvestorForm = ({ initialData = {}, onSubmit, statusMessage, errorMessage,
 
             {/* --- About --- */}
             <div className="input-wrapper" style={{ marginTop: '1.5rem' }}>
-              <label className="form-label" htmlFor="about">About You</label>
+              <label className="form-label" htmlFor="about">About You <span style={{ color: '#dc2626' }}>*</span></label>
               <textarea
                 id="about"
                 className="form-input"
@@ -234,7 +238,7 @@ const InvestorForm = ({ initialData = {}, onSubmit, statusMessage, errorMessage,
 
             {/* --- What I Like To Invest In --- */}
             <div className="form-section">
-              <label className="form-label" htmlFor="investLike">What I Like To Invest In</label>
+              <label className="form-label" htmlFor="investLike">What I Like To Invest In <span style={{ color: '#dc2626' }}>*</span></label>
               <textarea
                 id="investLike"
                 className="form-input"
@@ -247,7 +251,7 @@ const InvestorForm = ({ initialData = {}, onSubmit, statusMessage, errorMessage,
 
             {/* --- Expertise --- */}
             <div className="form-section">
-              <label className="form-label">Expertise</label>
+              <label className="form-label">Expertise <span style={{ color: '#dc2626' }}>*</span></label>
               {expertise.map((exp, i) => (
                 <div key={i} className="team-input-row">
                   <input
@@ -278,7 +282,7 @@ const InvestorForm = ({ initialData = {}, onSubmit, statusMessage, errorMessage,
 
             {/* --- Sectors --- */}
             <div className="form-section">
-              <label className="form-label">Sectors Interested In</label>
+              <label className="form-label">Sectors Interested In <span style={{ color: '#dc2626' }}>*</span></label>
               <div className="checkbox-grid">
                 {PREDEFINED_SECTORS.map((sector) => (
                   <label key={sector} className="checkbox-item">
@@ -301,7 +305,7 @@ const InvestorForm = ({ initialData = {}, onSubmit, statusMessage, errorMessage,
 
             {/* --- Stage Focus --- */}
             <div className="form-section">
-              <label className="form-label">Stage Focus</label>
+              <label className="form-label">Stage Focus <span style={{ color: '#dc2626' }}>*</span></label>
               <div className="checkbox-grid">
                 {PREDEFINED_STAGES.map((stage) => (
                   <label key={stage} className="checkbox-item">

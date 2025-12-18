@@ -192,7 +192,6 @@ export default function InvestorProfile() {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const [forceProfileViewPending, setForceProfileViewPending] = useState(false);
 
   const fileInputRef = useRef(null);
 
@@ -225,9 +224,10 @@ export default function InvestorProfile() {
       const merged = { ...prev, ...normalized };
       latestCompletion = evaluateProfileCompletion(merged);
       setProfileStatus(latestCompletion);
-      const forceProfileView = options.forceProfileView ?? false;
       const hasPersistedProfile = Boolean(merged.id);
-      setShowForm(forceProfileView ? false : !hasPersistedProfile);
+      // Show form until profile is created AND complete
+      const needsProfileCompletion = !hasPersistedProfile || !latestCompletion.isComplete;
+      setShowForm(needsProfileCompletion);
       if (latestCompletion.isComplete) {
         setFormStatusMessage('');
         setFormErrorMessage('');
@@ -237,11 +237,7 @@ export default function InvestorProfile() {
     return latestCompletion;
   }, []);
 
-  useEffect(() => {
-    if (location.state?.forceProfileView) {
-      setForceProfileViewPending(true);
-    }
-  }, [location.state]);
+  // Profile form is now mandatory for new users - no bypass allowed
 
   useEffect(() => {
     let mounted = true;
@@ -275,40 +271,7 @@ export default function InvestorProfile() {
     };
   }, [applyInvestorSnapshot]);
 
-  useEffect(() => {
-    if (!forceProfileViewPending) return;
-
-    let mounted = true;
-
-    const refreshProfile = async () => {
-      try {
-        const { investor } = await getMyInvestorProfile();
-        if (!mounted) return;
-        applyInvestorSnapshot(investor, undefined, { forceProfileView: true });
-        setErrorMessage('');
-        setFormErrorMessage('');
-      } catch (error) {
-        if (mounted) {
-          console.error('Failed to load investor profile:', error);
-          const message = error?.message || 'Unable to load investor profile.';
-          setErrorMessage(message);
-          setFormErrorMessage(message);
-          applyInvestorSnapshot(null, undefined, { forceProfileView: true });
-        }
-      } finally {
-        if (mounted) {
-          setForceProfileViewPending(false);
-          navigate(location.pathname, { replace: true });
-        }
-      }
-    };
-
-    refreshProfile();
-
-    return () => {
-      mounted = false;
-    };
-  }, [forceProfileViewPending, applyInvestorSnapshot, location.pathname, navigate]);
+  // Removed forceProfileView logic - form is now mandatory until profile is complete
 
   useEffect(() => {
     if (location.hash === '#connections') {
@@ -336,8 +299,7 @@ export default function InvestorProfile() {
       const { investor } = await saveMyInvestorProfile(payload);
       const completion = applyInvestorSnapshot(
         investor,
-        merged.startups || investorData.startups,
-        { forceProfileView: context === 'form' }
+        merged.startups || investorData.startups
       );
       if (context === 'form' && successMessage) {
         setFormStatusMessage(successMessage);
@@ -477,18 +439,39 @@ export default function InvestorProfile() {
   }
 
   if (showForm) {
+    const isNewUser = !investorData.id;
     const pendingSectionsMessage = profileStatus.missing.length
-      ? `Let's improve your profile by adding: ${profileStatus.missing.join(', ')}.`
+      ? (isNewUser 
+          ? `Welcome! Please complete your investor profile to get started. Required: ${profileStatus.missing.join(', ')}.`
+          : `Let's improve your profile by adding: ${profileStatus.missing.join(', ')}.`)
       : '';
 
     return (
-      <InvestorForm
-        initialData={investorData}
-        onSubmit={handleFormSubmit}
-        statusMessage={formStatusMessage || pendingSectionsMessage}
-        errorMessage={formErrorMessage}
-        isSubmitting={isSaving}
-      />
+      <div className="investor-profile-page">
+        {isNewUser && (
+          <div
+            style={{
+              border: '1px solid #bfdbfe',
+              background: '#eff6ff',
+              color: '#1e40af',
+              padding: '1rem 1.5rem',
+              borderRadius: '8px',
+              marginBottom: '1.5rem',
+              fontSize: '0.95rem',
+              fontWeight: '500',
+            }}
+          >
+            📝 Your profile is required to access the platform. Please fill in all required fields to continue.
+          </div>
+        )}
+        <InvestorForm
+          initialData={investorData}
+          onSubmit={handleFormSubmit}
+          statusMessage={formStatusMessage || pendingSectionsMessage}
+          errorMessage={formErrorMessage}
+          isSubmitting={isSaving}
+        />
+      </div>
     );
   }
 
