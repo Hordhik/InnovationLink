@@ -17,6 +17,9 @@ export default function InvestorCard({ data, onClick, onMyConnectionsClick }) {
         />
         <div className="investor-card-info">
           <h2>{data.name}</h2>
+          {data.username ? (
+            <p className="investor-role" style={{ opacity: 0.85 }}>@{data.username}</p>
+          ) : null}
           <p className="investor-role">
             <Briefcase size={14} /> {data.title} | {data.location}
           </p>

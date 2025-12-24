@@ -5,14 +5,23 @@ import { useNavigate } from "react-router-dom";
 import logo from "../assets/NavBar/logo.png";
 // import googleIcon from "../assets/Authentication/google.svg";
 import login from "../assets/Authentication/login.png";
-import { signup as signupApi } from "../services/authApi";
+import { getUsernameAvailability, signupV2 } from "../services/authApi";
 import { setAuth } from '../auth.js';
+
+const USERNAME_REGEX = /^[A-Za-z0-9_-]+$/;
+
+const normalizeUsername = (value) => {
+  if (value === undefined || value === null) return '';
+  return value.toString().trim().toLowerCase();
+};
 
 const SignUp = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     userType: "",
-    name: "",
+    fullName: "",
+    companyName: "",
+    username: "",
     email: "",
     phone: "",
     password: "",
@@ -20,9 +29,12 @@ const SignUp = () => {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const namePattern = /^[A-Za-z0-9_-]+$/;
-  const nameInputRef = useRef(null);
+  const usernameInputRef = useRef(null);
   const tipRef = useRef(null);
+
+  const [usernameTouched, setUsernameTouched] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState({ checking: false, available: null, suggestion: '', valid: true });
+  const usernameCheckTimerRef = useRef(null);
 
   const handleLoginClick = () => {
     navigate("/auth/login");
@@ -32,13 +44,41 @@ const SignUp = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const displayNameValue = formData.userType === 'startup' ? formData.companyName : formData.fullName;
+  const displayNameLabel = formData.userType === 'startup' ? 'Company / Startup Name' : 'Full Name';
+
+  const scheduleUsernameCheck = ({ username, name, applySuggestionWhenUntouched = false }) => {
+    if (usernameCheckTimerRef.current) {
+      clearTimeout(usernameCheckTimerRef.current);
+    }
+    usernameCheckTimerRef.current = setTimeout(async () => {
+      try {
+        setUsernameStatus((prev) => ({ ...prev, checking: true }));
+        const data = await getUsernameAvailability({ username, name });
+        if (applySuggestionWhenUntouched && !usernameTouched && data?.suggestion) {
+          setFormData((prev) => ({ ...prev, username: data.suggestion }));
+        }
+        setUsernameStatus({
+          checking: false,
+          available: Boolean(data?.available),
+          suggestion: data?.suggestion || '',
+          valid: data?.valid !== false,
+        });
+      } catch (err) {
+        setUsernameStatus((prev) => ({ ...prev, checking: false, available: null }));
+      }
+    }, 350);
+  };
+
   const setUserType = (type) => {
     setFormData(prev => {
       // If switching between startup and investor after a selection, clear the form fields
       if (prev.userType && prev.userType !== type) {
         return {
           userType: type,
-          name: "",
+          fullName: "",
+          companyName: "",
+          username: "",
           email: "",
           phone: "",
           password: "",
@@ -47,6 +87,8 @@ const SignUp = () => {
       // On first selection, keep whatever the user has typed
       return { ...prev, userType: type };
     });
+    setUsernameTouched(false);
+    setUsernameStatus({ checking: false, available: null, suggestion: '', valid: true });
   };
 
   const handleSubmit = async (e) => {
@@ -65,33 +107,53 @@ const SignUp = () => {
     }
 
     try {
-      // Validate username: allow only letters, numbers, underscores, hyphens
-      const usernameOk = namePattern.test(formData.name.trim());
+      const username = normalizeUsername(formData.username);
+      const displayName = (displayNameValue || '').toString().trim();
+
+      if (!displayName) {
+        return;
+      }
+
+      // Validate username format
+      const usernameOk = USERNAME_REGEX.test(username);
       if (!usernameOk) {
-        // Re-trigger error animation on every invalid submit
-        if (nameInputRef.current) {
-          const el = nameInputRef.current;
+        if (usernameInputRef.current) {
+          const el = usernameInputRef.current;
           el.classList.remove('error-pulse');
-          // Force reflow to restart CSS animation
           void el.offsetWidth;
           el.classList.add('error-pulse');
         }
-        // Show inline error only (no bottom error message)
         return;
       }
+
+      // Re-check availability right before submit
+      const availability = await getUsernameAvailability({ username });
+      if (!availability?.available) {
+        if (availability?.suggestion) {
+          setFormData((prev) => ({ ...prev, username: availability.suggestion }));
+          setUsernameStatus({ checking: false, available: true, suggestion: availability.suggestion, valid: true });
+        }
+        if (usernameInputRef.current) {
+          usernameInputRef.current.focus();
+        }
+        return;
+      }
+
       const payload = {
-        ...formData,
-        name: formData.name.trim(),
+        userType: formData.userType,
+        username,
         email: formData.email.trim(),
         phone: formData.phone.trim(),
         password: formData.password,
+        companyName: formData.userType === 'startup' ? displayName : undefined,
+        fullName: formData.userType === 'investor' ? displayName : undefined,
       };
 
-      const data = await signupApi(payload);
+      const data = await signupV2(payload);
       if (data?.user) {
         setAuth({ token: data?.token || null, user: data.user, role: data.user?.role || formData.userType });
       }
-      const displayName = data?.user?.name || data?.user?.username || data?.user?.email || formData.name || 'User';
+      const displayNameToast = data?.user?.name || data?.user?.username || data?.user?.email || displayName || 'User';
       const toast = { message: `Welcome to InnovationLink, ${displayName}!`, type: 'success', duration: 2200 };
       if (formData.userType === 'startup') {
         navigate(`/S/profile`, { state: { toast } });
@@ -156,23 +218,67 @@ const SignUp = () => {
             </div>
           )}
           <div className="username">
-            <label htmlFor="name" className="label">Name</label>
+            <label htmlFor="displayName" className="label">{displayNameLabel}</label>
             <input
               type="text"
-              id="name"
-              name="name"
-              placeholder="Your name / username"
-              value={formData.name}
-              onChange={handleChange}
+              id="displayName"
+              name={formData.userType === 'startup' ? 'companyName' : 'fullName'}
+              placeholder={formData.userType === 'startup' ? 'e.g., InnovationLink' : 'e.g., Chandra Sekhar'}
+              value={displayNameValue}
+              onChange={(e) => {
+                const value = e.target.value;
+                setFormData((prev) => ({
+                  ...prev,
+                  [formData.userType === 'startup' ? 'companyName' : 'fullName']: value,
+                }));
+                if (!usernameTouched) {
+                  scheduleUsernameCheck({ name: value, applySuggestionWhenUntouched: true });
+                }
+              }}
               required
-              ref={nameInputRef}
-              className={(submitted && formData.name.trim() && !namePattern.test(formData.name.trim())) ? 'input-error' : ''}
+              disabled={!formData.userType}
             />
-            {(formData.name.trim() && !namePattern.test(formData.name.trim())) && !submitted && (
-              <small className="note-warning">Username cannot contain spaces. Please use letters, numbers, underscores, or hyphens.</small>
+          </div>
+
+          <div className="username">
+            <label htmlFor="username" className="label">Username</label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              placeholder="e.g., innovationlink"
+              value={formData.username}
+              onChange={(e) => {
+                const value = e.target.value;
+                setUsernameTouched(true);
+                setFormData((prev) => ({ ...prev, username: value }));
+                const normalized = normalizeUsername(value);
+                if (normalized) {
+                  scheduleUsernameCheck({ username: normalized, name: displayNameValue });
+                } else {
+                  setUsernameStatus({ checking: false, available: null, suggestion: '', valid: true });
+                }
+              }}
+              required
+              ref={usernameInputRef}
+              disabled={!formData.userType}
+              className={(submitted && formData.username.trim() && !USERNAME_REGEX.test(normalizeUsername(formData.username))) ? 'input-error' : ''}
+            />
+            {formData.username.trim() && !USERNAME_REGEX.test(normalizeUsername(formData.username)) && (
+              <small className={submitted ? 'note-error' : 'note-warning'}>
+                Username can only contain letters, numbers, underscores, or hyphens.
+              </small>
             )}
-            {(submitted && formData.name.trim() && !namePattern.test(formData.name.trim())) && (
-              <small className="note-error">Username cannot contain spaces. Please use letters, numbers, underscores, or hyphens.</small>
+            {formData.username.trim() && USERNAME_REGEX.test(normalizeUsername(formData.username)) && (
+              <small className="note-warning">
+                {usernameStatus.checking
+                  ? 'Checking availability…'
+                  : (usernameStatus.available
+                      ? 'Username available'
+                      : (usernameStatus.suggestion
+                          ? `Username taken. Suggested: ${usernameStatus.suggestion}`
+                          : 'Username not available'))}
+              </small>
             )}
           </div>
           <div className="email">

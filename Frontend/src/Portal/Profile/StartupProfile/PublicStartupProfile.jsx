@@ -193,6 +193,9 @@ const PublicStartupProfile = () => {
                             </div>
                             <div className="spv-hmeta">
                                 <h2 className="spv-title">{profileData.company_name || '—'}</h2>
+                                <div className="spv-sub" style={{ opacity: 0.85 }}>
+                                    @{profileData.username}
+                                </div>
                                 <div className="spv-sub">
                                     Founder: <strong>{profileData.founder || '—'}</strong>
                                 </div>

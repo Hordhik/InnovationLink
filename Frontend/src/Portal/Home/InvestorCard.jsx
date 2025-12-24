@@ -9,6 +9,7 @@ const placeholderAvatar = "https://ui-avatars.com/api/?name=N+A&background=e9ece
 
 const defaultInvestorData = {
   name: "Loading...",
+  username: "",
   title: "",
   mentoredCount: 0,
   investmentsCount: 0,
@@ -23,6 +24,7 @@ const InvestorCard = ({ investorId, initialUsername, isConnected }) => {
   const [investorData, setInvestorData] = useState({
     ...defaultInvestorData,
     name: initialUsername || "Investor",
+    username: initialUsername || "",
     initials: (initialUsername || 'N/A').substring(0, 2).toUpperCase()
   });
 
@@ -52,10 +54,8 @@ const InvestorCard = ({ investorId, initialUsername, isConnected }) => {
           throw new Error("Investor details not found.");
         }
 
-        const fetchedName =
-          response.investor.username ||
-          initialUsername ||
-          `Investor #${investorId}`;
+        const fetchedUsername = response.investor.username || initialUsername || '';
+        const fetchedName = response.investor.name || response.investor.username || initialUsername || `Investor #${investorId}`;
 
         // Backend provides about (bio) and investLike (investment thesis). Prefer about; fall back to investLike.
         const aboutText =
@@ -74,11 +74,11 @@ const InvestorCard = ({ investorId, initialUsername, isConnected }) => {
         setInvestorData({
           id: response.investor.id,
           name: fetchedName,
+          username: fetchedUsername,
           initials: fetchedName.substring(0, 2).toUpperCase(),
           title: response.investor.title || defaultInvestorData.title,
           mentoredCount: response.investor.mentoredCount ?? defaultInvestorData.mentoredCount,
           investmentsCount: response.investor.investmentsCount ?? defaultInvestorData.investmentsCount,
-          thesis: aboutText,
           thesis: aboutText,
           tags: aggregateTags.length ? aggregateTags : defaultInvestorData.tags,
           image: response.investor.image || null,
@@ -101,6 +101,7 @@ const InvestorCard = ({ investorId, initialUsername, isConnected }) => {
   }, [investorId, initialUsername]);
 
   const displayName = investorData.name;
+  const displayUsername = investorData.username || initialUsername || '';
   const displayInitials = investorData.initials;
   const displayTitle = investorData.title;
   const displayMentored = investorData.mentoredCount;
@@ -111,7 +112,7 @@ const InvestorCard = ({ investorId, initialUsername, isConnected }) => {
   const avatarUrl = investorData.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayInitials)}&background=e9ecef&color=495057&bold=true&size=60`;
 
   // Build correct route: "/I/home/investor/:username"
-  const correctProfileUrl = `${portalPrefix}/home/investor/${displayName}`;
+  const correctProfileUrl = `${portalPrefix}/home/investor/${encodeURIComponent(displayUsername || displayName)}`;
 
   if (isLoading) {
     return (
@@ -143,7 +144,7 @@ const InvestorCard = ({ investorId, initialUsername, isConnected }) => {
           </div>
           <div className="text-info">
             <p className="startup-name">{displayName}</p>
-            <p className="founder-name">{displayTitle || 'Investor'}</p>
+            <p className="founder-name">{displayUsername ? `@${displayUsername}` : ''}</p>
           </div>
         </div>
         <div className="connect">

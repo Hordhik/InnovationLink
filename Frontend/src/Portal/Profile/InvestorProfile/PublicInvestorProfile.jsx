@@ -164,6 +164,11 @@ const PublicInvestorProfile = () => {
             <img src={avatar} alt={investor.name} className="investor-avatar" />
             <div className="investor-card-info">
               <h2>{investor.name}</h2>
+              {investor.username ? (
+                <p className="investor-role" style={{ opacity: 0.85 }}>
+                  @{investor.username}
+                </p>
+              ) : null}
               <p className="investor-role">
                 <Briefcase size={14} /> {investor.title} | {investor.location}
               </p>

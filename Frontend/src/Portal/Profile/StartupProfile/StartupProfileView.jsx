@@ -395,6 +395,11 @@ export default function StartupProfileView({ profileData = {}, isEditing, editSt
             </div>
             <div className="spv-hmeta">
               <h2 className="spv-title">{data.name || '—'}</h2>
+              {data.username ? (
+                <div className="spv-sub" style={{ opacity: 0.85 }}>
+                  @{data.username}
+                </div>
+              ) : null}
               <div className="spv-sub">
                 Founder: <strong>{data.founder || '—'}</strong>
               </div>

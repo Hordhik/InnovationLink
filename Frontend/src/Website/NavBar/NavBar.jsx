@@ -89,7 +89,19 @@ function NavBar() {
                     {isLoggedIn ? (
                         <>
                             <div className="Signin-option login">
-                                {(sessionUser?.name || sessionUser?.username) ?? (backendUser?.name || backendUser?.username) ?? backendUser?.email ?? user?.email}
+                                <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
+                                    <span>
+                                        {(sessionUser?.name || sessionUser?.username)
+                                            ?? (backendUser?.name || backendUser?.username)
+                                            ?? backendUser?.email
+                                            ?? user?.email}
+                                    </span>
+                                    <span style={{ opacity: 0.8, fontSize: '0.9em' }}>
+                                        {(sessionUser?.username || backendUser?.username)
+                                            ? `@${sessionUser?.username || backendUser?.username}`
+                                            : ''}
+                                    </span>
+                                </div>
                             </div>
                             <div className="Signup-option register" onClick={handleLogout}>
                                 Log out

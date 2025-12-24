@@ -13,6 +13,7 @@ import { getMyInvestorProfile, saveMyInvestorProfile } from '../../../services/i
 
 const initialInvestorData = {
   id: null,
+  username: "",
   name: "Chandra Sekhar",
   title: "Founder",
   location: "Hyderabad, India",
@@ -65,6 +66,7 @@ const normalizeInvestor = (raw, fallbackStartups = initialInvestorData.startups)
   if (!raw) {
     return {
       id: null,
+      username: '',
       name: '',
       title: '',
       location: '',
@@ -84,6 +86,7 @@ const normalizeInvestor = (raw, fallbackStartups = initialInvestorData.startups)
 
   return {
     id: raw?.id ?? null,
+    username: trimString(raw.username),
     name: trimString(raw.name || raw.username),
     title: trimString(raw.title),
     location: trimString(raw.location),
@@ -150,7 +153,9 @@ export function EditModal({ open, title, children, onSave, onCancel, initialFocu
           ? document.querySelector(initialFocusSelector)
           : backdropRef.current?.querySelector('textarea, input');
         if (el) el.focus();
-      } catch (e) { }
+      } catch {
+        return;
+      }
     }, 80);
     return () => document.removeEventListener('keydown', onKey);
   }, [open, onCancel, initialFocusSelector]);
@@ -211,13 +216,14 @@ export default function InvestorProfile() {
     linkedin: '',
     twitter: '',
     email: '',
+    phone: '',
   });
   const [expertiseDraft, setExpertiseDraft] = useState([]);
   const [investDesc, setInvestDesc] = useState('');
   const [tagsDraft, setTagsDraft] = useState([]);
   const [stageDraft, setStageDraft] = useState([]);
 
-  const applyInvestorSnapshot = useCallback((rawInvestor, fallbackStartups, options = {}) => {
+  const applyInvestorSnapshot = useCallback((rawInvestor, fallbackStartups) => {
     let latestCompletion = null;
     setInvestorData((prev) => {
       const normalized = normalizeInvestor(rawInvestor, fallbackStartups ?? prev.startups);
@@ -336,6 +342,7 @@ export default function InvestorProfile() {
       linkedin: investorData.linkedin || '',
       twitter: investorData.twitter || '',
       email: investorData.email || '',
+      phone: investorData.phone || '',
     });
     setHeaderOpen(true);
   };
@@ -374,6 +381,7 @@ export default function InvestorProfile() {
       linkedin: headerDraft.linkedin,
       twitter: headerDraft.twitter,
       email: headerDraft.email,
+      phone: headerDraft.phone,
     });
     if (result.ok) setHeaderOpen(false);
   };
@@ -421,13 +429,7 @@ export default function InvestorProfile() {
 
     const pathParts = location.pathname.split('/');
     const roleSegment = pathParts[1] || 'I';
-    setForceProfileViewPending(true);
-    navigate(`/${roleSegment}/profile`, { replace: true, state: { forceProfileView: true } });
-  };
-
-  const scrollToConnections = () => {
-    const el = document.getElementById('connected-startups-section');
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+    navigate(`/${roleSegment}/profile`, { replace: true });
   };
 
   if (loading) {
@@ -618,6 +620,16 @@ export default function InvestorProfile() {
               onChange={(e) => setHeaderDraft((prev) => ({ ...prev, email: e.target.value }))}
               className="form-input"
               placeholder="investor@email.com"
+            />
+          </div>
+
+          <div className="input-wrapper">
+            <label className="form-label">Phone</label>
+            <input
+              value={headerDraft.phone}
+              onChange={(e) => setHeaderDraft((prev) => ({ ...prev, phone: e.target.value }))}
+              className="form-input"
+              placeholder="e.g., +91 98765 43210"
             />
           </div>
         </div>

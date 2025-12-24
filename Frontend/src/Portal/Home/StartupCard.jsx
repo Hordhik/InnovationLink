@@ -42,6 +42,7 @@ const StartupCard = ({
           </div>
           <div className="text-info">
             <p className="startup-name">{displayName}</p>
+            <p className="founder-name">{username ? `@${username}` : ''}</p>
             <p className="founder-name">Founder: <span>{founder}</span></p>
             {/* <p className="location-team">Location: <span>Vijaywda</span></p> */}
             <p className="team-size">Team members: <span>{typeof teamCount === 'number' ? teamCount : '-'}</span></p>

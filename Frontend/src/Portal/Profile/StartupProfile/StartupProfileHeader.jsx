@@ -90,6 +90,9 @@ const StartupProfileHeader = ({ profileData, isEditing, editStateProps, publicVi
                   {(profileData.name || '').trim() && (
                     <div className="meta-name" title={profileData.name}>{profileData.name}</div>
                   )}
+                  {(profileData.username || '').trim() && (
+                    <div className="meta-founder" style={{ opacity: 0.85 }}>@{profileData.username}</div>
+                  )}
                   {(profileData.founder || '').trim() && (
                     <div className="meta-founder"><strong>Founder:</strong> {profileData.founder}</div>
                   )}

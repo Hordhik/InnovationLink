@@ -45,13 +45,14 @@ export default function StartupProfile() {
       try {
         const user = getStoredUser();
         if (user && isMounted) {
-          setProfileData(prev => ({ ...prev, name: user.name || user.username || '', email: user.email || '' }));
+          setProfileData(prev => ({ ...prev, name: user.name || user.username || '', username: user.username || '', email: user.email || '' }));
         }
         // Try to load profile from backend
         const resp = await apiGetProfile();
         if (isMounted && resp?.profile) {
           setProfileData({
             name: resp.profile.company_name || '',
+            username: resp?.user?.username || user?.username || '',
             founder: resp.profile.founder || '',
             description: resp.profile.description || '',
             address: resp.profile.address || '',

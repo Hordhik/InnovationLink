@@ -51,7 +51,7 @@ function TopBar() {
                 <div className="details">
                     <img src={profile} alt="Profile" />
                     <div className="names">
-                        <p className='name'>{displayUser?.username || displayUser?.name || displayUser?.email || 'User'}</p>
+                        <p className='name'>{displayUser?.name || displayUser?.username || displayUser?.email || 'User'}</p>
                         <p className='id'>{displayUser?.username ? `@${displayUser.username}` : ''}</p>
                     </div>
                 </div>
