@@ -176,7 +176,7 @@ exports.register = async (req, res) => {
       token = jwt.sign(
         { id: userId, userType },
         process.env.JWT_SECRET,
-        { expiresIn: "1m" }
+        { expiresIn: "1h" }
       );
     } catch (tokenErr) {
       console.error("JWT Sign Error (register):", tokenErr);
