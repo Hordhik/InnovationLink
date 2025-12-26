@@ -15,6 +15,7 @@ import SignUp from './Authentication/SignUp';
 import Portal from './Portal/Portal';
 import AddBlog from './Website/Blogs/AddBlog';
 import EditBlogPage from './Website/Blogs/EditBlogPage';
+import SessionManager from './components/SessionManager.jsx';
 
 
 function App() {
@@ -65,6 +66,7 @@ function App() {
   return (
     <AuthProvider>
       <>
+        <SessionManager />
         {/* Global toast removed to avoid duplicates. */}
         {shouldShowNavbar && <NavBar />}
   <Routes>

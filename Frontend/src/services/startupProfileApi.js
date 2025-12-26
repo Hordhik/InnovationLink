@@ -6,6 +6,7 @@
 
 import axios from 'axios';
 import { getToken } from '../auth.js';
+import { notifySessionExpired } from '../utils/session.js';
 
 let API_URL;
 
@@ -22,6 +23,16 @@ const api = axios.create({
     headers: { 'Content-Type': 'application/json' },
     timeout: 15000,
 });
+
+api.interceptors.response.use(
+    (res) => res,
+    (err) => {
+        if (err?.response?.status === 401) {
+            notifySessionExpired('api-401');
+        }
+        return Promise.reject(err);
+    }
+);
 
 function authHeader() {
     const token = getToken();

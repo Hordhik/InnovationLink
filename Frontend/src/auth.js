@@ -4,12 +4,48 @@ const TOKEN_KEY = 'il_token';
 const USER_KEY = 'il_user';
 const ROLE_KEY = 'il_role';
 
+function emitAuthChanged() {
+    try {
+        window.dispatchEvent(new Event('il:auth-changed'));
+    } catch {
+        // ignore
+    }
+}
+
+function decodeJwtPayload(token) {
+    if (!token || typeof token !== 'string') return null;
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    try {
+        // base64url decode
+        const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+        const padded = b64 + '==='.slice((b64.length + 3) % 4);
+        const json = atob(padded);
+        return JSON.parse(json);
+    } catch {
+        return null;
+    }
+}
+
 export function getToken() {
     try {
         return localStorage.getItem(TOKEN_KEY);
     } catch {
         return null;
     }
+}
+
+export function getTokenExpiryMs(token = getToken()) {
+    const payload = decodeJwtPayload(token);
+    const expSeconds = payload?.exp;
+    if (!expSeconds || typeof expSeconds !== 'number') return null;
+    return expSeconds * 1000;
+}
+
+export function isTokenExpired(token = getToken(), skewMs = 0) {
+    const expMs = getTokenExpiryMs(token);
+    if (!expMs) return false;
+    return Date.now() + Math.max(0, Number(skewMs) || 0) >= expMs;
 }
 
 export function getStoredUser() {
@@ -37,6 +73,7 @@ export function clearAuth() {
     } catch {
         // ignore
     }
+    emitAuthChanged();
 }
 
 export function setAuth({ token, user, role }) {
@@ -47,4 +84,5 @@ export function setAuth({ token, user, role }) {
     } catch {
         // ignore
     }
+    emitAuthChanged();
 }

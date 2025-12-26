@@ -25,6 +25,21 @@ const LogIn = () => {
 
   const [error, setError] = useState('');
   const [userType, setUserType] = useState(signupData?.userType || null); // null until user selects 'startup' or 'investor'
+  useEffect(() => {
+    // Surface session expiry on the login page (works even when portal toast isn't mounted).
+    const fromState = !!location.state?.sessionExpired;
+    let fromSession = false;
+    try {
+      fromSession = sessionStorage.getItem('il_session_expired') === '1';
+      if (fromSession) sessionStorage.removeItem('il_session_expired');
+    } catch {
+      // ignore
+    }
+
+    if (fromState || fromSession) {
+      setError('Session expired. Please log in again.');
+    }
+  }, [location.state]);
   const [successMessage, setSuccessMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [submitted, setSubmitted] = useState(false);

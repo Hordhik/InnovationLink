@@ -36,6 +36,7 @@ function TopBar() {
 
     const handleLogout = () => {
         try { sessionStorage.removeItem('il_welcome_toast_shown'); } catch { }
+        try { sessionStorage.setItem('il_user_logout', '1'); } catch { }
         clearAuth();
         try { contextLogout?.(); } catch { }
         setDisplayUser(null);

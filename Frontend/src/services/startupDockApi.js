@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getToken } from '../auth.js';
+import { notifySessionExpired } from '../utils/session.js';
 
 let API_URL;
 
@@ -21,10 +22,15 @@ const getAuthHeaders = () => {
  * Fetches all file metadata for the user's dock.
  */
 export async function getMyDock() {
-    const { data } = await axios.get(`${API_URL}/api/startup-dock/me`, {
-        headers: getAuthHeaders(),
-    });
-    return data; // Returns { files: { pitch: [], demo: [], patent: [] } }
+    try {
+        const { data } = await axios.get(`${API_URL}/api/startup-dock/me`, {
+            headers: getAuthHeaders(),
+        });
+        return data; // Returns { files: { pitch: [], demo: [], patent: [] } }
+    } catch (err) {
+        if (err?.response?.status === 401) notifySessionExpired('api-401');
+        throw err;
+    }
 }
 
 /**
@@ -35,20 +41,30 @@ export async function getMyDock() {
  */
 export async function uploadFile(category, fileName, fileDataURI) {
     const payload = { category, fileName, fileDataURI };
-    const { data } = await axios.post(`${API_URL}/api/startup-dock/upload`, payload, {
-        headers: getAuthHeaders(),
-    });
-    return data;
+    try {
+        const { data } = await axios.post(`${API_URL}/api/startup-dock/upload`, payload, {
+            headers: getAuthHeaders(),
+        });
+        return data;
+    } catch (err) {
+        if (err?.response?.status === 401) notifySessionExpired('api-401');
+        throw err;
+    }
 }
 
 /**
  * Deletes a file by its ID.
  */
 export async function deleteFile(file_id) {
-    const { data } = await axios.delete(`${API_URL}/api/startup-dock/files/${file_id}`, {
-        headers: getAuthHeaders(),
-    });
-    return data;
+    try {
+        const { data } = await axios.delete(`${API_URL}/api/startup-dock/files/${file_id}`, {
+            headers: getAuthHeaders(),
+        });
+        return data;
+    } catch (err) {
+        if (err?.response?.status === 401) notifySessionExpired('api-401');
+        throw err;
+    }
 }
 
 /**
@@ -58,14 +74,19 @@ export async function deleteFile(file_id) {
  */
 export async function setPrimaryFile(file_id, category) {
     const payload = { category };
-    const { data } = await axios.post(
-        `${API_URL}/api/startup-dock/files/${file_id}/set-primary`,
-        payload,
-        {
-            headers: getAuthHeaders(),
-        }
-    );
-    return data;
+    try {
+        const { data } = await axios.post(
+            `${API_URL}/api/startup-dock/files/${file_id}/set-primary`,
+            payload,
+            {
+                headers: getAuthHeaders(),
+            }
+        );
+        return data;
+    } catch (err) {
+        if (err?.response?.status === 401) notifySessionExpired('api-401');
+        throw err;
+    }
 }
 
 /**

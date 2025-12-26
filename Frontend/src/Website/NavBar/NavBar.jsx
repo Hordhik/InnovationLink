@@ -56,6 +56,7 @@ function NavBar() {
     };
 
     const handleLogout = () => {
+        try { sessionStorage.setItem('il_user_logout', '1'); } catch { }
         clearAuth();
         logout(); // AuthContext logout clears UI auth
         navigate('/home');

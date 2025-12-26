@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getToken, setAuth } from '../auth.js';
+import { notifySessionExpired } from '../utils/session.js';
 
 let API_URL;
 
@@ -16,6 +17,17 @@ const api = axios.create({
     headers: { 'Content-Type': 'application/json' },
     timeout: 10000,
 });
+
+// If backend rejects token (expired/invalid), force logout + redirect.
+api.interceptors.response.use(
+    (res) => res,
+    (err) => {
+        if (err?.response?.status === 401) {
+            notifySessionExpired('api-401');
+        }
+        return Promise.reject(err);
+    }
+);
 
 export async function login({ identifier, password, userType }) {
     const id = (identifier || '').trim();
@@ -87,9 +99,7 @@ export async function getSession() {
     } catch (error) {
         // If the token is invalid or expired, clear it and return null
         if (error.response?.status === 401) {
-            localStorage.removeItem('il_token');
-            localStorage.removeItem('il_user');
-            localStorage.removeItem('il_role');
+            notifySessionExpired('api-401');
             return null;
         }
         throw error;

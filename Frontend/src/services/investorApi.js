@@ -1,6 +1,7 @@
 // Frontend/src/services/investorApi.js
 import axios from "axios";
 import { getToken } from "../auth.js";
+import { notifySessionExpired } from '../utils/session.js';
 
 let API_URL;
 
@@ -34,6 +35,9 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (res) => res,
   (err) => {
+    if (err?.response?.status === 401) {
+      notifySessionExpired('api-401');
+    }
     const message =
       err?.response?.data?.message ||
       err?.message ||
