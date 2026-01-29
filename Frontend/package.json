@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "axios": "^1.11.0",
+    "framer-motion": "^12.26.2",
     "lucide-react": "^0.546.0",
     "pdfjs-dist": "^5.4.296",
     "quill-image-resize-module": "^3.0.0",
